@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -11,11 +12,10 @@
             font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Segoe UI", Roboto, Arial, sans-serif;
             background: #f4f5f7;
             color: #333;
-            /* スクロールを滑らかに */
-            scroll-behavior: smooth; 
+            scroll-behavior: smooth;
         }
 
-        /* --- ヘッダー（グラデーションアニメーション追加） --- */
+        /* --- ヘッダー --- */
         header {
             background: linear-gradient(135deg, #ff9a9e, #fecfef, #fad0c4);
             background-size: 200% 200%;
@@ -29,17 +29,22 @@
             box-shadow: 0 4px 12px rgba(255, 154, 158, 0.3);
             border-bottom-left-radius: 20px;
             border-bottom-right-radius: 20px;
-            position: relative;
-            z-index: 10;
         }
 
         @keyframes gradientMove {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
         }
 
-        /* --- コンテナとカード（フェードインアニメーション追加） --- */
         .container {
             padding: 20px 15px;
             max-width: 600px;
@@ -57,11 +62,9 @@
             animation: fadeUp 0.6s ease forwards;
         }
 
-        /* カードの出現タイミングを少しずつずらす */
-        .card:nth-child(1) { animation-delay: 0.1s; }
-        .card:nth-child(2) { animation-delay: 0.2s; }
-        .card:nth-child(3) { animation-delay: 0.3s; }
-        .card:nth-child(4) { animation-delay: 0.4s; }
+        .card:nth-child(n) {
+            animation-delay: 0.1s;
+        }
 
         @keyframes fadeUp {
             to {
@@ -70,13 +73,66 @@
             }
         }
 
+        .card-header-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .header-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
         h2 {
             font-size: 18px;
-            margin-top: 0;
-            margin-bottom: 15px;
+            margin: 0;
             display: flex;
             align-items: center;
             gap: 8px;
+        }
+
+        /* --- ボタン類 --- */
+        .btn-round {
+            background: #ff9a9e;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(255, 154, 158, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.1s;
+        }
+
+        .btn-round:active {
+            transform: scale(0.9);
+        }
+
+        .btn-round.btn-gray {
+            background: #e0e0e0;
+            color: #555;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+            font-size: 16px;
+        }
+
+        .btn-delete-small {
+            background: #ffe3e6;
+            color: #d81b60;
+            border: none;
+            border-radius: 8px;
+            padding: 5px 10px;
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
         }
 
         /* --- スライダー --- */
@@ -84,13 +140,12 @@
             overflow: hidden;
             border-radius: 16px;
             height: 220px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
         }
 
         .slides {
             display: flex;
             height: 100%;
-            /* JSで制御するため初期状態はそのまま */
         }
 
         .slides img {
@@ -101,33 +156,54 @@
         }
 
         /* --- お店リスト --- */
-        .shop {
+        .shop-card {
             padding: 15px;
             border-radius: 16px;
             margin-bottom: 12px;
             background: #fdfdfd;
             border: 1px solid #eee;
-            cursor: pointer;
             transition: all 0.2s ease;
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
+            position: relative;
+            cursor: pointer;
         }
 
-        .shop:active {
-            transform: scale(0.96);
-            background: #ffeef0;
-            border-color: #ff9a9e;
+        .shop-card:active {
+            transform: scale(0.98);
+            background: #fff5f6;
         }
 
         .shop-title {
             font-weight: bold;
             font-size: 16px;
+            color: #333;
+            margin-bottom: 4px;
         }
 
-        .shop-desc {
+        .shop-note {
             font-size: 13px;
-            color: #888;
+            color: #666;
+            margin-bottom: 12px;
+            line-height: 1.4;
+            white-space: pre-wrap;
+        }
+
+        .shop-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .insta-link {
+            font-size: 12px;
+            color: #fff;
+            text-decoration: none;
+            background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-weight: bold;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
         }
 
         /* --- マップ --- */
@@ -136,7 +212,6 @@
             height: 250px;
             border: 0;
             border-radius: 16px;
-            background-color: #eee; /* 読み込み前のプレースホルダー */
         }
 
         /* --- カレンダー --- */
@@ -145,7 +220,6 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 15px;
-            font-weight: bold;
         }
 
         .calendar-header button {
@@ -154,14 +228,7 @@
             border-radius: 50%;
             width: 36px;
             height: 36px;
-            font-size: 14px;
             cursor: pointer;
-            transition: background 0.2s;
-        }
-
-        .calendar-header button:active {
-            background: #ddd;
-            transform: scale(0.9);
         }
 
         .calendar-grid {
@@ -171,15 +238,12 @@
             text-align: center;
         }
 
-        /* 曜日のスタイル */
         .weekday {
             font-size: 12px;
             font-weight: bold;
             color: #888;
             padding-bottom: 5px;
         }
-        .weekday:first-child { color: #ff6b6b; } /* 日曜 */
-        .weekday:last-child { color: #4da8da; } /* 土曜 */
 
         .day {
             background: #f9f9f9;
@@ -192,72 +256,159 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            transition: all 0.2s ease;
-        }
-
-        .day:active {
-            transform: scale(0.9);
-            background: #e0e0e0;
         }
 
         .day.has-event {
             background: #ffe3e6;
             color: #d81b60;
             font-weight: bold;
-            box-shadow: inset 0 0 0 1px #ff9a9e;
         }
 
-        .event-icon {
-            font-size: 10px;
-            margin-top: 2px;
+        /* --- モーダル (入力画面) --- */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.4);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(2px);
         }
 
-        /* --- フッター --- */
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 24px;
+            border-radius: 20px;
+            width: 85%;
+            max-width: 400px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes popIn {
+            from {
+                transform: scale(0.9);
+                opacity: 0;
+            }
+
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .input-group {
+            margin-bottom: 16px;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 12px;
+            color: #888;
+            margin-bottom: 6px;
+            font-weight: bold;
+        }
+
+        .input-group input,
+        .input-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            font-size: 15px;
+            box-sizing: border-box;
+            font-family: inherit;
+        }
+
+        .input-group input:focus,
+        .input-group textarea:focus {
+            outline: none;
+            border-color: #ff9a9e;
+            box-shadow: 0 0 0 2px rgba(255, 154, 158, 0.2);
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 12px 18px;
+            border-radius: 10px;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .btn-cancel {
+            background: #f0f0f0;
+            color: #555;
+        }
+
+        .btn-save {
+            background: #ff9a9e;
+            color: white;
+        }
+
+        .btn-delete-main {
+            background: #ff4d4d;
+            color: white;
+            margin-right: auto;
+        }
+
         footer {
             text-align: center;
             font-size: 13px;
             color: #aaa;
             padding: 30px 20px;
-            margin-bottom: 20px;
         }
     </style>
 </head>
+
 <body>
 
-    <header>
-        Memories
-    </header>
+    <header>Memories</header>
 
     <div class="container">
 
         <div class="card">
-            <h2>📸 思い出ギャラリー</h2>
-            <div class="slider">
-                <div class="slides" id="slides">
-                    <img src="https://cdn.cheapoguides.com/wp-content/uploads/sites/2/2020/08/hydrangea-kamakura-Lily-C-B.jpg" alt="memory1" />
-                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS9U6YTJ960SxJdz7IBIr17kQl9BjLRkNp6eg&s" alt="memory2" />
-                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRW1nrdRCmskZ1OAqMZpf5sSGLBBUBSgcoSKQ&s" alt="memory3" />
-                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRtol7w5I5EC7PTHZcWCCsk3p82zv0l79gqWA&s" alt="memory4" />
+            <div class="card-header-actions">
+                <h2>📸 ギャラリー</h2>
+                <div class="header-buttons">
+                    <button class="btn-round btn-gray" onclick="clearPhotos()" title="アップロードした写真を消す">🗑️</button>
+                    <button class="btn-round" onclick="triggerPhotoUpload()">＋</button>
                 </div>
+            </div>
+            <input type="file" id="photoUpload" accept="image/*" style="display: none;"
+                onchange="handlePhotoUpload(this)">
+            <div class="slider" id="sliderContainer">
+                <div class="slides" id="slides"></div>
             </div>
         </div>
 
         <div class="card">
-            <h2>🍽 お店リスト</h2>
-            <div class="shop" onclick="setMap('https://maps.google.com/maps?q=Tokyo+Tower&t=&z=15&ie=UTF8&iwloc=&output=embed')">
-                <div class="shop-title">○○カフェ</div>
-                <div class="shop-desc">初デートでパンケーキを食べた場所🥞</div>
+            <div class="card-header-actions">
+                <h2>🍽 お店リスト</h2>
+                <button class="btn-round" onclick="openShopModal()">＋</button>
             </div>
-
-            <div class="shop" onclick="setMap('https://maps.google.com/maps?q=Tokyo+Skytree&t=&z=15&ie=UTF8&iwloc=&output=embed')">
-                <div class="shop-title">○○レストラン</div>
-                <div class="shop-desc">1年記念日のディナー🍷</div>
-            </div>
+            <div id="shopListContainer"></div>
         </div>
 
-        <div class="card map">
+        <div class="card">
             <h2>🗺 MAP</h2>
-            <iframe id="map" src="https://maps.google.com/maps?q=Tokyo+Tower&t=&z=15&ie=UTF8&iwloc=&output=embed" loading="lazy"></iframe>
+            <iframe id="map" src="https://maps.google.com/maps?q=東京駅&t=&z=15&ie=UTF8&iwloc=&output=embed"
+                loading="lazy"></iframe>
         </div>
 
         <div class="card">
@@ -272,110 +423,236 @@
 
     </div>
 
-    <footer>
-        Made with ❤️ Our Memory Page
-    </footer>
+    <footer>Made with ❤️ Our Memory Page</footer>
+
+    <div id="shopModal" class="modal-overlay">
+        <div class="modal-content">
+            <h3 style="margin-top:0; color:#333;">お店を追加 🍽</h3>
+            <div class="input-group">
+                <label>店名</label>
+                <input type="text" id="shopNameInput" placeholder="例: ○○カフェ">
+            </div>
+            <div class="input-group">
+                <label>Instagram URL</label>
+                <input type="url" id="shopInstaInput" placeholder="https://instagram.com/...">
+            </div>
+            <div class="input-group">
+                <label>メモ</label>
+                <textarea id="shopNoteInput" rows="3" placeholder="パンケーキが美味しかった！"></textarea>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-cancel" onclick="closeShopModal()">キャンセル</button>
+                <button class="btn btn-save" onclick="saveShop()">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="calendarModal" class="modal-overlay">
+        <div class="modal-content">
+            <h3 style="margin-top:0; color:#333;" id="calModalTitle">思い出を入力</h3>
+            <div class="input-group">
+                <textarea id="calNoteInput" rows="4" placeholder="今日は映画を見たよ🍿"></textarea>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-delete-main" id="calDeleteBtn" onclick="deleteEvent()">削除</button>
+                <button class="btn btn-cancel" onclick="closeCalendarModal()">キャンセル</button>
+                <button class="btn btn-save" onclick="saveEvent()">保存</button>
+            </div>
+        </div>
+    </div>
 
     <script>
-        // --- マップ連動 ---
-        function setMap(url) {
-            const mapFrame = document.getElementById('map');
-            mapFrame.style.opacity = 0; // 一瞬消して
-            setTimeout(() => {
-                mapFrame.src = url;
-                mapFrame.style.transition = "opacity 0.5s";
-                mapFrame.style.opacity = 1; // ふわっと表示
-            }, 200);
-            
-            // 少し下にスクロールしてマップを見やすくする
-            mapFrame.parentElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        // --- データ管理 ---
+        let photos = JSON.parse(localStorage.getItem('memoryPhotos') || '[]');
+        let shops = JSON.parse(localStorage.getItem('memoryShops') || '[]');
+        let events = JSON.parse(localStorage.getItem('events') || '{}');
+
+        // デフォルト画像
+        const defaultPhotos = [
+            "https://cdn.cheapoguides.com/wp-content/uploads/sites/2/2020/08/hydrangea-kamakura-Lily-C-B.jpg",
+            "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS9U6YTJ960SxJdz7IBIr17kQl9BjLRkNp6eg&s"
+        ];
+
+        // --- ギャラリー機能 ---
+        function triggerPhotoUpload() { document.getElementById('photoUpload').click(); }
+        function handlePhotoUpload(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    photos.push(e.target.result);
+                    localStorage.setItem('memoryPhotos', JSON.stringify(photos));
+                    renderGallery();
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+        function clearPhotos() {
+            if (photos.length === 0) return alert("追加された写真はありません。");
+            if (confirm("自分で追加した写真をすべて削除しますか？")) {
+                photos = [];
+                localStorage.setItem('memoryPhotos', JSON.stringify(photos));
+                renderGallery();
+            }
+        }
+        let slideIdx = 0;
+        let slideInterval;
+        function renderGallery() {
+            const slides = document.getElementById('slides');
+            slides.innerHTML = '';
+            const all = [...defaultPhotos, ...photos];
+            all.forEach(src => {
+                const img = document.createElement('img');
+                img.src = src;
+                slides.appendChild(img);
+            });
+            if (slideInterval) clearInterval(slideInterval);
+            if (all.length > 1) {
+                slides.appendChild(slides.children[0].cloneNode(true));
+                startSlider(all.length + 1);
+            }
+        }
+        function startSlider(total) {
+            slideInterval = setInterval(() => {
+                slideIdx++;
+                const slides = document.getElementById('slides');
+                slides.style.transition = 'transform 0.5s ease';
+                slides.style.transform = `translateX(-${slideIdx * 100}%)`;
+                if (slideIdx === total - 1) {
+                    setTimeout(() => {
+                        slides.style.transition = 'none';
+                        slideIdx = 0;
+                        slides.style.transform = 'translateX(0)';
+                    }, 500);
+                }
+            }, 3500);
         }
 
-        // --- スライダー（空白バグ解消版） ---
-        const slides = document.getElementById('slides');
-        // 無限ループを綺麗に見せるため、最初の画像を最後にクローンして追加
-        const firstImgClone = slides.children[0].cloneNode(true);
-        slides.appendChild(firstImgClone);
-        
-        let index = 0;
-        const totalSlides = slides.children.length; // クローン含めて5枚
+        // --- お店リスト＆モーダル機能 ---
+        function openShopModal() {
+            document.getElementById('shopNameInput').value = '';
+            document.getElementById('shopInstaInput').value = '';
+            document.getElementById('shopNoteInput').value = '';
+            document.getElementById('shopModal').classList.add('active');
+        }
+        function closeShopModal() { document.getElementById('shopModal').classList.remove('active'); }
 
-        setInterval(() => {
-            index++;
-            slides.style.transition = 'transform 0.5s ease-in-out';
-            slides.style.transform = `translateX(-${index * 100}%)`;
+        function saveShop() {
+            const name = document.getElementById('shopNameInput').value.trim();
+            const insta = document.getElementById('shopInstaInput').value.trim();
+            const note = document.getElementById('shopNoteInput').value.trim();
+            if (!name) { alert("店名を入力してね！"); return; }
 
-            // クローン（最後の画像）まで到達したら、アニメーションなしで0枚目に戻す
-            if (index === totalSlides - 1) {
-                setTimeout(() => {
-                    slides.style.transition = 'none';
-                    index = 0;
-                    slides.style.transform = 'translateX(0)';
-                }, 500); // transition時間と同じ500ms待つ
+            shops.push({ name, insta, note });
+            localStorage.setItem('memoryShops', JSON.stringify(shops));
+            closeShopModal();
+            renderShops();
+        }
+
+        function deleteShop(index) {
+            if (confirm("このお店をリストから削除しますか？")) {
+                shops.splice(index, 1);
+                localStorage.setItem('memoryShops', JSON.stringify(shops));
+                renderShops();
             }
-        }, 3500);
+        }
 
-        // --- カレンダー ---
-        let currentDate = new Date();
-        let events = JSON.parse(localStorage.getItem('events') || '{}');
+        function renderShops() {
+            const container = document.getElementById('shopListContainer');
+            container.innerHTML = '';
+
+            if (shops.length === 0) {
+                container.innerHTML = '<div style="text-align:center; color:#888; padding:20px; font-size:14px;">右上の＋ボタンからお店を追加してね！</div>';
+                return;
+            }
+
+            shops.forEach((shop, i) => {
+                const card = document.createElement('div');
+                card.className = 'shop-card';
+                card.onclick = () => {
+                    // Googleマップの検索URL（正常に動くように修正済み）
+                    document.getElementById('map').src = `https://maps.google.com/maps?q=${encodeURIComponent(shop.name)}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
+                    document.getElementById('map').parentElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                };
+
+                card.innerHTML = `
+                    <div class="shop-title">${shop.name}</div>
+                    <div class="shop-note">${shop.note || ''}</div>
+                    <div class="shop-actions">
+                        ${shop.insta ? `<a href="${shop.insta}" target="_blank" class="insta-link" onclick="event.stopPropagation()">📸 Instagram</a>` : '<div></div>'}
+                        <button class="btn-delete-small" onclick="deleteShop(${i}); event.stopPropagation();">🗑️ 削除</button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // --- カレンダー＆モーダル機能 ---
+        let currDate = new Date();
+        let targetDateKey = null;
 
         function renderCalendar() {
             const cal = document.getElementById('calendar');
             cal.innerHTML = '';
-
-            const year = currentDate.getFullYear();
-            const month = currentDate.getMonth();
-
+            const year = currDate.getFullYear();
+            const month = currDate.getMonth();
             document.getElementById('monthLabel').innerText = `${year}年 ${month + 1}月`;
 
-            // 曜日の描画を追加
-            const weekDays = ['日', '月', '火', '水', '木', '金', '土'];
-            weekDays.forEach(day => {
-                cal.innerHTML += `<div class="weekday">${day}</div>`;
-            });
-
-            const firstDay = new Date(year, month, 1).getDay();
+            ['日', '月', '火', '水', '木', '金', '土'].forEach(d => cal.innerHTML += `<div class="weekday">${d}</div>`);
+            const first = new Date(year, month, 1).getDay();
             const days = new Date(year, month + 1, 0).getDate();
 
-            // 1日の前の空白
-            for (let i = 0; i < firstDay; i++) {
-                cal.innerHTML += '<div></div>';
-            }
-
-            // 日付の描画
+            for (let i = 0; i < first; i++) cal.innerHTML += '<div></div>';
             for (let d = 1; d <= days; d++) {
                 const key = `${year}-${month + 1}-${d}`;
                 const has = events[key];
-
-                cal.innerHTML += `
-                    <div class="day ${has ? 'has-event' : ''}" onclick="editEvent('${key}')">
-                        ${d}
-                        ${has ? '<span class="event-icon">💖</span>' : ''}
-                    </div>
-                `;
+                const dayEl = document.createElement('div');
+                dayEl.className = `day ${has ? 'has-event' : ''}`;
+                dayEl.innerHTML = `${d}${has ? '<span style="font-size:10px; margin-top:2px;">💖</span>' : ''}`;
+                dayEl.onclick = () => openCalendarModal(key, `${month + 1}月${d}日`);
+                cal.appendChild(dayEl);
             }
         }
 
-        function editEvent(key) {
-            const text = prompt('予定や思い出を入力してね✏️', events[key] || '');
-            if (text === null) return; // キャンセル時
-            if (text.trim() === '') {
-                delete events[key];
+        function changeMonth(n) { currDate.setMonth(currDate.getMonth() + n); renderCalendar(); }
+
+        function openCalendarModal(key, displayDate) {
+            targetDateKey = key;
+            document.getElementById('calModalTitle').innerText = `${displayDate} の思い出`;
+            document.getElementById('calNoteInput').value = events[key] || '';
+
+            // 予定が既にある場合だけ削除ボタンを表示
+            document.getElementById('calDeleteBtn').style.display = events[key] ? 'block' : 'none';
+            document.getElementById('calendarModal').classList.add('active');
+        }
+
+        function closeCalendarModal() { document.getElementById('calendarModal').classList.remove('active'); }
+
+        function saveEvent() {
+            const text = document.getElementById('calNoteInput').value.trim();
+            if (text) {
+                events[targetDateKey] = text;
             } else {
-                events[key] = text;
+                delete events[targetDateKey];
             }
             localStorage.setItem('events', JSON.stringify(events));
+            closeCalendarModal();
             renderCalendar();
         }
 
-        function changeMonth(n) {
-            currentDate.setMonth(currentDate.getMonth() + n);
-            renderCalendar();
+        function deleteEvent() {
+            if (confirm("この日の思い出を削除しますか？")) {
+                delete events[targetDateKey];
+                localStorage.setItem('events', JSON.stringify(events));
+                closeCalendarModal();
+                renderCalendar();
+            }
         }
 
-        // 初期描画
+        // 初期化
+        renderGallery();
+        renderShops();
         renderCalendar();
     </script>
-
 </body>
+
 </html>
