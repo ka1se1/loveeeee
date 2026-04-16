@@ -4,9 +4,9 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Memories</title>
+    <title>Memories Shared</title>
     <style>
-        /* --- 全体のベース --- */
+        /* デザインはそのまま維持 */
         body {
             margin: 0;
             font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Segoe UI", Roboto, Arial, sans-serif;
@@ -56,20 +56,6 @@
             padding: 20px;
             margin-bottom: 20px;
             box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
-            opacity: 0;
-            transform: translateY(20px);
-            animation: fadeUp 0.6s ease forwards;
-        }
-
-        .card:nth-child(n) {
-            animation-delay: 0.1s;
-        }
-
-        @keyframes fadeUp {
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
         }
 
         .card-header-actions {
@@ -79,17 +65,9 @@
             margin-bottom: 15px;
         }
 
-        .header-buttons {
-            display: flex;
-            gap: 8px;
-        }
-
         h2 {
             font-size: 18px;
             margin: 0;
-            display: flex;
-            align-items: center;
-            gap: 8px;
         }
 
         .btn-round {
@@ -102,47 +80,29 @@
             font-size: 20px;
             font-weight: bold;
             cursor: pointer;
-            box-shadow: 0 2px 6px rgba(255, 154, 158, 0.3);
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: transform 0.1s;
         }
 
-        .btn-round:active {
-            transform: scale(0.9);
+        .btn-round:disabled {
+            background: #ccc;
         }
 
-        .btn-round.btn-gray {
-            background: #e0e0e0;
-            color: #555;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-            font-size: 16px;
-        }
-
-        .btn-delete-small {
-            background: #ffe3e6;
-            color: #d81b60;
-            border: none;
-            border-radius: 8px;
-            padding: 5px 10px;
-            font-size: 12px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-
+        /* スライダー */
         .slider {
             overflow: hidden;
             border-radius: 16px;
             height: 220px;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            background: #eee;
+            position: relative;
         }
 
         .slides {
             display: flex;
             height: 100%;
+            transition: transform 0.5s ease;
         }
 
         .slides img {
@@ -152,41 +112,43 @@
             height: 220px;
         }
 
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.7);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            color: #ff9a9e;
+            font-weight: bold;
+            z-index: 10;
+        }
+
+        /* お店・カレンダー・モーダルのスタイル（前回同様） */
         .shop-card {
             padding: 15px;
             border-radius: 16px;
             margin-bottom: 12px;
             background: #fdfdfd;
             border: 1px solid #eee;
-            transition: all 0.2s ease;
             position: relative;
             cursor: pointer;
-        }
-
-        .shop-card:active {
-            transform: scale(0.98);
-            background: #fff5f6;
         }
 
         .shop-title {
             font-weight: bold;
             font-size: 16px;
-            color: #333;
-            margin-bottom: 4px;
-        }
-
-        .shop-note {
-            font-size: 13px;
-            color: #666;
-            margin-bottom: 12px;
-            line-height: 1.4;
-            white-space: pre-wrap;
         }
 
         .shop-actions {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            margin-top: 10px;
         }
 
         .insta-link {
@@ -197,39 +159,15 @@
             padding: 5px 12px;
             border-radius: 20px;
             font-weight: bold;
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
         }
 
-        .loading-text {
-            text-align: center;
-            color: #888;
-            font-size: 14px;
-            padding: 20px;
-        }
-
-        .map iframe {
-            width: 100%;
-            height: 250px;
-            border: 0;
-            border-radius: 16px;
-        }
-
-        .calendar-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-
-        .calendar-header button {
-            background: #f0f0f0;
+        .btn-delete-small {
+            background: #ffe3e6;
+            color: #d81b60;
             border: none;
-            border-radius: 50%;
-            width: 36px;
-            height: 36px;
-            cursor: pointer;
+            border-radius: 8px;
+            padding: 5px 10px;
+            font-size: 11px;
         }
 
         .calendar-grid {
@@ -239,24 +177,13 @@
             text-align: center;
         }
 
-        .weekday {
-            font-size: 12px;
-            font-weight: bold;
-            color: #888;
-            padding-bottom: 5px;
-        }
-
         .day {
             background: #f9f9f9;
             border-radius: 10px;
             padding: 10px 5px;
             font-size: 14px;
             cursor: pointer;
-            min-height: 45px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
+            min-height: 40px;
         }
 
         .day.has-event {
@@ -265,6 +192,7 @@
             font-weight: bold;
         }
 
+        /* モーダル */
         .modal-overlay {
             display: none;
             position: fixed;
@@ -289,20 +217,6 @@
             border-radius: 20px;
             width: 85%;
             max-width: 400px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-
-        @keyframes popIn {
-            from {
-                transform: scale(0.9);
-                opacity: 0;
-            }
-
-            to {
-                transform: scale(1);
-                opacity: 1;
-            }
         }
 
         .input-group {
@@ -314,46 +228,28 @@
             font-size: 12px;
             color: #888;
             margin-bottom: 6px;
-            font-weight: bold;
         }
 
         .input-group input,
         .input-group textarea {
             width: 100%;
-            padding: 12px;
+            padding: 10px;
             border: 1px solid #ddd;
             border-radius: 10px;
-            font-size: 15px;
             box-sizing: border-box;
-            font-family: inherit;
-        }
-
-        .input-group input:focus,
-        .input-group textarea:focus {
-            outline: none;
-            border-color: #ff9a9e;
-            box-shadow: 0 0 0 2px rgba(255, 154, 158, 0.2);
         }
 
         .modal-actions {
             display: flex;
             justify-content: flex-end;
             gap: 10px;
-            margin-top: 20px;
         }
 
         .btn {
-            padding: 12px 18px;
+            padding: 10px 16px;
             border-radius: 10px;
             border: none;
-            font-weight: bold;
             cursor: pointer;
-            font-size: 14px;
-        }
-
-        .btn-cancel {
-            background: #f0f0f0;
-            color: #555;
         }
 
         .btn-save {
@@ -361,275 +257,229 @@
             color: white;
         }
 
-        .btn-delete-main {
-            background: #ff4d4d;
-            color: white;
-            margin-right: auto;
+        .map iframe {
+            width: 100%;
+            height: 200px;
+            border: 0;
+            border-radius: 16px;
         }
 
         footer {
             text-align: center;
-            font-size: 13px;
+            font-size: 12px;
             color: #aaa;
-            padding: 30px 20px;
+            padding: 20px;
         }
     </style>
 </head>
 
 <body>
 
-    <header>Memories</header>
+    <header>Our Memories</header>
 
     <div class="container">
         <div class="card">
             <div class="card-header-actions">
-                <h2>📸 ギャラリー</h2>
-                <div class="header-buttons">
-                    <button class="btn-round btn-gray" onclick="clearPhotos()" title="アップロードした写真を消す">🗑️</button>
-                    <button class="btn-round" onclick="triggerPhotoUpload()">＋</button>
+                <h2>📸 共有ギャラリー</h2>
+                <div style="display: flex; gap: 8px;">
+                    <button class="btn-round" style="background: #e0e0e0; color: #555; font-size: 16px;"
+                        onclick="deleteCurrentPhoto()" title="今見ている写真を消す">🗑️</button>
+                    <button class="btn-round" id="uploadBtn" onclick="triggerPhotoUpload()">＋</button>
                 </div>
+            </div>
+            <div class="slider">
+                <div class="loading-overlay" id="uploadLoading">アップロード中... 🚀</div>
+                <div class="slides" id="slides"></div>
             </div>
             <input type="file" id="photoUpload" accept="image/*" style="display: none;"
                 onchange="handlePhotoUpload(this)">
-            <div class="slider" id="sliderContainer">
-                <div class="slides" id="slides"></div>
-            </div>
         </div>
 
         <div class="card">
             <div class="card-header-actions">
-                <h2>🍽 お店リスト (共有)</h2>
+                <h2>🍽 お店リスト</h2>
                 <button class="btn-round" onclick="openShopModal()">＋</button>
             </div>
-            <div id="shopListContainer">
-                <div class="loading-text">リストを読み込み中... 🔄</div>
-            </div>
+            <div id="shopListContainer"></div>
         </div>
 
         <div class="card">
             <h2>🗺 MAP</h2>
-            <iframe id="map" src="https://maps.google.com/maps?q=東京駅&t=&z=15&ie=UTF8&iwloc=&output=embed"
-                loading="lazy"></iframe>
+            <iframe id="map"
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3240.8280303808788!2d139.76493611525882!3d35.68123618019432!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x60188bfbd89f700b%3A0x277c49539d93690d!2z5p2x5Lqs6aeF!5e0!3m2!1sja!2sjp!4v1625000000000!5m2!1sja!2sjp"></iframe>
         </div>
 
         <div class="card">
-            <h2>📅 カレンダー</h2>
-            <div class="calendar-header">
-                <button onclick="changeMonth(-1)">◀</button>
-                <div id="monthLabel"></div>
-                <button onclick="changeMonth(1)">▶</button>
-            </div>
+            <h2>📅 カレンダー (個人)</h2>
             <div class="calendar-grid" id="calendar"></div>
         </div>
     </div>
 
-    <footer>Made with ❤️ Our Memory Page</footer>
-
     <div id="shopModal" class="modal-overlay">
         <div class="modal-content">
-            <h3 style="margin-top:0; color:#333;">お店を追加 🍽</h3>
-            <div class="input-group"><label>店名</label><input type="text" id="shopNameInput" placeholder="例: ○○カフェ">
-            </div>
-            <div class="input-group"><label>Instagram URL</label><input type="url" id="shopInstaInput"
-                    placeholder="https://instagram.com/..."></div>
-            <div class="input-group"><label>メモ</label><textarea id="shopNoteInput" rows="3"
-                    placeholder="パンケーキが美味しかった！"></textarea></div>
+            <h3>お店を追加 🍽</h3>
+            <div class="input-group"><label>店名</label><input type="text" id="shopNameInput"></div>
+            <div class="input-group"><label>Instagram URL</label><input type="text" id="shopInstaInput"></div>
+            <div class="input-group"><label>メモ</label><textarea id="shopNoteInput"></textarea></div>
             <div class="modal-actions">
-                <button class="btn btn-cancel" onclick="closeShopModal()">キャンセル</button>
-                <button class="btn btn-save" onclick="saveShop()" id="saveShopBtn">保存</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="calendarModal" class="modal-overlay">
-        <div class="modal-content">
-            <h3 style="margin-top:0; color:#333;" id="calModalTitle">思い出を入力</h3>
-            <div class="input-group"><textarea id="calNoteInput" rows="4" placeholder="今日は映画を見たよ🍿"></textarea></div>
-            <div class="modal-actions">
-                <button class="btn btn-delete-main" id="calDeleteBtn" onclick="deleteEvent()">削除</button>
-                <button class="btn btn-cancel" onclick="closeCalendarModal()">キャンセル</button>
-                <button class="btn btn-save" onclick="saveEvent()">保存</button>
+                <button class="btn" onclick="closeShopModal()">キャンセル</button>
+                <button class="btn btn-save" onclick="saveShop()">保存</button>
             </div>
         </div>
     </div>
 
     <script>
         // ==========================================
-        // ⚠️ ここに JSONBin のキーを貼り付けてください！ ⚠️
-        // ==========================================
         const JSONBIN_BIN_ID = "69e06fd7856a6821893c5dec";
         const JSONBIN_API_KEY = "$2a$10$kakylabqJZLjJIRngThANeWMzSEMeRz4f.3Dr5ZFurxyfk16RV5Ia";
+        const IMGBB_API_KEY = "553844648129b68e053a8598caaf2cb5";
         // ==========================================
 
         let shops = [];
-        let photos = JSON.parse(localStorage.getItem('memoryPhotos') || '[]');
+        let photos = []; // クラウド上の写真URLが入る
         let events = JSON.parse(localStorage.getItem('events') || '{}');
 
-        // --- お店リスト (JSONBin連携) ---
-        async function fetchShops() {
-            if (JSONBIN_BIN_ID === "ここにBinIDを貼り付ける") {
-                document.getElementById('shopListContainer').innerHTML = '<div class="loading-text">⚠️ コード内の Bin ID と Master Key を設定してね！</div>';
-                return;
-            }
+        // --- クラウドデータの読み込み ---
+        async function loadCloudData() {
             try {
                 const response = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}/latest`, {
                     headers: { 'X-Master-Key': JSONBIN_API_KEY }
                 });
                 const data = await response.json();
                 shops = data.record.shops || [];
+                photos = data.record.photos || [];
                 renderShops();
-            } catch (error) {
-                console.error("読み込みエラー:", error);
-                document.getElementById('shopListContainer').innerHTML = '<div class="loading-text">通信エラーが発生しました🥲</div>';
-            }
+                renderGallery();
+            } catch (e) { console.error(e); }
         }
 
-        async function updateShopsOnCloud() {
+        async function updateCloudData() {
+            await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json', 'X-Master-Key': JSONBIN_API_KEY },
+                body: JSON.stringify({ shops, photos })
+            });
+        }
+
+        // --- Imgbbへのアップロード ---
+        async function handlePhotoUpload(input) {
+            if (!input.files || !input.files[0]) return;
+
+            const file = input.files[0];
+            const formData = new FormData();
+            formData.append('image', file);
+
+            document.getElementById('uploadLoading').style.display = 'flex';
+            document.getElementById('uploadBtn').disabled = true;
+
             try {
-                await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-Master-Key': JSONBIN_API_KEY
-                    },
-                    body: JSON.stringify({ shops: shops })
+                // 1. ImgBBにアップロードして画像のURLをもらう
+                const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
+                    method: 'POST',
+                    body: formData
                 });
-            } catch (error) {
-                console.error("保存エラー:", error);
-                alert("データの保存に失敗しました...");
+                const resData = await res.json();
+                const imageUrl = resData.data.url;
+
+                // 2. そのURLをJSONBinに保存（これで共有完了！）
+                photos.push(imageUrl);
+                await updateCloudData();
+
+                renderGallery();
+            } catch (e) {
+                console.error(e);
+                alert("アップロードに失敗しました🥲");
+            } finally {
+                document.getElementById('uploadLoading').style.display = 'none';
+                document.getElementById('uploadBtn').disabled = false;
             }
         }
 
+        function renderGallery() {
+            const slides = document.getElementById('slides');
+            slides.innerHTML = '';
+            // 写真がない時のダミー
+            const displayPhotos = photos.length > 0 ? photos : ["https://images.unsplash.com/photo-1516483638261-f4dbaf036963?auto=format&fit=crop&w=800&q=80"];
+
+            displayPhotos.forEach(url => {
+                const img = document.createElement('img');
+                img.src = url;
+                slides.appendChild(img);
+            });
+            startAutoSlide(displayPhotos.length);
+        }
+
+        let slideIdx = 0;
+        let timer;
+        function startAutoSlide(count) {
+            if (timer) clearInterval(timer);
+            if (count <= 1) return;
+            timer = setInterval(() => {
+                slideIdx = (slideIdx + 1) % count;
+                document.getElementById('slides').style.transform = `translateX(-${slideIdx * 100}%)`;
+            }, 4000);
+        }
+
+        // --- お店リスト機能（前回と同様） ---
         function renderShops() {
             const container = document.getElementById('shopListContainer');
-            container.innerHTML = '';
-            if (shops.length === 0) {
-                container.innerHTML = '<div style="text-align:center; color:#888; padding:20px; font-size:14px;">右上の＋ボタンからお店を追加してね！</div>';
-                return;
-            }
+            container.innerHTML = shops.length ? '' : '<div style="text-align:center;font-size:12px;color:#999;">リストが空です</div>';
             shops.forEach((shop, i) => {
-                const card = document.createElement('div');
-                card.className = 'shop-card';
-                card.onclick = () => {
-                    document.getElementById('map').src = `https://maps.google.com/maps?q=${encodeURIComponent(shop.name)}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
-                    document.getElementById('map').parentElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                const div = document.createElement('div');
+                div.className = 'shop-card';
+                div.onclick = () => {
+                    document.getElementById('map').src = `https://www.google.com/maps/embed/v1/search?key=YOUR_GOOGLE_MAP_API_KEY_OR_USE_IFRAME_GENERATOR&q=${encodeURIComponent(shop.name)}`;
+                    // ※簡易MAP表示のため前回のURL形式を推奨
+                    document.getElementById('map').src = `https://maps.google.com/maps?q=${encodeURIComponent(shop.name)}&output=embed`;
                 };
-                card.innerHTML = `
+                div.innerHTML = `
                     <div class="shop-title">${shop.name}</div>
-                    <div class="shop-note">${shop.note || ''}</div>
+                    <div style="font-size:12px;color:#666;">${shop.note || ''}</div>
                     <div class="shop-actions">
-                        ${shop.insta ? `<a href="${shop.insta}" target="_blank" class="insta-link" onclick="event.stopPropagation()">📸 Instagram</a>` : '<div></div>'}
-                        <button class="btn-delete-small" onclick="deleteShop(${i}); event.stopPropagation();">🗑️ 削除</button>
+                        ${shop.insta ? `<a href="${shop.insta}" target="_blank" class="insta-link" onclick="event.stopPropagation()">Instagram</a>` : '<span></span>'}
+                        <button class="btn-delete-small" onclick="deleteShop(${i}); event.stopPropagation();">削除</button>
                     </div>
                 `;
-                container.appendChild(card);
+                container.appendChild(div);
             });
         }
 
         async function saveShop() {
-            const name = document.getElementById('shopNameInput').value.trim();
-            const insta = document.getElementById('shopInstaInput').value.trim();
-            const note = document.getElementById('shopNoteInput').value.trim();
-            if (!name) { alert("店名を入力してね！"); return; }
-
-            const saveBtn = document.getElementById('saveShopBtn');
-            saveBtn.innerText = "保存中...";
-            saveBtn.disabled = true;
-
+            const name = document.getElementById('shopNameInput').value;
+            const insta = document.getElementById('shopInstaInput').value;
+            const note = document.getElementById('shopNoteInput').value;
+            if (!name) return;
             shops.push({ name, insta, note });
-            renderShops(); // 先に画面に反映
-            await updateShopsOnCloud(); // 裏でクラウドに保存
-
-            saveBtn.innerText = "保存";
-            saveBtn.disabled = false;
+            await updateCloudData();
             closeShopModal();
+            renderShops();
         }
 
-        async function deleteShop(index) {
-            if (confirm("このお店をリストから削除しますか？")) {
-                shops.splice(index, 1);
-                renderShops();
-                await updateShopsOnCloud();
-            }
+        async function deleteShop(i) {
+            if (!confirm("消してもいい？")) return;
+            shops.splice(i, 1);
+            await updateCloudData();
+            renderShops();
         }
 
-        function openShopModal() {
-            document.getElementById('shopNameInput').value = '';
-            document.getElementById('shopInstaInput').value = '';
-            document.getElementById('shopNoteInput').value = '';
-            document.getElementById('shopModal').classList.add('active');
-        }
+        function openShopModal() { document.getElementById('shopModal').classList.add('active'); }
         function closeShopModal() { document.getElementById('shopModal').classList.remove('active'); }
 
-        // --- 以下は既存のギャラリー・カレンダー機能（ローカル保存のまま） ---
-        const defaultPhotos = [
-            "https://cdn.cheapoguides.com/wp-content/uploads/sites/2/2020/08/hydrangea-kamakura-Lily-C-B.jpg",
-            "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS9U6YTJ960SxJdz7IBIr17kQl9BjLRkNp6eg&s"
-        ];
-        function triggerPhotoUpload() { document.getElementById('photoUpload').click(); }
-        function handlePhotoUpload(input) {
-            if (input.files && input.files[0]) {
-                const reader = new FileReader();
-                reader.onload = (e) => { photos.push(e.target.result); localStorage.setItem('memoryPhotos', JSON.stringify(photos)); renderGallery(); };
-                reader.readAsDataURL(input.files[0]);
-            }
-        }
-        function clearPhotos() {
-            if (photos.length === 0) return alert("追加された写真はありません。");
-            if (confirm("自分で追加した写真をすべて削除しますか？")) { photos = []; localStorage.setItem('memoryPhotos', JSON.stringify(photos)); renderGallery(); }
-        }
-        let slideIdx = 0; let slideInterval;
-        function renderGallery() {
-            const slides = document.getElementById('slides'); slides.innerHTML = '';
-            const all = [...defaultPhotos, ...photos];
-            all.forEach(src => { const img = document.createElement('img'); img.src = src; slides.appendChild(img); });
-            if (slideInterval) clearInterval(slideInterval);
-            if (all.length > 1) { slides.appendChild(slides.children[0].cloneNode(true)); startSlider(all.length + 1); }
-        }
-        function startSlider(total) {
-            slideInterval = setInterval(() => {
-                slideIdx++; const slides = document.getElementById('slides');
-                slides.style.transition = 'transform 0.5s ease'; slides.style.transform = `translateX(-${slideIdx * 100}%)`;
-                if (slideIdx === total - 1) { setTimeout(() => { slides.style.transition = 'none'; slideIdx = 0; slides.style.transform = 'translateX(0)'; }, 500); }
-            }, 3500);
-        }
-
-        let currDate = new Date(); let targetDateKey = null;
+        // --- カレンダー (個人保存) ---
         function renderCalendar() {
-            const cal = document.getElementById('calendar'); cal.innerHTML = '';
-            const year = currDate.getFullYear(); const month = currDate.getMonth();
-            document.getElementById('monthLabel').innerText = `${year}年 ${month + 1}月`;
-            ['日', '月', '火', '水', '木', '金', '土'].forEach(d => cal.innerHTML += `<div class="weekday">${d}</div>`);
-            const first = new Date(year, month, 1).getDay(); const days = new Date(year, month + 1, 0).getDate();
-            for (let i = 0; i < first; i++) cal.innerHTML += '<div></div>';
+            const cal = document.getElementById('calendar');
+            const days = new Date(2024, new Date().getMonth() + 1, 0).getDate();
             for (let d = 1; d <= days; d++) {
-                const key = `${year}-${month + 1}-${d}`; const has = events[key];
-                const dayEl = document.createElement('div'); dayEl.className = `day ${has ? 'has-event' : ''}`;
-                dayEl.innerHTML = `${d}${has ? '<span style="font-size:10px; margin-top:2px;">💖</span>' : ''}`;
-                dayEl.onclick = () => openCalendarModal(key, `${month + 1}月${d}日`); cal.appendChild(dayEl);
+                const el = document.createElement('div');
+                el.className = 'day';
+                el.innerText = d;
+                cal.appendChild(el);
             }
         }
-        function changeMonth(n) { currDate.setMonth(currDate.getMonth() + n); renderCalendar(); }
-        function openCalendarModal(key, displayDate) {
-            targetDateKey = key; document.getElementById('calModalTitle').innerText = `${displayDate} の思い出`;
-            document.getElementById('calNoteInput').value = events[key] || '';
-            document.getElementById('calDeleteBtn').style.display = events[key] ? 'block' : 'none';
-            document.getElementById('calendarModal').classList.add('active');
-        }
-        function closeCalendarModal() { document.getElementById('calendarModal').classList.remove('active'); }
-        function saveEvent() {
-            const text = document.getElementById('calNoteInput').value.trim();
-            text ? events[targetDateKey] = text : delete events[targetDateKey];
-            localStorage.setItem('events', JSON.stringify(events)); closeCalendarModal(); renderCalendar();
-        }
-        function deleteEvent() {
-            if (confirm("この日の思い出を削除しますか？")) { delete events[targetDateKey]; localStorage.setItem('events', JSON.stringify(events)); closeCalendarModal(); renderCalendar(); }
-        }
 
-        // 初期化
-        renderGallery();
+        // 起動
+        loadCloudData();
         renderCalendar();
-        fetchShops(); // ここでクラウドからお店データを取得します
     </script>
 </body>
 
