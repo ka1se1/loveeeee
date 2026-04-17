@@ -174,15 +174,15 @@
 
         #shopListContainer {
             display: flex;
-            overflow-x: auto;
+            overflow-x: scroll;
             scroll-snap-type: x mandatory;
             -webkit-overflow-scrolling: touch; /* ←iPhone対策 */
             overflow-y: hidden;
         }
 
         .shop-page {
-            flex: 0 0 100%;
-            width: 100%; /* ←これ追加！！ */
+            flex: 0 0 100vw;
+            width: 100vw; /* ←これ追加！！ */
             box-sizing: border-box; /* ←これも入れると安定 */
             display: flex;
             flex-direction: column;
@@ -190,6 +190,7 @@
             padding: 5px;
             scroll-snap-align: start;
             min-width: 100%;
+            padding: 0 10px;
         }
 
         .shop-card {
