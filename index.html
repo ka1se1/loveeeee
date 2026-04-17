@@ -747,6 +747,27 @@
             const slides = document.getElementById('slides');
         });
 
+        slides.addEventListener('touchstart', (e) => {
+            startX = e.touches[0].clientX;
+            isDragging = true;
+            prevTranslate = currentTranslate;
+        });
+
+        slides.addEventListener('touchmove', (e) => {
+            if (!isDragging) return;
+
+            let moveX = e.touches[0].clientX;
+            let diff = moveX - startX;
+
+            currentTranslate = prevTranslate + diff;
+
+            slides.style.transform = `translateX(${currentTranslate}px)`;
+        });
+
+        slides.addEventListener('touchend', () => {
+            isDragging = false;
+        });
+
         // --- ギャラリー表示（スライダー＆一覧） ---
         let slideIdx = 0;
         let timer;
@@ -778,6 +799,7 @@
             });
 
             slides.classList.add('active'); // ← 写真あるときだけ動かす
+            startAutoScroll();
         }
 
         function startAutoSlide(count) {
