@@ -773,7 +773,7 @@
         firebase.initializeApp(firebaseConfig);
 
         // ★エラーを防ぐための強力な設定を追加！
-        const db = firebase.firestore();
+        const db = firebase.app().firestore("website");
         db.settings({
             // ブロックされやすい「長時間の通信」を避ける設定
             experimentalForceLongPolling: true,
