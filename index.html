@@ -756,25 +756,18 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <script>
-        const IMGBB_API_KEY = "98846b51d380b3b2c66f74b7875c4707"
-        // Supabaseの接続情報（プロジェクトの設定画面「API」に書いてあるもの）
+        const IMGBB_API_KEY = "98846b51d380b3b2c66f74b7875c4707";
+        
+        // 接続情報を1回だけ書く！
         const SUPABASE_URL = 'https://aelvmpvgzvaiomqimzgo.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_q0Zo34coaQEx57ey6DO84w_E71EljZD';
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-        async function saveData(text) {
-            const { data, error } = await supabase
-            .from('diaries') // さっき作ったテーブル名
-            .insert([{ content: text }]);
-            
-            if (error) {
-            console.error('エラー:', error);
-            } else {
-            alert('保存できたよ！');
-            }
-        }
+        
+        // パソコンが混乱しないように初期化
+        const { createClient } = window.supabase;
+        const db = createClient(SUPABASE_URL, SUPABASE_KEY);
 
         async function loadData() {
-            const { data, error } = await supabase
+            const { data, error } = await db
                 .from('memories')
                 .select('*')
                 .eq('id', 'main')
@@ -800,7 +793,7 @@
         }
 
         async function updateCloudData() {
-            const { error } = await supabase
+            const { error } = await db
                 .from('memories')
                 .upsert({
                     id: "main",
@@ -824,6 +817,14 @@
         let prevTranslate = 0;
         let loveCount = 0;
         const ANNIVERSARY_DATE = "2026/01/21"; // 例: 付き合い始めた日
+
+        // ページを開いた時にデータを読み込む
+        window.onload = () => {
+            loadData();
+            setTimeout(() => {
+                document.getElementById('splashScreen').classList.add('hidden');
+            }, 2000);
+        };
 
         // --- 写真アップロード (ImgBB) ・一括対応 ---
         function triggerPhotoUpload() { document.getElementById('photoUpload').click(); }
