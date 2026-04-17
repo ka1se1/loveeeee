@@ -773,15 +773,7 @@
         firebase.initializeApp(firebaseConfig);
 
         // 1. まず「website」という名前の金庫を指定してdbを作る
-        const db = firebase.app().firestore("marin");
-
-        // 2. そのdbに対して、通信のブロックを回避する設定を流し込む
-        db.settings({
-            host: "firestore.googleapis.com", // 接続先を明示
-            ssl: true,                        // 安全な通信を明示
-            experimentalForceLongPolling: true, // 広告ブロック回避
-            useFetchStreams: false
-        });
+        const db = firebase.firestore();
 
         // 3. データを入れる場所を指定
         const docRef = db.collection("apps").doc("couple_app");
