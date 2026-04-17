@@ -7,10 +7,9 @@
     <title>Memories Shared</title>
     <style>
         body {
-        
             margin: 0;
             font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Segoe UI", Roboto, Arial, sans-serif;
-            background: #f4f5f7;
+            background: linear-gradient(180deg, #fdfbfb, #ebedee);
             color: #333;
             scroll-behavior: smooth;
         }
@@ -51,11 +50,14 @@
         }
 
         .card {
-            background: white;
-            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.85); /* ちょい透け */
+            backdrop-filter: blur(10px); /* ガラス感 */
+            border-radius: 24px;
             padding: 20px;
             margin-bottom: 20px;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            border: 1px solid rgba(255,255,255,0.4);
         }
 
         .card-header-actions {
@@ -71,18 +73,22 @@
         }
 
         .btn-round {
-            background: #ff9a9e;
+            background: linear-gradient(135deg, #ff9a9e, #fecfef);
             color: white;
-            border: none;
+
+            border: none;              /* ← これで縁消える */
+            outline: none;             /* ← 念のため */
+
             border-radius: 50%;
             width: 36px;
             height: 36px;
-            font-size: 20px;
-            font-weight: bold;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+
+            box-shadow: 0 6px 16px rgba(255, 154, 158, 0.3);
+            transition: all 0.2s ease;
+        }
+
+        .btn-round:active {
+            transform: scale(0.9);
         }
 
         .btn-round:disabled {
@@ -100,6 +106,8 @@
             display: flex;
             gap: 12px;
             width: max-content;
+            align-items: center;
+            justify-content: center;
         }
 
         .slides.active {
@@ -169,6 +177,9 @@
             animation: pulse 1.5s infinite ease-in-out;
             align-self: center;
             width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         @keyframes pulse {
@@ -400,6 +411,7 @@
         // ==========================================
 
         let shops = [];
+        let editingIndex = null;
         let photos = [];
 
         // --- クラウドデータの読み込み ---
@@ -589,6 +601,8 @@
                         <div class="shop-title">${shop.name}</div>
                         <div class="shop-note">${shop.note || ''}</div>
                         ${shop.insta ? `<a href="${shop.insta}" target="_blank" class="insta-link" onclick="event.stopPropagation()">Instagram</a>` : ''}
+                        <button class="btn-delete-small" style="background:#e3f2fd;color:#1976d2;"
+                        onclick="editShop(${actualIdx}); event.stopPropagation();">編集</button>
                         <button class="btn-delete-small" onclick="deleteShop(${actualIdx}); event.stopPropagation();">削除</button>
                     `;
 
@@ -603,13 +617,26 @@
             const name = document.getElementById('shopNameInput').value;
             const insta = document.getElementById('shopInstaInput').value;
             const note = document.getElementById('shopNoteInput').value;
-            if (!name) { alert("店名を入れてね！"); return; }
-            shops.push({ name, insta, note });
+
+            if (!name) {
+                alert("店名を入れてね！");
+                return;
+            }
+
+            if (editingIndex !== null) {
+                // ✏️ 編集
+                shops[editingIndex] = { name, insta, note };
+            } else {
+                // ➕ 新規
+                shops.push({ name, insta, note });
+            }
+
             await updateCloudData();
             closeShopModal();
             renderShops();
 
-            // 入力欄を空に戻す
+            // リセット
+            editingIndex = null;
             document.getElementById('shopNameInput').value = '';
             document.getElementById('shopInstaInput').value = '';
             document.getElementById('shopNoteInput').value = '';
@@ -624,7 +651,16 @@
 
         function openShopModal() { document.getElementById('shopModal').classList.add('active'); }
         function closeShopModal() { document.getElementById('shopModal').classList.remove('active'); }
+        function editShop(index) {
+            const shop = shops[index];
 
+            document.getElementById('shopNameInput').value = shop.name;
+            document.getElementById('shopInstaInput').value = shop.insta || '';
+            document.getElementById('shopNoteInput').value = shop.note || '';
+
+            editingIndex = index; // ← ここ重要
+            openShopModal();
+        }
         // --- 起動と自動同期 ---
         // 最初に読み込む
         loadCloudData();
