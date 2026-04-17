@@ -760,28 +760,30 @@
     <script>
         // --- 1. Firebaseの設定（そのまま） ---
         const firebaseConfig = {
-            apiKey: "AIzaSyCO06lAVe3sIQW-0FT1IvsN0TIIEemQkaM",
-            authDomain: "site-cdaf5.firebaseapp.com",
-            projectId: "site-cdaf5",
-            storageBucket: "site-cdaf5.firebasestorage.app",
-            messagingSenderId: "323004999027",
-            appId: "1:323004999027:web:ee0edac6d97139db0c5106",
-            measurementId: "G-8D3GRQY2L4"
+            apiKey: "AIzaSyBmPuAIeKh9xHc0YxONBU42krL2PeiKZnU",
+            authDomain: "marin-493616.firebaseapp.com",
+            projectId: "marin-493616",
+            storageBucket: "marin-493616.firebasestorage.app",
+            messagingSenderId: "987836888615",
+            appId: "1:987836888615:web:b291e1a5f3f3be1efc0002",
+            measurementId: "G-G25Q4RS8BT"
         };
 
-        // --- 2. Firebaseの初期化（★ここを書き換えます！） ---
+        // --- 2. Firebaseの初期化（最強の直通設定） ---
         firebase.initializeApp(firebaseConfig);
 
-        // ★エラーを防ぐための強力な設定を追加！
+        // 1. まず「website」という名前の金庫を指定してdbを作る
         const db = firebase.app().firestore("website");
+
+        // 2. そのdbに対して、通信のブロックを回避する設定を流し込む
         db.settings({
-            // ブロックされやすい「長時間の通信」を避ける設定
-            experimentalForceLongPolling: true,
-            // ブラウザのブロックを回避しやすい通信方式に変更
-            useFetchStreams: false 
+            host: "firestore.googleapis.com", // 接続先を明示
+            ssl: true,                        // 安全な通信を明示
+            experimentalForceLongPolling: true, // 広告ブロック回避
+            useFetchStreams: false
         });
 
-        // 金庫の場所（もしさっきの画像のように名前が"website"なら、db.collectionの前を firebase.app().firestore("website") に変えてください）
+        // 3. データを入れる場所を指定
         const docRef = db.collection("apps").doc("couple_app");
         const IMGBB_API_KEY = "553844648129b68e053a8598caaf2cb5";
         // --- 3. データのリアルタイム同期（ここが魔法の心臓部！） ---
