@@ -753,32 +753,26 @@
         <span class="love-icon">🤍</span>
         <span id="loveCountDisplay" class="love-count-badge">0</span>
     </button>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <script>
-        // --- 1. Firebaseの設定（そのまま） ---
-        const firebaseConfig = {
-            apiKey: "AIzaSyBmPuAIeKh9xHc0YxONBU42krL2PeiKZnU",
-            authDomain: "marin-493616.firebaseapp.com",
-            projectId: "marin-493616",
-            storageBucket: "marin-493616.firebasestorage.app",
-            messagingSenderId: "987836888615",
-            appId: "1:987836888615:web:b291e1a5f3f3be1efc0002",
-            measurementId: "G-G25Q4RS8BT"
-        };
+        // Supabaseの接続情報（プロジェクトの設定画面「API」に書いてあるもの）
+        const SUPABASE_URL = 'https://aelvmpvgzvaiomqimzgo.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_q0Zo34coaQEx57ey6DO84w_E71EljZD';
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // --- 2. Firebaseの初期化（最強の直通設定） ---
-        firebase.initializeApp(firebaseConfig);
+        async function saveData(text) {
+            const { data, error } = await supabase
+            .from('diaries') // さっき作ったテーブル名
+            .insert([{ content: text }]);
+            
+            if (error) {
+            console.error('エラー:', error);
+            } else {
+            alert('保存できたよ！');
+            }
+        }
 
-        // 1. まず「website」という名前の金庫を指定してdbを作る
-        const db = firebase.firestore();
-
-        // 3. データを入れる場所を指定
-        const docRef = db.collection("apps").doc("couple_app");
-        const IMGBB_API_KEY = "553844648129b68e053a8598caaf2cb5";
-        // --- 3. データのリアルタイム同期（ここが魔法の心臓部！） ---
         function startSync() {
             docRef.onSnapshot((doc) => {
                 if (doc.exists) {
