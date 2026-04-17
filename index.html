@@ -774,7 +774,7 @@
 
         // --- 2. Firebaseの初期化 ---
         firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
+        const db = firebase.app().firestore("website");
         const docRef = db.collection("apps").doc("couple_app"); // 金庫の場所を指定
 
         // --- 3. データのリアルタイム同期（ここが魔法の心臓部！） ---
