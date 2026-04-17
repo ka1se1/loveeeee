@@ -484,6 +484,32 @@
             justify-content: center;
             z-index: 999;
         }
+        /* 📔 交換日記 */
+        .diary-container { max-height: 300px; overflow-y: auto; padding-right: 5px; }
+        .diary-container::-webkit-scrollbar { width: 4px; }
+        .diary-container::-webkit-scrollbar-thumb { background: #fad0c4; border-radius: 10px; }
+        .diary-entry { background: #fff; border: 1px solid #ffe3e6; border-radius: 16px; padding: 15px; margin-bottom: 12px; position: relative; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
+        .diary-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px; border-bottom: 1px dashed #ffe3e6; padding-bottom: 6px; }
+        .diary-author { font-weight: bold; font-size: 14px; color: #d81b60; }
+        .diary-date { font-size: 10px; color: #999; margin-right: 20px; }
+        .diary-content { font-size: 13px; line-height: 1.6; white-space: pre-wrap; word-break: break-word; color: #444; }
+        .btn-delete-diary { background: none; border: none; color: #ccc; font-size: 12px; cursor: pointer; padding: 4px; position: absolute; top: 10px; right: 10px; }
+        
+        /* 💬 返信用のデザイン */
+        .reply-list { margin-top: 10px; padding-top: 10px; border-top: 1px dashed #eee; }
+        .reply-entry { background: #fdfdfd; border-radius: 10px; padding: 10px; margin-bottom: 6px; font-size: 12px; position: relative; border-left: 3px solid #ff9a9e; }
+        .reply-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; }
+        .reply-author { font-weight: bold; color: #e6683c; }
+        .reply-date { font-size: 9px; color: #999; margin-right: 15px; }
+        .btn-reply { background: #ffe3e6; color: #d81b60; border: none; border-radius: 8px; padding: 6px 12px; font-size: 10px; cursor: pointer; margin-top: 5px; font-weight: bold; }
+        .btn-delete-reply { background: none; border: none; color: #ccc; font-size: 10px; cursor: pointer; padding: 2px; position: absolute; top: 5px; right: 5px; }
+        
+        /* ⏳ ボタンが押せない時（保存中）のデザイン */
+        .btn-save:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
     </style>
 </head>
 
@@ -526,6 +552,16 @@
             </div>
         </div>
 
+        <div class="card">
+            <div class="card-header-actions">
+                <h2>📔 交換日記</h2>
+                <button class="btn-round" onclick="openDiaryModal()">＋</button>
+            </div>
+            <div id="diaryListContainer" class="diary-container">
+                <div class="loading-pulse">日記を読み込み中... 📔🔄</div>
+            </div>
+        </div>
+
         <div class="card" style="text-align: center;">
             <h2 style="margin-bottom: 15px;">🗺 MAP</h2>
             <iframe id="map" src="https://maps.google.co.jp/maps?q=日本&output=embed"
@@ -557,6 +593,31 @@
             </div>
         </div>
     </div>
+
+    <div id="diaryModal" class="modal-overlay">
+        <div class="modal-content">
+            <h3>日記を書く 🖋</h3>
+            <div class="input-group"><label>名前</label><input type="text" id="diaryAuthorInput" placeholder="例：ぼく"></div>
+            <div class="input-group"><label>内容</label><textarea id="diaryContentInput" rows="5" placeholder="今日の出来事や気持ちを書いてね！"></textarea></div>
+            <div class="modal-actions">
+                <button class="btn" onclick="closeDiaryModal()">キャンセル</button>
+                <button class="btn btn-save" onclick="saveDiary()">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="replyModal" class="modal-overlay">
+        <div class="modal-content">
+            <h3>返信を書く 💬</h3>
+            <div class="input-group"><label>名前</label><input type="text" id="replyAuthorInput" placeholder="例：わたし"></div>
+            <div class="input-group"><label>内容</label><textarea id="replyContentInput" rows="3" placeholder="返信を書いてね！"></textarea></div>
+            <div class="modal-actions">
+                <button class="btn" onclick="closeReplyModal()">キャンセル</button>
+                <button class="btn btn-save" onclick="saveReply()">送信</button>
+            </div>
+        </div>
+    </div>
+
     <div id="deleteModal" class="delete-modal">
         <div class="delete-card">
             <p>この写真を削除する？</p>
@@ -641,6 +702,7 @@
         let shops = [];
         let editingIndex = null;
         let photos = [];
+        let diaries = [];
         let prevTranslate = 0;
 
         // --- クラウドデータの読み込み ---
@@ -655,9 +717,11 @@
                 // お店データと写真データを取得。写真が1枚もない場合は空配列にする
                 shops = data.record.shops || [];
                 photos = data.record.photos || [];
+                diaries = data.record.diaries || [];
 
                 renderShops();
                 renderGallery();
+                renderDiaries();
             } catch (e) {
                 console.error(e);
                 document.getElementById('slides').innerHTML = '<div style="padding:20px;text-align:center;color:red;font-size:12px;">エラー：データの読み込みに失敗しました🥲</div>';
@@ -669,7 +733,7 @@
             await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json', 'X-Master-Key': JSONBIN_API_KEY },
-                body: JSON.stringify({ shops, photos })
+                body: JSON.stringify({ shops, photos,diaries })
             });
         }
 
@@ -946,6 +1010,8 @@
             showToast("写真を削除しました🗑️");
         }
 
+
+
         function openInsta(url) {
             window.open(url, '_blank');
         }
@@ -975,6 +1041,147 @@
             setTimeout(() => {
                 toast.style.display = "none";
             }, 2000);
+        }
+
+        // --- 交換日記＆返信機能 ---
+        let currentReplyTarget = null; // どの記事に返信するか覚える変数
+
+        function renderDiaries() {
+            const container = document.getElementById('diaryListContainer');
+            if (!diaries.length) {
+                container.innerHTML = '<div style="text-align:center;font-size:12px;color:#999;padding:20px;">まだ日記がありません。＋ボタンで最初のページを書いてね！📔</div>';
+                return;
+            }
+            container.innerHTML = '';
+            
+            // 新しい日記を一番上にする
+            [...diaries].reverse().forEach((diary, i) => {
+                const actualIdx = (diaries.length - 1) - i;
+                const div = document.createElement('div');
+                div.className = 'diary-entry';
+
+                // 返信一覧のHTMLを作成
+                let repliesHtml = '';
+                if (diary.replies && diary.replies.length > 0) {
+                    repliesHtml = '<div class="reply-list">';
+                    diary.replies.forEach((reply, rIdx) => {
+                        repliesHtml += `
+                            <div class="reply-entry">
+                                <button class="btn-delete-reply" onclick="deleteReply(${actualIdx}, ${rIdx})">🗑️</button>
+                                <div class="reply-header">
+                                    <span class="reply-author">↳ ${reply.author}</span>
+                                    <span class="reply-date">${reply.date}</span>
+                                </div>
+                                <div class="diary-content">${reply.content}</div>
+                            </div>
+                        `;
+                    });
+                    repliesHtml += '</div>';
+                }
+
+                div.innerHTML = `
+                    <button class="btn-delete-diary" onclick="deleteDiary(${actualIdx})">🗑️</button>
+                    <div class="diary-header">
+                        <span class="diary-author">✍️ ${diary.author}</span>
+                        <span class="diary-date">${diary.date}</span>
+                    </div>
+                    <div class="diary-content">${diary.content}</div>
+                    ${repliesHtml}
+                    <div style="text-align: right;">
+                        <button class="btn-reply" onclick="openReplyModal(${actualIdx})">💬 返信する</button>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        // --- 日記の保存 ---
+        async function saveDiary() {
+            const author = document.getElementById('diaryAuthorInput').value;
+            const content = document.getElementById('diaryContentInput').value;
+            if(!author || !content) { alert("名前と日記の内容を両方入れてね！"); return; }
+            
+            // 🌟 追加：ボタンを「保存中」にして連打を防ぐ
+            const saveBtn = document.querySelector('#diaryModal .btn-save');
+            const originalText = saveBtn.innerText;
+            saveBtn.innerText = '保存中... ⏳';
+            saveBtn.disabled = true;
+
+            try {
+                const now = new Date();
+                const dateStr = `${now.getFullYear()}/${now.getMonth()+1}/${now.getDate()} ${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')}`;
+                
+                diaries.push({ author, content, date: dateStr, replies: [] });
+                await updateCloudData();
+                closeDiaryModal();
+                renderDiaries();
+                document.getElementById('diaryContentInput').value = ''; 
+            } finally {
+                // 🌟 追加：処理が終わったらボタンを元の状態に戻す
+                saveBtn.innerText = originalText;
+                saveBtn.disabled = false;
+            }
+        }
+
+        async function deleteDiary(idx) {
+            if(!confirm("この日記を消してもいい？（返信も全部消えます！）")) return;
+            diaries.splice(idx, 1);
+            await updateCloudData();
+            renderDiaries();
+        }
+
+        function openDiaryModal() { document.getElementById('diaryModal').classList.add('active'); }
+        function closeDiaryModal() { document.getElementById('diaryModal').classList.remove('active'); }
+
+        // --- 返信の保存・削除 ---
+        function openReplyModal(idx) {
+            currentReplyTarget = idx;
+            document.getElementById('replyModal').classList.add('active');
+        }
+
+        function closeReplyModal() {
+            currentReplyTarget = null;
+            document.getElementById('replyModal').classList.remove('active');
+        }
+
+        // --- 返信の保存 ---
+        async function saveReply() {
+            if (currentReplyTarget === null) return;
+            const author = document.getElementById('replyAuthorInput').value;
+            const content = document.getElementById('replyContentInput').value;
+            if(!author || !content) { alert("名前と返信の内容を入れてね！"); return; }
+            
+            // 🌟 追加：ボタンを「送信中」にして連打を防ぐ
+            const saveBtn = document.querySelector('#replyModal .btn-save');
+            const originalText = saveBtn.innerText;
+            saveBtn.innerText = '送信中... 🚀';
+            saveBtn.disabled = true;
+
+            try {
+                const now = new Date();
+                const dateStr = `${now.getFullYear()}/${now.getMonth()+1}/${now.getDate()} ${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')}`;
+                
+                if (!diaries[currentReplyTarget].replies) {
+                    diaries[currentReplyTarget].replies = [];
+                }
+                
+                diaries[currentReplyTarget].replies.push({ author, content, date: dateStr });
+                await updateCloudData();
+                closeReplyModal();
+                renderDiaries();
+                document.getElementById('replyContentInput').value = ''; 
+            } finally {
+                // 🌟 追加：処理が終わったらボタンを元の状態に戻す
+                saveBtn.innerText = originalText;
+                saveBtn.disabled = false;
+            }
+        }
+
+        async function deleteReply(diaryIdx, replyIdx) {
+            if(!confirm("この返信を消してもいい？")) return;
+            diaries[diaryIdx].replies.splice(replyIdx, 1);
+            await updateCloudData();
+            renderDiaries();
         }
 
         // --- 起動と自動同期 ---
