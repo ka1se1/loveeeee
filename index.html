@@ -595,8 +595,6 @@
                 ✕
             </button>
         </div>
-
-        <img id="viewerImg" src="">
     </div>
 
     <div id="shopDeleteModal" class="delete-modal">
@@ -737,15 +735,11 @@
             uploadBtn.disabled = false;
             input.value = ""; // リセット
         }
-
+        const slides = document.getElementById('slides');
         let startX = 0;
         let currentTranslate = 0;
         let isDragging = false;
-
-        window.addEventListener('load', () => {
-
-            const slides = document.getElementById('slides');
-        });
+        prevTranslate = currentTranslate;
 
         slides.addEventListener('touchstart', (e) => {
             startX = e.touches[0].clientX;
@@ -760,7 +754,6 @@
             let diff = moveX - startX;
 
             currentTranslate = prevTranslate + diff;
-
             slides.style.transform = `translateX(${currentTranslate}px)`;
         });
 
@@ -799,7 +792,7 @@
             });
 
             slides.classList.add('active'); // ← 写真あるときだけ動かす
-            startAutoScroll();
+            startAutoSlide;
         }
 
         function startAutoSlide(count) {
