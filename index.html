@@ -122,6 +122,15 @@
             flex-shrink: 0;
 
             box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+
+            transition: all 0.25s ease; /* ← 追加 */
+            cursor: pointer;            /* ← 追加 */
+        }
+
+        .slides img:hover {
+            transform: translateY(-8px) scale(1.05); /* ← 浮いて拡大 */
+            box-shadow: 0 12px 28px rgba(0,0,0,0.25); /* ← 影強く */
+            z-index: 5;
         }
 
         @keyframes scrollLoop {
@@ -311,10 +320,23 @@
         .shop-card {
             width: 100%;
             padding: 12px;
-            border-radius: 12px;
-            background: #fdfdfd;
-            border: 1px solid #eee;
+            border-radius: 14px;
+            background: #ffffff;
             box-sizing: border-box;
+
+            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+
+            transition: all 0.25s ease;
+            cursor: pointer;
+        }
+
+        .shop-card:hover {
+            transform: translateY(-6px) scale(1.02);
+            box-shadow: 0 10px 24px rgba(0,0,0,0.12);
+        }
+
+        .shop-card:active {
+            transform: scale(0.97);
         }
         
         .shop-title { font-weight: bold; font-size: 12px; margin-bottom: 4px; word-break: break-word; line-height: 1.2; }
