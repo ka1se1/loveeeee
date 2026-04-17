@@ -43,6 +43,42 @@
             }
         }
 
+        .photo-viewer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+
+            background: rgba(0,0,0,0.9);
+            display: none;
+
+            align-items: center;
+            justify-content: center;
+
+            z-index: 9999;
+        }
+
+        .photo-viewer img {
+            max-width: 90%;
+            max-height: 90%;
+            border-radius: 16px;
+
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            animation: zoomIn 0.3s ease;
+        }
+
+        @keyframes zoomIn {
+            from {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
         .container {
             padding: 20px 15px;
             max-width: 600px;
@@ -108,10 +144,7 @@
             width: 100%;
             align-items: center;
             justify-content: center;
-        }
-
-        .slides.active {
-            animation: scrollLoop 20s linear infinite;
+            transition: transform 0.3s ease;
         }
 
         .slides img {
@@ -338,6 +371,12 @@
         .shop-card:active {
             transform: scale(0.97);
         }
+
+        .shop-card.deleting {
+            transform: scale(0.85);
+            opacity: 0;
+            transition: transform 0.25s ease, opacity 0.25s ease;
+        }
         
         .shop-title { font-weight: bold; font-size: 12px; margin-bottom: 4px; word-break: break-word; line-height: 1.2; }
         .shop-note { font-size: 10px; color: #666; flex-grow: 1; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; margin-bottom: 6px; }
@@ -458,8 +497,6 @@
             <div class="card-header-actions">
                 <h2>📸 共有ギャラリー</h2>
                 <div style="display: flex; gap: 8px;">
-                    <button class="btn-round" style="background: #e0e0e0; color: #555; font-size: 16px;"
-                        onclick="deleteCurrentPhoto()" title="今見ている写真を消す">🗑️</button>
                     <button class="btn-round" id="uploadBtn" onclick="triggerPhotoUpload()">＋</button>
                 </div>
             </div>
@@ -523,6 +560,73 @@
         </div>
     </div>
 
+    <!-- 📸 フルスクリーンビュー -->
+    <div id="photoViewer" class="photo-viewer" onclick="closeViewer()">
+        <img id="viewerImg" src="">
+        <div style="
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 10000;
+        ">
+            <button onclick="deleteFromViewer()" style="
+                background: rgba(255,255,255,0.95);
+                border: none;
+                padding: 10px 12px;
+                border-radius: 12px;
+                font-size: 14px;
+                font-weight: bold;
+                color: #ff4d6d;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            ">
+                🗑 削除
+            </button>
+
+            <button onclick="closeViewer()" style="
+                background: rgba(255,255,255,0.95);
+                border: none;
+                padding: 10px 12px;
+                border-radius: 12px;
+                font-size: 14px;
+            ">
+                ✕
+            </button>
+        </div>
+
+        <img id="viewerImg" src="">
+    </div>
+
+    <div id="shopDeleteModal" class="delete-modal">
+        <div class="delete-card">
+            <p>このお店を削除する？</p>
+            <p style="font-size:11px;color:#888;margin-top:6px;">
+                この操作は取り消せません
+            </p>
+
+            <button class="delete-btn" onclick="confirmShopDelete()">削除する</button>
+            <button class="cancel-btn" onclick="closeShopDeleteModal()">キャンセル</button>
+        </div>
+    </div>
+
+    <div id="toast" style="
+        position: fixed;
+        bottom: 30px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(0,0,0,0.8);
+        color: white;
+        padding: 10px 16px;
+        border-radius: 20px;
+        font-size: 12px;
+        display: none;
+        z-index: 99999;
+    ">
+    </div>
+
+
+
     <script>
         // ==========================================
         // ⚠️ 下の3行を、必ずあなたのIDとキーに書き換えてください！ ⚠️
@@ -534,7 +638,7 @@
         let shops = [];
         let editingIndex = null;
         let photos = [];
-        let selectedPhotoIndex = null;
+        let prevTranslate = 0;
 
         // --- クラウドデータの読み込み ---
         async function loadCloudData() {
@@ -633,23 +737,63 @@
             input.value = ""; // リセット
         }
 
-        async function deleteCurrentPhoto() {
-            if (selectedPhotoIndex === null) {
-                alert("削除する写真をタップして選んでね！");
-                return;
-            }
+        let autoScroll;
 
-            if (!confirm("この写真を削除する？")) return;
+        function startAutoScroll() {
+            stopAutoScroll();
 
-            const actualIdx = (photos.length - 1) - selectedPhotoIndex;
+            autoScroll = setInterval(() => {
+                currentTranslate -= 0.5; // ← スピード（調整OK）
 
-            photos.splice(actualIdx, 1);
+                const slides = document.getElementById('slides');
 
-            await updateCloudData();
+                // 無限ループ処理
+                if (Math.abs(currentTranslate) >= slides.scrollWidth / 2) {
+                    currentTranslate = 0;
+                }
 
-            selectedPhotoIndex = null; // リセット
-            renderGallery();
+                slides.style.transform = `translateX(${currentTranslate}px)`;
+            }, 16); // 約60fps
         }
+
+        function stopAutoScroll() {
+            clearInterval(autoScroll);
+        }
+
+        let startX = 0;
+        let currentTranslate = 0;
+        let isDragging = false;
+
+        window.addEventListener('load', () => {
+
+            const slides = document.getElementById('slides');
+
+            // 指を置いた瞬間
+            slides.addEventListener('touchstart', (e) => {
+                startX = e.touches[0].clientX;
+                isDragging = true;
+                prevTranslate = currentTranslate;
+                stopAutoScroll(); // ← 自動スクロール止める
+            });
+
+            // 指を動かしてる間
+            slides.addEventListener('touchmove', (e) => {
+                if (!isDragging) return;
+
+                let moveX = e.touches[0].clientX;
+                let diff = moveX - startX;
+                currentTranslate = prevTranslate + diff;
+                slides.style.transform = `translateX(${currentTranslate + diff}px)`;
+            });
+
+            // 指を離したとき
+            slides.addEventListener('touchend', (e) => {
+                let endX = e.changedTouches[0].clientX;
+                let diff = endX - startX;
+                startAutoScroll(); // ← また動かす
+            });
+
+        });
 
         // --- ギャラリー表示（スライダー＆一覧） ---
         let slideIdx = 0;
@@ -670,27 +814,19 @@
                 return;
             }
 
-            // 🔥 2回並べる
-            const loopPhotos = [...displayPhotos, ...displayPhotos];
+            const loopPhotos = [...photos, ...photos];
 
-            loopPhotos.forEach((url, index) => {
+            loopPhotos.forEach((url) => {
                 const img = document.createElement('img');
                 img.src = url;
 
-                img.onclick = () => {
-                    selectedPhotoIndex = index % displayPhotos.length;
-
-                    // 見た目で選択状態にする
-                    document.querySelectorAll('.slides img').forEach(i => {
-                        i.style.outline = "none";
-                    });
-                    img.style.outline = "3px solid #ff9a9e";
-                };
+                img.onclick = () => openViewer(url);
 
                 slides.appendChild(img);
             });
 
             slides.classList.add('active'); // ← 写真あるときだけ動かす
+            startAutoScroll();
         }
 
         function startAutoSlide(count) {
@@ -776,11 +912,56 @@
             document.getElementById('shopNoteInput').value = '';
         }
 
-        async function deleteShop(actualIdx) {
-            if (!confirm("消してもいい？")) return;
-            shops.splice(actualIdx, 1);
-            await updateCloudData();
-            renderShops();
+        let pendingDeleteIndex = null;
+
+        function deleteShop(actualIdx) {
+            pendingDeleteIndex = actualIdx;
+            document.getElementById("shopDeleteModal").classList.add("active");
+        }
+
+        function closeShopDeleteModal() {
+            document.getElementById("shopDeleteModal").classList.remove("active");
+            pendingDeleteIndex = null;
+        }
+
+        async function confirmShopDelete() {
+            if (pendingDeleteIndex === null) return;
+
+            const allCards = document.querySelectorAll(".shop-card");
+
+            // reverse表示なので対応
+            const displayIndex = shops.length - 1 - pendingDeleteIndex;
+            const targetCard = allCards[displayIndex];
+
+            if (targetCard) {
+                targetCard.classList.add("deleting");
+
+                // アニメ完了後に削除
+                setTimeout(async () => {
+                    shops.splice(pendingDeleteIndex, 1);
+                    await updateCloudData();
+
+                    closeShopDeleteModal();
+                    pendingDeleteIndex = null;
+
+                    renderShops(); // 再描画
+
+                    showToast("削除しました🗑️");
+                }, 250);
+
+            } else {
+                // フォールバック（念のため）
+                shops.splice(pendingDeleteIndex, 1);
+                await updateCloudData();
+                renderShops();
+
+                closeShopDeleteModal();
+                pendingDeleteIndex = null;
+            }
+        }
+
+        function closeShopDeleteSheet() {
+            document.getElementById("shopDeleteSheet").classList.remove("active");
         }
 
         function openShopModal() { document.getElementById('shopModal').classList.add('active'); }
@@ -794,14 +975,6 @@
 
             editingIndex = index; // ← ここ重要
             openShopModal();
-        }
-        function deleteCurrentPhoto() {
-            if (selectedPhotoIndex === null) {
-                alert("写真を選んでね！");
-                return;
-            }
-
-            document.getElementById("deleteModal").classList.add("active");
         }
 
         function closeDeleteModal() {
@@ -819,24 +992,56 @@
             renderGallery();
         }
 
-        function closeDeleteSheet() {
-            document.getElementById("deleteSheet").classList.remove("active");
+        async function deleteFromViewer() {
+            if (currentViewerIndex === null) return;
+
+            // 確認
+            if (!confirm("この写真を削除する？")) return;
+
+            // 削除
+            photos.splice(currentViewerIndex, 1);
+            await updateCloudData();
+
+            // UI更新
+            closeViewer();
+            renderGallery();
+
+            currentViewerIndex = null;
+
+            showToast("写真を削除しました🗑️");
         }
 
         function openInsta(url) {
             window.open(url, '_blank');
         }
 
-        async function confirmDelete() {
-            const actualIdx = (photos.length - 1) - selectedPhotoIndex;
+        let currentViewerIndex = null;
 
-            photos.splice(actualIdx, 1);
-            await updateCloudData();
+        function openViewer(url) {
+            const viewer = document.getElementById('photoViewer');
+            const img = document.getElementById('viewerImg');
 
-            selectedPhotoIndex = null;
-            closeDeleteSheet();
-            renderGallery();
+            currentViewerIndex = photos.lastIndexOf(url); 
+            // ← 同じURL対策で「最後の一致」を使う
+
+            img.src = url;
+            viewer.style.display = 'flex';
         }
+
+        function closeViewer() {
+            document.getElementById('photoViewer').style.display = 'none';
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById("toast");
+            toast.textContent = msg;
+            toast.style.display = "block";
+
+            setTimeout(() => {
+                toast.style.display = "none";
+            }, 2000);
+        }
+
         // --- 起動と自動同期 ---
         // 最初に読み込む
         loadCloudData();
