@@ -773,7 +773,7 @@
         firebase.initializeApp(firebaseConfig);
 
         // 1. まず「website」という名前の金庫を指定してdbを作る
-        const db = firebase.app().firestore("website");
+        const db = firebase.app().firestore("marin");
 
         // 2. そのdbに対して、通信のブロックを回避する設定を流し込む
         db.settings({
