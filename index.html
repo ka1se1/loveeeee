@@ -734,7 +734,7 @@
                     div.innerHTML = `
                         <div class="shop-title">${shop.name}</div>
                         <div class="shop-note">${shop.note || ''}</div>
-                        ${shop.insta ? `<a href="${shop.insta}" target="_blank" class="insta-link" onclick="event.stopPropagation()">Instagram</a>` : ''}
+                        ${shop.insta ? `<a href="${shop.insta}" class="insta-link"onclick="openInsta('${shop.insta}'); event.stopPropagation(); return false;">Instagram</a>` : ''}
                         <button class="btn-delete-small" style="background:#e3f2fd;color:#1976d2;"
                         onclick="editShop(${actualIdx}); event.stopPropagation();">編集</button>
                         <button class="btn-delete-small" onclick="deleteShop(${actualIdx}); event.stopPropagation();">削除</button>
@@ -821,6 +821,10 @@
 
         function closeDeleteSheet() {
             document.getElementById("deleteSheet").classList.remove("active");
+        }
+
+        function openInsta(url) {
+            window.open(url, '_blank');
         }
 
         async function confirmDelete() {
