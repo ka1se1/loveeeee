@@ -89,27 +89,40 @@
             background: #ccc;
         }
 
-        /* スライダー */
         .slider {
             overflow: hidden;
             border-radius: 16px;
             height: 220px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            background: #eee;
             position: relative;
         }
 
         .slides {
             display: flex;
-            height: 100%;
-            transition: transform 0.5s ease;
+            gap: 12px;
+            width: max-content;
+        }
+
+        .slides.active {
+            animation: scrollLoop 20s linear infinite;
         }
 
         .slides img {
-            width: 100%;
-            flex-shrink: 0;
-            object-fit: cover;
             height: 220px;
+            width: auto;
+            border-radius: 16px;
+            object-fit: cover;
+            flex-shrink: 0;
+
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+        }
+
+        @keyframes scrollLoop {
+            0% {
+                transform: translateX(0);
+            }
+            100% {
+                transform: translateX(-50%);
+            }
         }
 
         .loading-overlay {
@@ -174,23 +187,22 @@
 
         #shopListContainer {
             display: flex;
-            overflow-x: scroll;
+            overflow-x: auto;
             scroll-snap-type: x mandatory;
-            -webkit-overflow-scrolling: touch; /* ←iPhone対策 */
-            overflow-y: hidden;
         }
 
         .shop-page {
-            flex: 0 0 100vw;
-            width: 100vw; /* ←これ追加！！ */
-            box-sizing: border-box; /* ←これも入れると安定 */
+            flex: 0 0 100%;
+            width: 100%;
+            max-width: 100%; /* ← これ追加 */
+            box-sizing: border-box;
+            scroll-snap-align: start;
+
             display: flex;
             flex-direction: column;
             gap: 10px;
-            padding: 5px;
-            scroll-snap-align: start;
-            min-width: 100%;
-            padding: 0 10px;
+
+            padding: 0 5px; /* ← 左右に少し余白つける */
         }
 
         .shop-card {
@@ -199,6 +211,7 @@
             border-radius: 12px;
             background: #fdfdfd;
             border: 1px solid #eee;
+            box-sizing: border-box;
         }
         
         .shop-title { font-weight: bold; font-size: 12px; margin-bottom: 4px; word-break: break-word; line-height: 1.2; }
@@ -315,7 +328,6 @@
     </div>
 
     <header>Our Memories</header>
-    ...
     <div class="container">
         <div class="card">
             <div class="card-header-actions">
@@ -509,45 +521,30 @@
         let timer;
         function renderGallery() {
             const slides = document.getElementById('slides');
-            const grid = document.getElementById('galleryGrid'); // グリッドも取得
+            const grid = document.getElementById('galleryGrid');
 
-            // 一旦表示をリセット
-            slides.style.transform = `translateX(0)`;
-            slideIdx = 0;
             slides.innerHTML = '';
-            grid.innerHTML = ''; // グリッドもリセット
+            grid.innerHTML = '';
+            slides.classList.remove('active'); // ← 一旦外す
 
-            // 写真を新しい順にする
             const displayPhotos = [...photos].reverse();
 
-            // ★岩の写真を削除し、写真がない場合の表示を修正★
+            // 👇 写真ない時（ここ重要）
             if (displayPhotos.length === 0) {
-                const noPhotoHtml = `
-                    <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; width:100%; height:220px; color:#aaa;">
-                        <span style="font-size:40px;">🖼️</span>
-                        <span style="font-size:12px; margin-top:8px;">写真を追加してね！</span>
-                    </div>`;
-                slides.innerHTML = noPhotoHtml;
-                grid.innerHTML = ''; // グリッドには何も表示しない
-                if (timer) clearInterval(timer); // タイマー停止
+                slides.innerHTML = '<div class="loading-pulse">写真を読み込み中... 📸🔄</div>';
                 return;
             }
 
-            // スライダー表示
-            displayPhotos.forEach(url => {
+            // 🔥 2回並べる
+            const loopPhotos = [...displayPhotos, ...displayPhotos];
+
+            loopPhotos.forEach(url => {
                 const img = document.createElement('img');
                 img.src = url;
                 slides.appendChild(img);
             });
-            startAutoSlide(displayPhotos.length);
 
-            // 【新規】一覧表示（グリッド）
-            displayPhotos.forEach(url => {
-                const img = document.createElement('img');
-                img.src = url;
-                // タップしたらスライダーのその写真にジャンプさせる機能を後で追加
-                grid.appendChild(img);
-            });
+            slides.classList.add('active'); // ← 写真あるときだけ動かす
         }
 
         function startAutoSlide(count) {
