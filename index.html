@@ -756,11 +756,11 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <script>
+        const IMGBB_API_KEY = "98846b51d380b3b2c66f74b7875c4707"
         // Supabaseの接続情報（プロジェクトの設定画面「API」に書いてあるもの）
         const SUPABASE_URL = 'https://aelvmpvgzvaiomqimzgo.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_q0Zo34coaQEx57ey6DO84w_E71EljZD';
-        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         async function saveData(text) {
             const { data, error } = await supabase
             .from('diaries') // さっき作ったテーブル名
@@ -773,51 +773,47 @@
             }
         }
 
-        function startSync() {
-            docRef.onSnapshot((doc) => {
-                if (doc.exists) {
-                    const data = doc.data();
-                    shops = data.shops || [];
-                    photos = data.photos || [];
-                    diaries = data.diaries || [];
-                    loveCount = data.loveCount || 0;
-                    
-                    // 画面を自動更新
-                    renderShops();
-                    renderGallery();
-                    renderDiaries();
-                    updateLoveDisplay();
-                    updateCountdowns();
-                } else {
-                    // 最初だけ空のデータを作る
-                    docRef.set(
-                        { shops: [], photos: [], diaries: [], loveCount: 0 },
-                        { merge: true }
-                        );
-                }
-            }, (error) => {
-                console.error("同期エラー:", error);
-            });
+        async function loadData() {
+            const { data, error } = await supabase
+                .from('memories')
+                .select('*')
+                .eq('id', 'main')
+                .single();
+
+            if (error) {
+                console.error(error);
+                return;
+            }
+
+            if (data) {
+                shops = data.shops || [];
+                photos = data.photos || [];
+                diaries = data.diaries || [];
+                loveCount = data.love_count || 0;
+
+                renderShops();
+                renderGallery();
+                renderDiaries();
+                updateLoveDisplay();
+                updateCountdowns();
+            }
         }
 
-        startSync();
-
-        // --- 4. データを保存する関数（Firestore版：強力バージョン！） ---
         async function updateCloudData() {
-            try {
-                // update ではなく set({merge: true}) を使うと、箱がないエラーを自動回避できます！
-                await docRef.set({
-                    shops: shops,
-                    photos: photos,
-                    diaries: diaries,
-                    loveCount: loveCount
-                }, { merge: true });
-                
-                console.log("🔥 Firebaseに保存完了！");
-            } catch (e) {
-                // 🌟 なぜ失敗したか画面にアラートを出す！
-                alert("⚠️ 保存に失敗しました！理由: " + e.message);
-                console.error("保存失敗:", e);
+            const { error } = await supabase
+                .from('memories')
+                .upsert({
+                    id: "main",
+                    shops,
+                    photos,
+                    diaries,
+                    love_count: loveCount,
+                    updated_at: new Date().toISOString()
+                });
+
+            if (error) {
+                console.error(error);
+                alert("保存失敗: " + error.message);
             }
         }
 
@@ -981,7 +977,7 @@
             const insta = document.getElementById('shopInstaInput').value;
 
             if (!name) {
-                alert("お店の名をを入れてね！");
+                alert("お店の名前を入れてね！");
                 return;
             }
 
@@ -1259,10 +1255,16 @@
 
         // --- 起動と自動同期 ---
         // 🚀 画面を開いてから1.5秒後にスプラッシュスクリーンをフワッと消す
-        window.addEventListener('load', () => {
-            setTimeout(() => {
-                document.getElementById('splashScreen').classList.add('hidden');
-            }, 1500); // 1500 = 1.5秒（短くしたければ1000、長くしたければ2000に変更）
+        window.addEventListener('load', async () => {
+            try {
+                await loadData();
+            } catch (e) {
+                console.error(e);
+            } finally {
+                setTimeout(() => {
+                    document.getElementById('splashScreen').classList.add('hidden');
+                }, 1500);
+            }
         });
         window.onclick = function(e) {
             const modal = document.getElementById('shopModal');
