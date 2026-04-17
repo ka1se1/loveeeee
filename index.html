@@ -314,6 +314,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            height: 100%;
         }
 
         @keyframes pulse {
@@ -737,29 +738,6 @@
             input.value = ""; // リセット
         }
 
-        let autoScroll;
-
-        function startAutoScroll() {
-            stopAutoScroll();
-
-            autoScroll = setInterval(() => {
-                currentTranslate -= 0.5; // ← スピード（調整OK）
-
-                const slides = document.getElementById('slides');
-
-                // 無限ループ処理
-                if (Math.abs(currentTranslate) >= slides.scrollWidth / 2) {
-                    currentTranslate = 0;
-                }
-
-                slides.style.transform = `translateX(${currentTranslate}px)`;
-            }, 16); // 約60fps
-        }
-
-        function stopAutoScroll() {
-            clearInterval(autoScroll);
-        }
-
         let startX = 0;
         let currentTranslate = 0;
         let isDragging = false;
@@ -767,32 +745,6 @@
         window.addEventListener('load', () => {
 
             const slides = document.getElementById('slides');
-
-            // 指を置いた瞬間
-            slides.addEventListener('touchstart', (e) => {
-                startX = e.touches[0].clientX;
-                isDragging = true;
-                prevTranslate = currentTranslate;
-                stopAutoScroll(); // ← 自動スクロール止める
-            });
-
-            // 指を動かしてる間
-            slides.addEventListener('touchmove', (e) => {
-                if (!isDragging) return;
-
-                let moveX = e.touches[0].clientX;
-                let diff = moveX - startX;
-                currentTranslate = prevTranslate + diff;
-                slides.style.transform = `translateX(${currentTranslate + diff}px)`;
-            });
-
-            // 指を離したとき
-            slides.addEventListener('touchend', (e) => {
-                let endX = e.changedTouches[0].clientX;
-                let diff = endX - startX;
-                startAutoScroll(); // ← また動かす
-            });
-
         });
 
         // --- ギャラリー表示（スライダー＆一覧） ---
@@ -826,7 +778,6 @@
             });
 
             slides.classList.add('active'); // ← 写真あるときだけ動かす
-            startAutoScroll();
         }
 
         function startAutoSlide(count) {
