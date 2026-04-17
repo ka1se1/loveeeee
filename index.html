@@ -510,6 +510,62 @@
             cursor: not-allowed;
             opacity: 0.7;
         }
+
+        /* ハートのカウントダウンと愛のボタン */
+        .countdown-container {
+            background: linear-gradient(135deg, #fff5f7 0%, #ffe3e6 100%);
+            border-radius: 20px;
+            padding: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+            border: 2px solid #fff;
+            box-shadow: 0 4px 15px rgba(255, 182, 193, 0.3);
+        }
+        .countdown-item { margin: 5px 0; font-size: 14px; color: #d81b60; }
+        .countdown-number { font-size: 20px; font-weight: bold; margin: 0 4px; }
+
+        /* 🤍 スタイリッシュなすりガラス風カプセルボタン */
+        .love-float-btn {
+            position: fixed;
+            bottom: 25px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.85); /* 半透明の白 */
+            backdrop-filter: blur(8px); /* 背景をぼかす（すりガラス効果） */
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 182, 193, 0.4);
+            border-radius: 30px; /* 横長のカプセル型 */
+            padding: 10px 18px;
+            display: flex;
+            flex-direction: row; /* 縦積みではなく横並びにする */
+            align-items: center;
+            gap: 6px; /* アイコンと数字の隙間 */
+            box-shadow: 0 4px 15px rgba(0,0,0,0.06); /* 影をふんわり薄く */
+            cursor: pointer;
+            z-index: 1000;
+            transition: transform 0.1s;
+        }
+        .love-float-btn:active { transform: scale(0.92); }
+        .love-icon { font-size: 18px; line-height: 1; }
+        .love-count-badge {
+            font-size: 14px;
+            font-weight: bold;
+            color: #d81b60; /* 数字の色はアクセントで残す */
+            background: transparent;
+            padding: 0;
+        }
+
+        /* ハートが飛ぶアニメーション */
+        @keyframes floatUp {
+            0% { transform: translateY(0) scale(1); opacity: 1; }
+            100% { transform: translateY(-100px) scale(1.5); opacity: 0; }
+        }
+        .flying-heart {
+            position: fixed;
+            pointer-events: none;
+            font-size: 24px;
+            z-index: 999;
+            animation: floatUp 1s ease-out forwards;
+        }
     </style>
 </head>
 
@@ -554,11 +610,11 @@
 
         <div class="card">
             <div class="card-header-actions">
-                <h2>📔 交換日記</h2>
+                <h2>メッセージ</h2>
                 <button class="btn-round" onclick="openDiaryModal()">＋</button>
             </div>
             <div id="diaryListContainer" class="diary-container">
-                <div class="loading-pulse">日記を読み込み中... 📔🔄</div>
+                <div class="loading-pulse">メッセージを読み込み中... 📔🔄</div>
             </div>
         </div>
 
@@ -596,7 +652,7 @@
 
     <div id="diaryModal" class="modal-overlay">
         <div class="modal-content">
-            <h3>日記を書く 🖋</h3>
+            <h3>メッセージを書く 🖋</h3>
             <div class="input-group"><label>名前</label><input type="text" id="diaryAuthorInput" placeholder="例：ぼく"></div>
             <div class="input-group"><label>内容</label><textarea id="diaryContentInput" rows="5" placeholder="今日の出来事や気持ちを書いてね！"></textarea></div>
             <div class="modal-actions">
@@ -689,53 +745,94 @@
     ">
     </div>
 
+    <div class="countdown-container">
+            <div class="countdown-item">Days - <span id="anniversaryDays" class="countdown-number">-</span> 日</div>
+    </div>
+
+    <button class="love-float-btn" onclick="sendLove()">
+        <span class="love-icon">🤍</span>
+        <span id="loveCountDisplay" class="love-count-badge">0</span>
+    </button>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
 
     <script>
         // ==========================================
         // ⚠️ 下の3行を、必ずあなたのIDとキーに書き換えてください！ ⚠️
-        const JSONBIN_BIN_ID = "69e06fd7856a6821893c5dec";
-        const JSONBIN_API_KEY = "$2a$10$kakylabqJZLjJIRngThANeWMzSEMeRz4f.3Dr5ZFurxyfk16RV5Ia";
+        const firebaseConfig = {
+        apiKey: "AIzaSyCO06lAVe3sIQW-0FT1IvsN0TIIEemQkaM",
+        authDomain: "site-cdaf5.firebaseapp.com",
+        projectId: "site-cdaf5",
+        storageBucket: "site-cdaf5.firebasestorage.app",
+        messagingSenderId: "323004999027",
+        appId: "1:323004999027:web:ee0edac6d97139db0c5106",
+        measurementId: "G-8D3GRQY2L4"
+        };
         const IMGBB_API_KEY = "553844648129b68e053a8598caaf2cb5";
         // ==========================================
+
+        // --- 2. Firebaseの初期化 ---
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const docRef = db.collection("apps").doc("couple_app"); // 金庫の場所を指定
+
+        // --- 3. データのリアルタイム同期（ここが魔法の心臓部！） ---
+        function startSync() {
+            docRef.onSnapshot((doc) => {
+                if (doc.exists) {
+                    const data = doc.data();
+                    shops = data.shops || [];
+                    photos = data.photos || [];
+                    diaries = data.diaries || [];
+                    loveCount = data.loveCount || 0;
+                    
+                    // 画面を自動更新
+                    renderShops();
+                    renderGallery();
+                    renderDiaries();
+                    updateLoveDisplay();
+                    updateCountdowns();
+                } else {
+                    // 最初だけ空のデータを作る
+                    docRef.set(
+                        { shops: [], photos: [], diaries: [], loveCount: 0 },
+                        { merge: true }
+                        );
+                }
+            }, (error) => {
+                console.error("同期エラー:", error);
+            });
+        }
+
+        startSync();
+
+        // --- 4. データを保存する関数（Firestore版：強力バージョン！） ---
+        async function updateCloudData() {
+            try {
+                // update ではなく set({merge: true}) を使うと、箱がないエラーを自動回避できます！
+                await docRef.set({
+                    shops: shops,
+                    photos: photos,
+                    diaries: diaries,
+                    loveCount: loveCount
+                }, { merge: true });
+                
+                console.log("🔥 Firebaseに保存完了！");
+            } catch (e) {
+                // 🌟 なぜ失敗したか画面にアラートを出す！
+                alert("⚠️ 保存に失敗しました！理由: " + e.message);
+                console.error("保存失敗:", e);
+            }
+        }
 
         let shops = [];
         let editingIndex = null;
         let photos = [];
         let diaries = [];
         let prevTranslate = 0;
-
-        // --- クラウドデータの読み込み ---
-        async function loadCloudData() {
-            try {
-                const response = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}/latest`, {
-                    headers: { 'X-Master-Key': JSONBIN_API_KEY }
-                });
-                if (!response.ok) throw new Error("データの取得に失敗しました");
-                const data = await response.json();
-
-                // お店データと写真データを取得。写真が1枚もない場合は空配列にする
-                shops = data.record.shops || [];
-                photos = data.record.photos || [];
-                diaries = data.record.diaries || [];
-
-                renderShops();
-                renderGallery();
-                renderDiaries();
-            } catch (e) {
-                console.error(e);
-                document.getElementById('slides').innerHTML = '<div style="padding:20px;text-align:center;color:red;font-size:12px;">エラー：データの読み込みに失敗しました🥲</div>';
-                document.getElementById('shopListContainer').innerHTML = '<div style="padding:20px;text-align:center;color:red;font-size:12px;">リストの読み込みに失敗しました🥲</div>';
-            }
-        }
-
-        async function updateCloudData() {
-            await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json', 'X-Master-Key': JSONBIN_API_KEY },
-                body: JSON.stringify({ shops, photos,diaries })
-            });
-        }
+        let loveCount = 0;
+        const ANNIVERSARY_DATE = "2026/01/21"; // 例: 付き合い始めた日
 
         // --- 写真アップロード (ImgBB) ・一括対応 ---
         function triggerPhotoUpload() { document.getElementById('photoUpload').click(); }
@@ -882,33 +979,50 @@
             }
         }
 
+        // --- お店リストの保存 ---
         async function saveShop() {
             const name = document.getElementById('shopNameInput').value;
-            const insta = document.getElementById('shopInstaInput').value;
             const note = document.getElementById('shopNoteInput').value;
+            const insta = document.getElementById('shopInstaInput').value;
 
             if (!name) {
-                alert("店名を入れてね！");
+                alert("お店の名をを入れてね！");
                 return;
             }
 
-            if (editingIndex !== null) {
-                // ✏️ 編集
-                shops[editingIndex] = { name, insta, note };
-            } else {
-                // ➕ 新規
-                shops.push({ name, insta, note });
+            const saveBtn = document.querySelector('#shopModal .btn-save');
+            const originalText = saveBtn.innerText;
+            saveBtn.innerText = '保存中... ⏳';
+            saveBtn.disabled = true;
+
+            try {
+                const data = { name, note, insta };
+
+                if (editingIndex !== null) {
+                    // ✏️ 編集モード
+                    shops[editingIndex] = data;
+                    editingIndex = null;
+                } else {
+                    // ➕ 新規追加
+                    shops.push(data);
+                }
+
+                await updateCloudData();
+
+                closeShopModal();
+                renderShops();
+
+                document.getElementById('shopNameInput').value = '';
+                document.getElementById('shopNoteInput').value = '';
+                document.getElementById('shopInstaInput').value = '';
+
+            } catch (e) {
+                alert("保存に失敗したよ🥲");
+                console.error(e);
+            } finally {
+                saveBtn.innerText = originalText;
+                saveBtn.disabled = false;
             }
-
-            await updateCloudData();
-            closeShopModal();
-            renderShops();
-
-            // リセット
-            editingIndex = null;
-            document.getElementById('shopNameInput').value = '';
-            document.getElementById('shopInstaInput').value = '';
-            document.getElementById('shopNoteInput').value = '';
         }
 
         let pendingDeleteIndex = null;
@@ -921,42 +1035,6 @@
         function closeShopDeleteModal() {
             document.getElementById("shopDeleteModal").classList.remove("active");
             pendingDeleteIndex = null;
-        }
-
-        async function confirmShopDelete() {
-            if (pendingDeleteIndex === null) return;
-
-            const allCards = document.querySelectorAll(".shop-card");
-
-            // reverse表示なので対応
-            const displayIndex = shops.length - 1 - pendingDeleteIndex;
-            const targetCard = allCards[displayIndex];
-
-            if (targetCard) {
-                targetCard.classList.add("deleting");
-
-                // アニメ完了後に削除
-                setTimeout(async () => {
-                    shops.splice(pendingDeleteIndex, 1);
-                    await updateCloudData();
-
-                    closeShopDeleteModal();
-                    pendingDeleteIndex = null;
-
-                    renderShops(); // 再描画
-
-                    showToast("削除しました🗑️");
-                }, 250);
-
-            } else {
-                // フォールバック（念のため）
-                shops.splice(pendingDeleteIndex, 1);
-                await updateCloudData();
-                renderShops();
-
-                closeShopDeleteModal();
-                pendingDeleteIndex = null;
-            }
         }
 
         function closeShopDeleteSheet() {
@@ -1099,7 +1177,7 @@
         async function saveDiary() {
             const author = document.getElementById('diaryAuthorInput').value;
             const content = document.getElementById('diaryContentInput').value;
-            if(!author || !content) { alert("名前と日記の内容を両方入れてね！"); return; }
+            if(!author || !content) { alert("名前とメッセージの内容を両方入れてね！"); return; }
             
             // 🌟 追加：ボタンを「保存中」にして連打を防ぐ
             const saveBtn = document.querySelector('#diaryModal .btn-save');
@@ -1124,7 +1202,7 @@
         }
 
         async function deleteDiary(idx) {
-            if(!confirm("この日記を消してもいい？（返信も全部消えます！）")) return;
+            if(!confirm("このメッセージを消してもいい？（返信も全部消えます！）")) return;
             diaries.splice(idx, 1);
             await updateCloudData();
             renderDiaries();
@@ -1185,14 +1263,6 @@
         }
 
         // --- 起動と自動同期 ---
-        // 最初に読み込む
-        loadCloudData();
-
-        // 15秒ごとにクラウド（JSONBin）をチェックして、勝手に最新にする
-        setInterval(() => {
-            loadCloudData();
-            console.log("最新のデータを同期しました 🔄");
-        }, 15000); 
         // 🚀 画面を開いてから1.5秒後にスプラッシュスクリーンをフワッと消す
         window.addEventListener('load', () => {
             setTimeout(() => {
@@ -1205,6 +1275,38 @@
                 closeShopModal();
             }
         }
+        // --- 記念日計算 ---
+        function updateCountdowns() {
+            const now = new Date();
+            
+            const start = new Date(ANNIVERSARY_DATE);
+            const diffAnniv = Math.floor((now - start) / (1000 * 60 * 60 * 24));
+            document.getElementById('anniversaryDays').innerText = diffAnniv;  
+        }
+
+        // --- 愛の送り合い機能 ---
+        function updateLoveDisplay() {
+            document.getElementById('loveCountDisplay').innerText = loveCount;
+        }
+
+        async function sendLove() {
+            loveCount++;
+            updateLoveDisplay();
+            
+            // ハートを飛ばす演出
+            const btn = document.querySelector('.love-float-btn');
+            const heart = document.createElement('div');
+            heart.className = 'flying-heart';
+            heart.innerText = '🤍';
+            heart.style.left = (btn.offsetLeft + 20) + 'px';
+            heart.style.top = (btn.offsetTop) + 'px';
+            document.body.appendChild(heart);
+            setTimeout(() => heart.remove(), 1000);
+
+            // 保存（連打してもいいように少し待ってから保存するのが理想ですが、まずはシンプルに）
+            await updateCloudData();
+        }
+        updateCountdowns();
     </script>
 </body>
 
