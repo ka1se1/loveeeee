@@ -758,25 +758,32 @@
 
 
     <script>
-        // ==========================================
-        // ⚠️ 下の3行を、必ずあなたのIDとキーに書き換えてください！ ⚠️
+        // --- 1. Firebaseの設定（そのまま） ---
         const firebaseConfig = {
-        apiKey: "AIzaSyCO06lAVe3sIQW-0FT1IvsN0TIIEemQkaM",
-        authDomain: "site-cdaf5.firebaseapp.com",
-        projectId: "site-cdaf5",
-        storageBucket: "site-cdaf5.firebasestorage.app",
-        messagingSenderId: "323004999027",
-        appId: "1:323004999027:web:ee0edac6d97139db0c5106",
-        measurementId: "G-8D3GRQY2L4"
+            apiKey: "AIzaSyCO06lAVe3sIQW-0FT1IvsN0TIIEemQkaM",
+            authDomain: "site-cdaf5.firebaseapp.com",
+            projectId: "site-cdaf5",
+            storageBucket: "site-cdaf5.firebasestorage.app",
+            messagingSenderId: "323004999027",
+            appId: "1:323004999027:web:ee0edac6d97139db0c5106",
+            measurementId: "G-8D3GRQY2L4"
         };
-        const IMGBB_API_KEY = "553844648129b68e053a8598caaf2cb5";
-        // ==========================================
 
-        // --- 2. Firebaseの初期化 ---
+        // --- 2. Firebaseの初期化（★ここを書き換えます！） ---
         firebase.initializeApp(firebaseConfig);
-        const db = firebase.app().firestore("website");
-        const docRef = db.collection("apps").doc("couple_app"); // 金庫の場所を指定
 
+        // ★エラーを防ぐための強力な設定を追加！
+        const db = firebase.firestore();
+        db.settings({
+            // ブロックされやすい「長時間の通信」を避ける設定
+            experimentalForceLongPolling: true,
+            // ブラウザのブロックを回避しやすい通信方式に変更
+            useFetchStreams: false 
+        });
+
+        // 金庫の場所（もしさっきの画像のように名前が"website"なら、db.collectionの前を firebase.app().firestore("website") に変えてください）
+        const docRef = db.collection("apps").doc("couple_app");
+        const IMGBB_API_KEY = "553844648129b68e053a8598caaf2cb5";
         // --- 3. データのリアルタイム同期（ここが魔法の心臓部！） ---
         function startSync() {
             docRef.onSnapshot((doc) => {
