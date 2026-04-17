@@ -136,6 +136,10 @@
             border-radius: 16px;
             height: 220px;
             position: relative;
+            scroll-behavior: smooth;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scroll-snap-type: x mandatory;
         }
 
         .slides {
@@ -153,7 +157,7 @@
             border-radius: 16px;
             object-fit: cover;
             flex-shrink: 0;
-
+            scroll-snap-align: center;
             box-shadow: 0 6px 16px rgba(0,0,0,0.15);
 
             transition: all 0.25s ease; /* ← 追加 */
@@ -741,29 +745,6 @@
         let isDragging = false;
         prevTranslate = currentTranslate;
 
-        slides.addEventListener('touchstart', (e) => {
-            startX = e.touches[0].clientX;
-            isDragging = true;
-            prevTranslate = currentTranslate;
-        });
-
-        slides.addEventListener('touchmove', (e) => {
-            if (!isDragging) return;
-
-            let moveX = e.touches[0].clientX;
-            let diff = moveX - startX;
-
-            currentTranslate = prevTranslate + diff;
-            slides.style.transform = `translateX(${currentTranslate}px)`;
-        });
-
-        slides.addEventListener('touchend', () => {
-            isDragging = false;
-        });
-
-        // --- ギャラリー表示（スライダー＆一覧） ---
-        let slideIdx = 0;
-        let timer;
         function renderGallery() {
             const slides = document.getElementById('slides');
             const grid = document.getElementById('galleryGrid');
@@ -790,18 +771,6 @@
 
                 slides.appendChild(img);
             });
-
-            slides.classList.add('active'); // ← 写真あるときだけ動かす
-            startAutoSlide;
-        }
-
-        function startAutoSlide(count) {
-            if (timer) clearInterval(timer);
-            if (count <= 1) return;
-            timer = setInterval(() => {
-                slideIdx = (slideIdx + 1) % count;
-                document.getElementById('slides').style.transform = `translateX(-${slideIdx * 100}%)`;
-            }, 4000);
         }
 
         function renderShops() {
