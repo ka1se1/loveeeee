@@ -7,6 +7,7 @@
     <title>Memories Shared</title>
     <style>
         body {
+        
             margin: 0;
             font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Segoe UI", Roboto, Arial, sans-serif;
             background: #f4f5f7;
@@ -171,61 +172,39 @@
             }
         }
 
-        /* お店・モーダル */
+        #shopListContainer {
+            display: flex;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch; /* ←iPhone対策 */
+            overflow-y: hidden;
+        }
+
+        .shop-page {
+            flex: 0 0 100%;
+            width: 100%; /* ←これ追加！！ */
+            box-sizing: border-box; /* ←これも入れると安定 */
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding: 5px;
+            scroll-snap-align: start;
+            min-width: 100%;
+        }
+
         .shop-card {
-            padding: 15px;
-            border-radius: 16px;
-            margin-bottom: 12px;
+            width: 100%;
+            padding: 12px;
+            border-radius: 12px;
             background: #fdfdfd;
             border: 1px solid #eee;
-            position: relative;
-            cursor: pointer;
         }
-
-        .shop-title {
-            font-weight: bold;
-            font-size: 16px;
-        }
-
-        .shop-actions {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 10px;
-        }
-
-        .insta-link {
-            font-size: 12px;
-            color: #fff;
-            text-decoration: none;
-            background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-weight: bold;
-        }
-
-        .btn-delete-small {
-            background: #ffe3e6;
-            color: #d81b60;
-            border: none;
-            border-radius: 8px;
-            padding: 5px 10px;
-            font-size: 11px;
-        }
-
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.4);
-            z-index: 100;
-            justify-content: center;
-            align-items: center;
-            backdrop-filter: blur(2px);
-        }
+        
+        .shop-title { font-weight: bold; font-size: 12px; margin-bottom: 4px; word-break: break-word; line-height: 1.2; }
+        .shop-note { font-size: 10px; color: #666; flex-grow: 1; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; margin-bottom: 6px; }
+        .shop-actions { display: flex; flex-direction: column; gap: 4px; margin-top: auto; }
+        .insta-link { font-size: 9px; color: #fff; text-decoration: none; background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); padding: 4px; border-radius: 8px; font-weight: bold; text-align: center; }
+        .btn-delete-small { background: #ffe3e6; color: #d81b60; border: none; border-radius: 8px; padding: 4px; font-size: 9px; }
 
         .modal-overlay.active {
             display: flex;
@@ -276,13 +255,66 @@
             background: #ff9a9e;
             color: white;
         }
+        /* 🚀 スプラッシュスクリーン（ようこそ画面） */
+        .splash-screen {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: linear-gradient(135deg, #ff9a9e, #fecfef, #fad0c4);
+            background-size: 200% 200%;
+            animation: gradientMove 5s ease infinite;
+            display: flex;
+            align-items: center; justify-content: center;
+            z-index: 9999; /* 一番手前に表示 */
+            color: white;
+            transition: opacity 0.8s ease, visibility 0.8s ease;
+        }
+        .splash-screen.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+        .splash-content {
+            text-align: center;
+            animation: popIn 1s cubic-bezier(0.28, 0.84, 0.42, 1);
+        }
+        .splash-content h1 {
+            font-size: 40px; margin: 0; letter-spacing: 2px;
+            text-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .splash-content p {
+            font-size: 16px; margin-top: 10px; font-weight: bold;
+        }
+        @keyframes popIn {
+            0% { transform: scale(0.8); opacity: 0; }
+            50% { transform: scale(1.05); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.4);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 999;
+        }
     </style>
 </head>
 
 <body>
 
-    <header>Our Memories</header>
+    <div id="splashScreen" class="splash-screen">
+        <div class="splash-content">
+            <h1>Our Memories</h1>
+            <p>Welcome back! </p>
+        </div>
+    </div>
 
+    <header>Our Memories</header>
+    ...
     <div class="container">
         <div class="card">
             <div class="card-header-actions">
@@ -526,32 +558,47 @@
             }, 4000);
         }
 
-        // --- お店リスト機能（インスタ別タブ＆マップ検索） ---
         function renderShops() {
             const container = document.getElementById('shopListContainer');
-            container.innerHTML = shops.length ? '' : '<div style="text-align:center;font-size:12px;color:#999;padding:20px;">リストが空です。＋ボタンで追加してね！🍽️</div>';
 
-            // お店リストも新しい順にする
-            [...shops].reverse().forEach((shop, i) => {
-                // 逆順にしたリストのインデックスを、元の配列のインデックスに直す
-                const totalShops = shops.length;
-                const actualIdx = (totalShops - 1) - i;
+            if (!shops.length) {
+                container.innerHTML = '<div style="width:100%; text-align:center; font-size:12px; color:#999; padding:20px;">リストが空です🍽️</div>';
+                return;
+            }
 
-                const div = document.createElement('div');
-                div.className = 'shop-card';
-                div.onclick = () => {
-                    document.getElementById('map').src = `https://maps.google.co.jp/maps?q=${encodeURIComponent(shop.name)}&output=embed`;
-                };
-                div.innerHTML = `
-                    <div class="shop-title">${shop.name}</div>
-                    <div style="font-size:12px;color:#666;">${shop.note || ''}</div>
-                    <div class="shop-actions">
-                        ${shop.insta ? `<a href="${shop.insta}" target="_blank" rel="noopener noreferrer" class="insta-link" onclick="event.stopPropagation()">Instagram</a>` : '<span></span>'}
+            container.innerHTML = '';
+
+            const displayShops = [...shops].reverse();
+
+            // 👉 3件ずつグループ化
+            for (let i = 0; i < displayShops.length; i += 3) {
+                const page = document.createElement('div');
+                page.className = 'shop-page';
+
+                const group = displayShops.slice(i, i + 3);
+
+                group.forEach((shop, j) => {
+                    const actualIdx = (shops.length - 1) - (i + j);
+
+                    const div = document.createElement('div');
+                    div.className = 'shop-card';
+                    div.onclick = () => {
+                        document.getElementById('map').src =
+                            `https://maps.google.co.jp/maps?q=${encodeURIComponent(shop.name)}&output=embed`;
+                    };
+
+                    div.innerHTML = `
+                        <div class="shop-title">${shop.name}</div>
+                        <div class="shop-note">${shop.note || ''}</div>
+                        ${shop.insta ? `<a href="${shop.insta}" target="_blank" class="insta-link" onclick="event.stopPropagation()">Instagram</a>` : ''}
                         <button class="btn-delete-small" onclick="deleteShop(${actualIdx}); event.stopPropagation();">削除</button>
-                    </div>
-                `;
-                container.appendChild(div);
-            });
+                    `;
+
+                    page.appendChild(div);
+                });
+
+                container.appendChild(page);
+            }
         }
 
         async function saveShop() {
@@ -589,6 +636,18 @@
             loadCloudData();
             console.log("最新のデータを同期しました 🔄");
         }, 15000); 
+        // 🚀 画面を開いてから1.5秒後にスプラッシュスクリーンをフワッと消す
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                document.getElementById('splashScreen').classList.add('hidden');
+            }, 1500); // 1500 = 1.5秒（短くしたければ1000、長くしたければ2000に変更）
+        });
+        window.onclick = function(e) {
+            const modal = document.getElementById('shopModal');
+            if (e.target === modal) {
+                closeShopModal();
+            }
+        }
     </script>
 </body>
 
