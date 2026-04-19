@@ -1120,7 +1120,6 @@
                 renderCalendar();  // ← 追加
                 updateLoveDisplay();
                 updateCountdowns();
-                initMap();
             }
         }
 
@@ -1286,7 +1285,6 @@
 
                 container.appendChild(page);
             }
-            updateMapMarkers();
         }
 
         // --- お店リストの保存 ---
@@ -1771,94 +1769,19 @@
             document.getElementById('eventModal').classList.add('active');
         }
 
-        // --- 地図 ---
-        let mapInstance = null;
-        let markers = [];
 
-        function initMap() {
-            if (mapInstance) return;
 
-            mapInstance = L.map('map').setView([35.6812, 139.7671], 13);
+        const DEFAULT_LOCATION = { lat: 35.6812, lon: 139.7671, name: '東京' };
 
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '© OpenStreetMap'
-            }).addTo(mapInstance);
-
-            // 現在地を表示
-            navigator.geolocation.getCurrentPosition((pos) => {
-                const lat = pos.coords.latitude;
-                const lon = pos.coords.longitude;
-                mapInstance.setView([lat, lon], 13);
-
-                L.circleMarker([lat, lon], {
-                    radius: 8,
-                    fillColor: '#ff9a9e',
-                    color: 'white',
-                    weight: 2,
-                    fillOpacity: 1,
-                }).addTo(mapInstance).bindPopup('📍 現在地').openPopup();
-            });
-        }
-
-        function updateMapMarkers() {
-            if (!mapInstance) return;
-
-            markers.forEach(m => m.remove());
-            markers = [];
-
-            shops.forEach((shop) => {
-                fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(shop.name)}&format=json&limit=1`)
-                    .then(res => res.json())
-                    .then(data => {
-                        if (data.length === 0) return;
-                        const lat = parseFloat(data[0].lat);
-                        const lon = parseFloat(data[0].lon);
-
-                        const icon = L.divIcon({
-                            html: `<div style="
-                        background: linear-gradient(135deg,#ff9a9e,#fecfef);
-                        color: white;
-                        border-radius: 20px;
-                        padding: 4px 8px;
-                        font-size: 11px;
-                        font-weight: bold;
-                        white-space: nowrap;
-                        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-                    ">🍽 ${shop.name}</div>`,
-                            className: '',
-                            iconAnchor: [0, 0],
-                        });
-
-                        const marker = L.marker([lat, lon], { icon })
-                            .addTo(mapInstance)
-                            .bindPopup(`
-                        <div style="font-size:13px;">
-                            <div style="font-weight:bold;margin-bottom:4px;">🍽 ${shop.name}</div>
-                            <div style="font-size:11px;color:#888;">${shop.note || ''}</div>
-                        </div>
-                    `);
-
-                        markers.push(marker);
-                    });
-            });
-        }
-
-        // --- 天気 ---
         async function fetchWeather() {
             const container = document.getElementById('weatherContainer');
             container.innerHTML = '<div class="loading-pulse">取得中... 🌤️</div>';
 
             try {
-                // 現在地を取得
-                const pos = await new Promise((resolve, reject) => {
-                    navigator.geolocation.getCurrentPosition(resolve, reject);
-                });
+                const saved = localStorage.getItem('weatherLocation');
+                const loc = saved ? JSON.parse(saved) : DEFAULT_LOCATION;
 
-                const lat = pos.coords.latitude;
-                const lon = pos.coords.longitude;
-
-                // Open-Meteo APIで天気取得
-                const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weathercode,windspeed_10m,relativehumidity_2m&timezone=Asia%2FTokyo`);
+                const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${loc.lat}&longitude=${loc.lon}&current=temperature_2m,weathercode,windspeed_10m,relativehumidity_2m&timezone=Asia%2FTokyo`);
                 const data = await res.json();
 
                 const temp = data.current.temperature_2m;
@@ -1867,8 +1790,6 @@
                 const wind = data.current.windspeed_10m;
 
                 const weatherInfo = getWeatherInfo(code);
-
-                // 服装アドバイス
                 const advice = getAdvice(temp, code);
 
                 container.innerHTML = `
@@ -1879,20 +1800,33 @@
                 <div>💧 湿度 ${humidity}%</div>
                 <div>💨 風速 ${wind}m/s</div>
             </div>
-            <div style="
-                background: linear-gradient(135deg,#fff5f7,#ffe3e6);
-                border-radius:14px;
-                padding:12px;
-                font-size:13px;
-                color:#d81b60;
-                font-weight:bold;
-            ">
+            <div style="background:linear-gradient(135deg,#fff5f7,#ffe3e6);border-radius:14px;padding:12px;font-size:13px;color:#d81b60;font-weight:bold;">
                 👗 ${advice}
+            </div>
+            <div style="margin-top:12px;font-size:11px;color:#bbb;">
+                📍 ${loc.name}
+                <button onclick="changeLocation()" style="background:none;border:none;color:#ff9a9e;font-size:11px;cursor:pointer;margin-left:6px;">変更する</button>
             </div>
         `;
             } catch (e) {
-                container.innerHTML = `<div style="font-size:12px;color:#999;text-align:center;padding:20px;">位置情報を許可してね！📍</div>`;
+                container.innerHTML = `<div style="font-size:12px;color:#999;text-align:center;padding:20px;">天気の取得に失敗しました🥲</div>`;
             }
+        }
+
+        function changeLocation() {
+            const city = prompt('都市名を入力してください（例：大阪、名古屋）');
+            if (!city) return;
+            fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(city)}&format=json&limit=1`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.length === 0) { alert('都市が見つかりませんでした🥲'); return; }
+                    localStorage.setItem('weatherLocation', JSON.stringify({
+                        lat: parseFloat(data[0].lat),
+                        lon: parseFloat(data[0].lon),
+                        name: city
+                    }));
+                    fetchWeather();
+                });
         }
 
         function getWeatherInfo(code) {
