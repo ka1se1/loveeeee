@@ -1,6 +1,2388 @@
 <!DOCTYPE html>
 <html lang="ja">
+<!DOCTYPE html>
+<html lang="ja">
 
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <title>Memories Shared</title>
+    <!-- ホーム画面アイコン -->
+    <link rel="apple-touch-icon" href="/loveeeee/icon.png">
+
+    <!-- PWA設定 -->
+    <link rel="manifest" href="/loveeeee/manifest.json">
+    <style>
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Segoe UI", Roboto, Arial, sans-serif;
+            background: linear-gradient(180deg, #fdfbfb, #ebedee);
+            color: #333;
+            scroll-behavior: smooth;
+        }
+
+        header {
+            background: linear-gradient(135deg, #ff9a9e, #fecfef, #fad0c4);
+            background-size: 200% 200%;
+            animation: gradientMove 5s ease infinite;
+            color: white;
+            padding: 24px 20px;
+            text-align: center;
+            font-size: 22px;
+            font-weight: 800;
+            letter-spacing: 2px;
+            box-shadow: 0 4px 12px rgba(255, 154, 158, 0.3);
+            border-bottom-left-radius: 20px;
+            border-bottom-right-radius: 20px;
+            position: relative;
+        }
+
+        @keyframes gradientMove {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        .input-group input,
+        .input-group textarea {
+            font-size: 16px;
+        }
+
+        .photo-viewer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+
+            background: rgba(0, 0, 0, 0.9);
+            display: none;
+
+            align-items: center;
+            justify-content: center;
+
+            z-index: 9999;
+        }
+
+        .photo-viewer img {
+            max-width: 90%;
+            max-height: 90%;
+            border-radius: 16px;
+
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            animation: zoomIn 0.3s ease;
+        }
+
+        @keyframes zoomIn {
+            from {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .container {
+            padding: 20px 15px;
+            max-width: 600px;
+            margin: auto;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(255, 154, 158, 0.15);
+            /* ← ここだけ変更 */
+            border: 1px solid rgba(255, 255, 255, 0.4);
+        }
+
+        .card-header-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        h2 {
+            font-size: 18px;
+            margin: 0;
+        }
+
+        .btn-round {
+            background: linear-gradient(135deg, #ff9a9e, #fecfef);
+            color: white;
+
+            border: none;
+            /* ← これで縁消える */
+            outline: none;
+            /* ← 念のため */
+
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+
+            box-shadow: 0 6px 16px rgba(255, 154, 158, 0.3);
+            transition: all 0.2s ease;
+        }
+
+        .btn-round:active {
+            transform: scale(0.9);
+        }
+
+        .btn-round:disabled {
+            background: #ccc;
+        }
+
+        .slider {
+            overflow: auto;
+            border-radius: 16px;
+            height: 220px;
+            position: relative;
+            scroll-behavior: smooth;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scroll-snap-type: x mandatory;
+        }
+
+        .slides {
+            display: flex;
+            gap: 12px;
+            width: 100%;
+            align-items: center;
+            justify-content: flex-start;
+            transition: transform 0.3s ease;
+            padding: 0 20px;
+            box-sizing: border-box;
+        }
+
+        .slides img {
+            height: 220px;
+            width: auto;
+            border-radius: 16px;
+            object-fit: cover;
+            flex-shrink: 0;
+            scroll-snap-align: center;
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+
+            transition: all 0.25s ease;
+            /* ← 追加 */
+            cursor: pointer;
+            /* ← 追加 */
+        }
+
+        .slides img:hover {
+            transform: translateY(-8px) scale(1.05);
+            /* ← 浮いて拡大 */
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.25);
+            /* ← 影強く */
+            z-index: 5;
+        }
+
+        @keyframes scrollLoop {
+            0% {
+                transform: translateX(0);
+            }
+
+            100% {
+                transform: translateX(-50%);
+            }
+        }
+
+        .delete-sheet {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+
+            background: rgba(0, 0, 0, 0.3);
+            display: none;
+            justify-content: center;
+            align-items: flex-end;
+
+            z-index: 9999;
+        }
+
+        .delete-sheet.active {
+            display: flex;
+        }
+
+        .delete-box {
+            width: 100%;
+            background: white;
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
+            padding: 20px;
+            text-align: center;
+
+            animation: slideUp 0.3s ease;
+        }
+
+        .delete-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(4px);
+
+            display: none;
+            justify-content: center;
+            align-items: center;
+
+            z-index: 9999;
+        }
+
+        .delete-modal.active {
+            display: flex;
+        }
+
+        .delete-card {
+            background: white;
+            padding: 24px;
+            border-radius: 20px;
+            width: 80%;
+            max-width: 300px;
+            text-align: center;
+
+            animation: pop 0.25s ease;
+        }
+
+        @keyframes pop {
+            from {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .delete-btn {
+            width: 100%;
+            padding: 12px;
+            margin-top: 12px;
+            border: none;
+            border-radius: 12px;
+            background: #ff4d6d;
+            color: white;
+            font-weight: bold;
+        }
+
+        .cancel-btn {
+            width: 100%;
+            padding: 12px;
+            margin-top: 8px;
+            border: none;
+            border-radius: 12px;
+            background: #eee;
+        }
+
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.7);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            color: #ff9a9e;
+            font-weight: bold;
+            z-index: 10;
+            text-align: center;
+        }
+
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+            align-items: start;
+        }
+
+        .gallery-grid img {
+            width: 100%;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 12px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        /* 読み込み中アニメーション */
+        .loading-pulse {
+            text-align: center;
+            padding: 40px 20px;
+            color: #ff9a9e;
+            font-weight: bold;
+            font-size: 14px;
+            animation: pulse 1.5s infinite ease-in-out;
+            align-self: center;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+        }
+
+        @keyframes pulse {
+            0% {
+                opacity: 0.4;
+            }
+
+            50% {
+                opacity: 1;
+            }
+
+            100% {
+                opacity: 0.4;
+            }
+        }
+
+        #shopListContainer {
+            display: flex;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+        }
+
+        .shop-page {
+            flex: 0 0 100%;
+            width: 100%;
+            max-width: 100%;
+            /* ← これ追加 */
+            box-sizing: border-box;
+            scroll-snap-align: start;
+
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+
+            padding: 0 5px;
+            /* ← 左右に少し余白つける */
+        }
+
+        .shop-card {
+            width: 100%;
+            padding: 12px;
+            border-radius: 14px;
+            background: #ffffff;
+            box-sizing: border-box;
+
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+
+            transition: all 0.25s ease;
+            cursor: pointer;
+        }
+
+        .shop-card:hover {
+            transform: translateY(-6px) scale(1.02);
+            box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12);
+        }
+
+        .shop-card:active {
+            transform: scale(0.97);
+        }
+
+        .shop-card.deleting {
+            transform: scale(0.85);
+            opacity: 0;
+            transition: transform 0.25s ease, opacity 0.25s ease;
+        }
+
+        .shop-title {
+            font-weight: bold;
+            font-size: 12px;
+            margin-bottom: 4px;
+            word-break: break-word;
+            line-height: 1.2;
+        }
+
+        .shop-note {
+            font-size: 10px;
+            color: #666;
+            flex-grow: 1;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            margin-bottom: 6px;
+        }
+
+        .shop-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            margin-top: auto;
+        }
+
+        .insta-link {
+            font-size: 9px;
+            color: #fff;
+            text-decoration: none;
+            background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+            padding: 4px;
+            border-radius: 8px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .btn-delete-small {
+            background: #ffe3e6;
+            color: #d81b60;
+            border: none;
+            border-radius: 8px;
+            padding: 4px;
+            font-size: 9px;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 24px;
+            border-radius: 20px;
+            width: 85%;
+            max-width: 400px;
+        }
+
+        .input-group {
+            margin-bottom: 16px;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 12px;
+            color: #888;
+            margin-bottom: 6px;
+        }
+
+        .input-group input,
+        .input-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            box-sizing: border-box;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 10px 16px;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-save {
+            background: #ff9a9e;
+            color: white;
+        }
+
+        /* 🚀 スプラッシュスクリーン（ようこそ画面） */
+        .splash-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(135deg, #ff9a9e, #fecfef, #fad0c4);
+            background-size: 200% 200%;
+            animation: gradientMove 5s ease infinite;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            /* 一番手前に表示 */
+            color: white;
+            transition: opacity 0.8s ease, visibility 0.8s ease;
+        }
+
+        .splash-screen.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .splash-content {
+            text-align: center;
+            animation: popIn 1s cubic-bezier(0.28, 0.84, 0.42, 1);
+        }
+
+        .splash-content h1 {
+            font-size: 40px;
+            margin: 0;
+            letter-spacing: 2px;
+            text-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .splash-content p {
+            font-size: 16px;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+
+        @keyframes popIn {
+            0% {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+
+            50% {
+                transform: scale(1.05);
+                opacity: 1;
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.4);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 999;
+        }
+
+        /* 📔 交換日記 */
+        .diary-container {
+            max-height: 300px;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+
+        .diary-container::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .diary-container::-webkit-scrollbar-thumb {
+            background: #fad0c4;
+            border-radius: 10px;
+        }
+
+        .diary-entry {
+            background: #fff;
+            border: 1px solid #ffe3e6;
+            border-radius: 16px;
+            padding: 15px;
+            margin-bottom: 12px;
+            position: relative;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+        }
+
+        .diary-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 10px;
+            border-bottom: 1px dashed #ffe3e6;
+            padding-bottom: 6px;
+        }
+
+        .diary-author {
+            font-weight: bold;
+            font-size: 14px;
+            color: #d81b60;
+        }
+
+        .diary-date {
+            font-size: 10px;
+            color: #999;
+            margin-right: 20px;
+        }
+
+        .diary-content {
+            font-size: 13px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-break: break-word;
+            color: #444;
+        }
+
+        .btn-delete-diary {
+            background: none;
+            border: none;
+            color: #ccc;
+            font-size: 12px;
+            cursor: pointer;
+            padding: 4px;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+
+        /* 💬 返信用のデザイン */
+        .reply-list {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px dashed #eee;
+        }
+
+        .reply-entry {
+            background: #fdfdfd;
+            border-radius: 10px;
+            padding: 10px;
+            margin-bottom: 6px;
+            font-size: 12px;
+            position: relative;
+            border-left: 3px solid #ff9a9e;
+        }
+
+        .reply-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 4px;
+        }
+
+        .reply-author {
+            font-weight: bold;
+            color: #e6683c;
+        }
+
+        .reply-date {
+            font-size: 9px;
+            color: #999;
+            margin-right: 15px;
+        }
+
+        .btn-reply {
+            background: #ffe3e6;
+            color: #d81b60;
+            border: none;
+            border-radius: 8px;
+            padding: 6px 12px;
+            font-size: 10px;
+            cursor: pointer;
+            margin-top: 5px;
+            font-weight: bold;
+        }
+
+        .btn-delete-reply {
+            background: none;
+            border: none;
+            color: #ccc;
+            font-size: 10px;
+            cursor: pointer;
+            padding: 2px;
+            position: absolute;
+            top: 5px;
+            right: 5px;
+        }
+
+        /* ⏳ ボタンが押せない時（保存中）のデザイン */
+        .btn-save:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        /* ハートのカウントダウンと愛のボタン */
+        .countdown-container {
+            background: linear-gradient(135deg, #fff5f7 0%, #ffe3e6 100%);
+            border-radius: 20px;
+            padding: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+            border: 2px solid #fff;
+            box-shadow: 0 4px 15px rgba(255, 182, 193, 0.3);
+        }
+
+        .countdown-item {
+            margin: 5px 0;
+            font-size: 14px;
+            color: #d81b60;
+        }
+
+        .countdown-number {
+            font-size: 20px;
+            font-weight: bold;
+            margin: 0 4px;
+        }
+
+        /* 🤍 スタイリッシュなすりガラス風カプセルボタン */
+        .love-float-btn {
+            position: fixed;
+            bottom: 25px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.85);
+            /* 半透明の白 */
+            backdrop-filter: blur(8px);
+            /* 背景をぼかす（すりガラス効果） */
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 182, 193, 0.4);
+            border-radius: 30px;
+            /* 横長のカプセル型 */
+            padding: 10px 18px;
+            display: flex;
+            flex-direction: row;
+            /* 縦積みではなく横並びにする */
+            align-items: center;
+            gap: 6px;
+            /* アイコンと数字の隙間 */
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+            /* 影をふんわり薄く */
+            cursor: pointer;
+            z-index: 1000;
+            transition: transform 0.1s;
+        }
+
+        .love-float-btn:active {
+            transform: scale(0.92);
+        }
+
+        .love-icon {
+            font-size: 18px;
+            line-height: 1;
+        }
+
+        .love-count-badge {
+            font-size: 14px;
+            font-weight: bold;
+            color: #d81b60;
+            /* 数字の色はアクセントで残す */
+            background: transparent;
+            padding: 0;
+        }
+
+        /* ハートが飛ぶアニメーション */
+        @keyframes floatUp {
+            0% {
+                transform: translateY(0) scale(1);
+                opacity: 1;
+            }
+
+            100% {
+                transform: translateY(-100px) scale(1.5);
+                opacity: 0;
+            }
+        }
+
+        .flying-heart {
+            position: fixed;
+            pointer-events: none;
+            font-size: 24px;
+            z-index: 999;
+            animation: floatUp 1s ease-out forwards;
+        }
+
+        .love-float-btn {
+            /* 既存のスタイルはそのままで、以下を追加 */
+            touch-action: manipulation;
+        }
+
+        /* ✨ ボタンキラキラエフェクト */
+        .btn-round {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-round::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.4s ease, height 0.4s ease, opacity 0.4s ease;
+            opacity: 0;
+        }
+
+        .btn-round:active::after {
+            width: 80px;
+            height: 80px;
+            opacity: 0;
+            transition: 0s;
+        }
+
+        .btn-save {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-save::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.4s ease, height 0.4s ease, opacity 0.4s ease;
+            opacity: 0;
+        }
+
+        .btn-save:active::after {
+            width: 200px;
+            height: 200px;
+            opacity: 0;
+            transition: 0s;
+        }
+
+        input[type="date"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            box-sizing: border-box;
+            font-size: 16px;
+            appearance: none;
+            -webkit-appearance: none;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="splashScreen" class="splash-screen">
+        <div class="splash-content">
+            <h1>Our Memories</h1>
+            <p>Welcome back! </p>
+        </div>
+    </div>
+
+    <header>Our Memories
+        <button onclick="location.reload()" style="
+        position: absolute;
+        right: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: rgba(255,255,255,0.25);
+        border: 1px solid rgba(255,255,255,0.4);
+        border-radius: 20px;
+        padding: 5px 12px;
+        color: white;
+        font-size: 11px;
+        font-weight: bold;
+        cursor: pointer;
+        backdrop-filter: blur(4px);
+        letter-spacing: 1px;
+    ">更新</button>
+    </header>
+    <div class="container">
+        <div class="card" id="weatherCard">
+            <div class="card-header-actions">
+                <h2>🌤️ 今日の天気</h2>
+                <button class="btn-round" onclick="fetchWeather()">🔄</button>
+            </div>
+            <div id="weatherContainer" style="text-align:center;padding:10px;">
+                <div class="loading-pulse">天気を読み込み中... 🌤️</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header-actions">
+                <h2>📸 共有ギャラリー <span id="galleryNewBadge"
+                        style="display:none;font-size:11px;color:#ff4d6d;font-weight:bold;background:#ffe3e6;padding:2px 8px;border-radius:20px;">✨
+                        NEW!</span></h2>
+                <div style="display: flex; gap: 8px;">
+                    <button class="btn-round" id="uploadBtn" onclick="triggerPhotoUpload()">＋</button>
+                </div>
+            </div>
+            <div class="slider">
+                <div class="loading-overlay" id="uploadLoading">アップロード中... 🚀 (1/○枚目)</div>
+                <div class="slides" id="slides">
+                    <div class="loading-pulse">写真を読み込み中... 📸🔄</div>
+                </div>
+            </div>
+            <div class="gallery-grid" id="galleryGrid"></div>
+            <input type="file" id="photoUpload" accept="image/*" multiple style="display: none;"
+                onchange="handlePhotoUpload(this)">
+        </div>
+
+        <div class="card">
+            <div class="card-header-actions">
+                <h2>🍽 お店リスト <span id="shopNewBadge"
+                        style="display:none;font-size:11px;color:#ff4d6d;font-weight:bold;background:#ffe3e6;padding:2px 8px;border-radius:20px;">✨
+                        NEW!</span>
+                </h2>
+                <button class="btn-round" onclick="openShopModal()">＋</button>
+            </div>
+            <div id="shopListContainer">
+                <div class="loading-pulse">お店リストを読み込み中... 🍽️🔄</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header-actions">
+                <h2>メッセージ <span id="diaryNewBadge"
+                        style="display:none;font-size:11px;color:#ff4d6d;font-weight:bold;background:#ffe3e6;padding:2px 8px;border-radius:20px;">✨
+                        NEW!</span></h2>
+                <button class="btn-round" onclick="openDiaryModal()">＋</button>
+            </div>
+            <div id="diaryListContainer" class="diary-container">
+                <div class="loading-pulse">メッセージを読み込み中... 📔🔄</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header-actions">
+                <h2>🎤 ボイスメッセージ <span id="voiceNewBadge"
+                        style="display:none;font-size:11px;color:#ff4d6d;font-weight:bold;background:#ffe3e6;padding:2px 8px;border-radius:20px;">✨
+                        NEW!</span></h2>
+            </div>
+            <div id="voiceListContainer" class="diary-container">
+                <div class="loading-pulse">読み込み中... 🎤</div>
+            </div>
+            <div style="margin-top:12px;text-align:center;">
+                <button id="recordBtn" onclick="toggleRecording()" style="
+            background: linear-gradient(135deg, #ff9a9e, #fecfef);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 64px;
+            height: 64px;
+            font-size: 28px;
+            cursor: pointer;
+            box-shadow: 0 6px 16px rgba(255,154,158,0.4);
+            transition: all 0.2s ease;
+        ">🎤</button>
+                <div id="recordStatus" style="font-size:12px;color:#999;margin-top:8px;">タップして録音</div>
+                <div style="margin-top:12px;">
+                    <input type="text" id="voiceAuthorInput" placeholder="名前を入れてね" style="
+                padding: 8px 12px;
+                border: 1px solid #ddd;
+                border-radius: 10px;
+                font-size: 16px;
+                width: 60%;
+                box-sizing: border-box;
+            ">
+                </div>
+            </div>
+        </div>
+
+        <div class="card" style="text-align: center;">
+            <h2 style="margin-bottom: 15px;">MAP</h2>
+            <iframe id="map" src="https://maps.google.co.jp/maps?q=東京&output=embed"
+                style="width: 100%; max-width: 500px; height: 250px; border: none; border-radius: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); display: block; margin: 0 auto;"></iframe>
+        </div>
+
+        <div class="card">
+            <div class="card-header-actions">
+                <h2>📅 カレンダー</h2>
+                <button class="btn-round" onclick="openEventModal()">＋</button>
+            </div>
+            <div id="calendarContainer"></div>
+            <p style="text-align: center; font-size: 11px; color: #888; margin-top: 10px;">
+                日付をタップして予定を確認・追加できるよ！
+            </p>
+        </div>
+    </div>
+
+    <div id="shopModal" class="modal-overlay">
+        <div class="modal-content">
+            <h3>お店を追加 🍽</h3>
+            <div class="input-group"><label>店名</label><input type="text" id="shopNameInput"></div>
+            <div class="input-group"><label>Instagram URL</label><input type="text" id="shopInstaInput"></div>
+            <div class="input-group"><label>メモ</label><textarea id="shopNoteInput"></textarea></div>
+            <div class="modal-actions">
+                <button class="btn" onclick="closeShopModal()">キャンセル</button>
+                <button class="btn btn-save" onclick="saveShop()">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="diaryModal" class="modal-overlay">
+        <div class="modal-content">
+            <h3>メッセージを書く 🖋</h3>
+            <div class="input-group"><label>名前</label><input type="text" id="diaryAuthorInput" placeholder="例：ぼく"></div>
+            <div class="input-group"><label>内容</label><textarea id="diaryContentInput" rows="5"
+                    placeholder="今日の出来事や気持ちを書いてね！"></textarea></div>
+            <div class="modal-actions">
+                <button class="btn" onclick="closeDiaryModal()">キャンセル</button>
+                <button class="btn btn-save" onclick="saveDiary()">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="replyModal" class="modal-overlay">
+        <div class="modal-content">
+            <h3>返信を書く 💬</h3>
+            <div class="input-group"><label>名前</label><input type="text" id="replyAuthorInput" placeholder="例：わたし">
+            </div>
+            <div class="input-group"><label>内容</label><textarea id="replyContentInput" rows="3"
+                    placeholder="返信を書いてね！"></textarea></div>
+            <div class="modal-actions">
+                <button class="btn" onclick="closeReplyModal()">キャンセル</button>
+                <button class="btn btn-save" onclick="saveReply()">送信</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="deleteModal" class="delete-modal">
+        <div class="delete-card">
+            <p>この写真を削除する？</p>
+            <button class="delete-btn" onclick="confirmDelete()">削除する</button>
+            <button class="cancel-btn" onclick="closeDeleteModal()">キャンセル</button>
+        </div>
+    </div>
+
+    <div id="photoViewer" class="photo-viewer">
+        <img id="viewerImg" src="" onclick="event.stopPropagation()">
+        <div style="
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        display: flex;
+        gap: 10px;
+        z-index: 10000;
+    ">
+            <button onclick="deleteFromViewer()" style="
+            background: rgba(255,255,255,0.95);
+            border: none;
+            padding: 10px 12px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: bold;
+            color: #ff4d6d;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        ">🗑 削除</button>
+            <button onclick="closeViewer()" style="
+            background: rgba(255,255,255,0.95);
+            border: none;
+            padding: 10px 12px;
+            border-radius: 12px;
+            font-size: 14px;
+        ">✕</button>
+        </div>
+        <!-- 左右ボタン -->
+        <button onclick="viewerPrev()" style="
+        position: absolute;
+        left: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: rgba(255,255,255,0.9);
+        border: none;
+        border-radius: 50%;
+        width: 44px;
+        height: 44px;
+        font-size: 20px;
+        cursor: pointer;
+        z-index: 10000;
+    ">‹</button>
+        <button onclick="viewerNext()" style="
+        position: absolute;
+        right: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: rgba(255,255,255,0.9);
+        border: none;
+        border-radius: 50%;
+        width: 44px;
+        height: 44px;
+        font-size: 20px;
+        cursor: pointer;
+        z-index: 10000;
+    ">›</button>
+        <!-- 背景タップで閉じる -->
+        <div onclick="closeViewer()" style="
+        position: absolute;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        z-index: 9998;
+    "></div>
+    </div>
+
+    <div id="shopDeleteModal" class="delete-modal">
+        <div class="delete-card">
+            <p>このお店を削除する？</p>
+            <p style="font-size:11px;color:#888;margin-top:6px;">
+                この操作は取り消せません
+            </p>
+
+            <button class="delete-btn" onclick="confirmShopDelete()">削除する</button>
+            <button class="cancel-btn" onclick="closeShopDeleteModal()">キャンセル</button>
+        </div>
+    </div>
+
+    <div id="toast" style="
+        position: fixed;
+        bottom: 30px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(0,0,0,0.8);
+        color: white;
+        padding: 10px 16px;
+        border-radius: 20px;
+        font-size: 12px;
+        display: none;
+        z-index: 99999;
+    ">
+    </div>
+
+    <div class="countdown-container">
+        <div class="countdown-item">Days - <span id="anniversaryDays" class="countdown-number">-</span> 日</div>
+    </div>
+
+    <button class="love-float-btn" onclick="sendLove()">
+        <span class="love-icon">🤍</span>
+        <span id="loveCountDisplay" class="love-count-badge">0</span>
+    </button>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <script>
+        const IMGBB_API_KEY = "98846b51d380b3b2c66f74b7875c4707";
+
+        // 接続情報を1回だけ書く！
+        const SUPABASE_URL = 'https://aelvmpvgzvaiomqimzgo.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_q0Zo34coaQEx57ey6DO84w_E71EljZD';
+
+        // パソコンが混乱しないように初期化
+        const { createClient } = window.supabase;
+        const db = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        async function loadData() {
+            const { data, error } = await db
+                .from('memories')
+                .select('*')
+                .eq('id', 'main')
+                .single();
+
+            if (error) {
+                console.error(error);
+                return;
+            }
+
+            if (data) {
+                shops = data.shops || [];
+                photos = data.photos || [];
+                diaries = data.diaries || [];
+                loveCount = data.love_count || 0;
+                events = data.events || [];  // ← 追加
+
+                renderShops();
+                renderGallery();
+                renderDiaries();
+                renderCalendar();  // ← 追加
+                updateLoveDisplay();
+                updateCountdowns();
+                voices = data.voices || [];
+                renderVoices();
+                initLastKnownCounts();
+            }
+        }
+
+        async function updateCloudData() {
+            const { error } = await db
+                .from('memories')
+                .upsert({
+                    id: "main",
+                    shops,
+                    photos,
+                    diaries,
+                    events,  // ← 追加
+                    voices,
+                    love_count: loveCount,
+                    updated_at: new Date().toISOString()
+                });
+
+            if (error) {
+                console.error(error);
+                alert("保存失敗: " + error.message);
+            }
+        }
+
+        let shops = [];
+        let editingIndex = null;
+        let photos = [];
+        let diaries = [];
+        let prevTranslate = 0;
+        let loveCount = 0;
+        const ANNIVERSARY_DATE = "2026/01/21"; // 例: 付き合い始めた日
+
+        // --- 写真アップロード (ImgBB) ・一括対応 ---
+        function triggerPhotoUpload() { document.getElementById('photoUpload').click(); }
+
+        async function handlePhotoUpload(input) {
+            if (!input.files || input.files.length === 0) return;
+
+            const totalFiles = input.files.length;
+            const newPhotoUrls = [];
+            const uploadBtn = document.getElementById('uploadBtn');
+            const uploadLoading = document.getElementById('uploadLoading');
+
+            uploadBtn.disabled = true;
+            uploadLoading.style.display = 'flex';
+
+            let successCount = 0;
+
+            for (let i = 0; i < totalFiles; i++) {
+                uploadLoading.innerHTML = `アップロード中... 🚀 (${i + 1}/${totalFiles}枚目)`;
+
+                const file = input.files[i];
+                const fileName = `${Date.now()}_${file.name}`;
+
+                try {
+                    // Supabase Storageにアップロード
+                    const { data, error } = await db.storage
+                        .from('photos')
+                        .upload(fileName, file, {
+                            cacheControl: '3600',
+                            upsert: false
+                        });
+
+                    if (error) throw error;
+
+                    // 公開URLを取得
+                    const { data: urlData } = db.storage
+                        .from('photos')
+                        .getPublicUrl(fileName);
+
+                    newPhotoUrls.push(urlData.publicUrl);
+                    successCount++;
+
+                } catch (e) {
+                    console.error(`${i + 1}枚目のアップロードに失敗しました🥲`, e);
+                }
+            }
+
+            if (newPhotoUrls.length > 0) {
+                photos.push(...newPhotoUrls);
+                await updateCloudData();
+                renderGallery();
+            }
+
+            uploadLoading.style.display = 'none';
+            uploadBtn.disabled = false;
+            input.value = "";
+            alert(`${successCount}/${totalFiles}枚アップロードしました！✨`);
+        }
+        const slides = document.getElementById('slides');
+        let startX = 0;
+        let currentTranslate = 0;
+        let isDragging = false;
+        prevTranslate = currentTranslate;
+
+        function renderGallery() {
+            const slides = document.getElementById('slides');
+            const grid = document.getElementById('galleryGrid');
+
+            slides.innerHTML = '';
+            grid.innerHTML = '';
+
+            // 既存のボタンラッパーを削除
+            const oldWrapper = document.getElementById('galleryBtnWrapper');
+            if (oldWrapper) oldWrapper.remove();
+
+            if (photos.length === 0) {
+                slides.innerHTML = '<div class="loading-pulse">写真を追加してね！📸</div>';
+                return;
+            }
+
+            // スライダーは最新6枚
+            const displayPhotos = [...photos].reverse();
+            const sliderPhotos = displayPhotos.slice(0, 6);
+            sliderPhotos.forEach((url, index) => {
+                const actualIndex = photos.length - 1 - index;
+                const img = document.createElement('img');
+                img.src = url;
+                img.onclick = () => openViewer(url, actualIndex);
+                slides.appendChild(img);
+            });
+
+            // 全部見るボタンをグリッドの外に配置
+            const btnWrapper = document.createElement('div');
+            btnWrapper.id = 'galleryBtnWrapper';
+            btnWrapper.style.cssText = `text-align: center; margin-top: 12px;`;
+
+            const btn = document.createElement('button');
+            btn.innerText = `📂 全部見る（${photos.length}枚）`;
+            btn.style.cssText = `
+                padding: 10px 24px;
+                background: linear-gradient(135deg, #ff9a9e, #fecfef);
+                color: white;
+                border: none;
+                border-radius: 12px;
+                font-size: 13px;
+                font-weight: bold;
+                cursor: pointer;
+            `;
+            btn.onclick = () => {
+                grid.innerHTML = '';
+                [...photos].reverse().forEach((url) => {
+                    const actualIndex = photos.indexOf(url);
+                    const img = document.createElement('img');
+                    img.src = url;
+                    img.onclick = () => openViewer(url, actualIndex);
+                    grid.appendChild(img);
+                });
+
+                const closeBtn = document.createElement('button');
+                closeBtn.innerText = '閉じる ▲';
+                closeBtn.style.cssText = `
+                    width: 100%;
+                    padding: 10px;
+                    margin-top: 8px;
+                    background: #eee;
+                    color: #666;
+                    border: none;
+                    border-radius: 12px;
+                    font-size: 13px;
+                    font-weight: bold;
+                    cursor: pointer;
+                    grid-column: 1 / -1;
+                `;
+                closeBtn.onclick = () => renderGallery();
+                grid.appendChild(closeBtn);
+                btnWrapper.style.display = 'none';
+            };
+
+            btnWrapper.appendChild(btn);
+            grid.after(btnWrapper);
+        }
+
+        function renderShops() {
+            const container = document.getElementById('shopListContainer');
+
+            if (!shops.length) {
+                container.innerHTML = '<div style="width:100%; text-align:center; font-size:12px; color:#999; padding:20px;">リストが空です🍽️</div>';
+                return;
+            }
+
+            container.innerHTML = '';
+
+            const displayShops = [...shops].reverse();
+
+            // 👉 3件ずつグループ化
+            for (let i = 0; i < displayShops.length; i += 3) {
+                const page = document.createElement('div');
+                page.className = 'shop-page';
+
+                const group = displayShops.slice(i, i + 3);
+
+                group.forEach((shop, j) => {
+                    const actualIdx = (shops.length - 1) - (i + j);
+
+                    const div = document.createElement('div');
+                    div.className = 'shop-card';
+                    div.onclick = () => {
+                        document.getElementById('map').src =
+                            `https://maps.google.co.jp/maps?q=${encodeURIComponent(shop.name)}&output=embed`;
+                    };
+
+                    div.innerHTML = `
+                        <div class="shop-title">${shop.name}</div>
+                        <div class="shop-note">${shop.note || ''}</div>
+                        ${shop.insta ? `<a href="${shop.insta}" class="insta-link"onclick="openInsta('${shop.insta}'); event.stopPropagation(); return false;">Instagram</a>` : ''}
+                        <button class="btn-delete-small" style="background:#e3f2fd;color:#1976d2;"
+                        onclick="editShop(${actualIdx}); event.stopPropagation();">編集</button>
+                        <button class="btn-delete-small" onclick="deleteShop(${actualIdx}); event.stopPropagation();">削除</button>
+                    `;
+
+                    page.appendChild(div);
+                });
+
+                container.appendChild(page);
+            }
+        }
+
+        // --- お店リストの保存 ---
+        async function saveShop() {
+            const name = document.getElementById('shopNameInput').value;
+            const note = document.getElementById('shopNoteInput').value;
+            const insta = document.getElementById('shopInstaInput').value;
+
+            if (!name) {
+                alert("お店の名前を入れてね！");
+                return;
+            }
+
+            const saveBtn = document.querySelector('#shopModal .btn-save');
+            const originalText = saveBtn.innerText;
+            saveBtn.innerText = '保存中... ⏳';
+            saveBtn.disabled = true;
+
+            try {
+                const data = { name, note, insta };
+
+                if (editingIndex !== null) {
+                    // ✏️ 編集モード
+                    shops[editingIndex] = data;
+                    editingIndex = null;
+                } else {
+                    // ➕ 新規追加
+                    shops.push(data);
+                }
+
+                await updateCloudData();
+
+                closeShopModal();
+                renderShops();
+
+                document.getElementById('shopNameInput').value = '';
+                document.getElementById('shopNoteInput').value = '';
+                document.getElementById('shopInstaInput').value = '';
+
+            } catch (e) {
+                alert("保存に失敗したよ🥲");
+                console.error(e);
+            } finally {
+                saveBtn.innerText = originalText;
+                saveBtn.disabled = false;
+            }
+        }
+
+        let pendingDeleteIndex = null;
+
+        function deleteShop(actualIdx) {
+            pendingDeleteIndex = actualIdx;
+            document.getElementById("shopDeleteModal").classList.add("active");
+        }
+
+        function closeShopDeleteModal() {
+            document.getElementById("shopDeleteModal").classList.remove("active");
+            pendingDeleteIndex = null;
+        }
+
+        function closeShopDeleteSheet() {
+            document.getElementById("shopDeleteSheet").classList.remove("active");
+        }
+
+        function openShopModal() { document.getElementById('shopModal').classList.add('active'); }
+        function closeShopModal() { document.getElementById('shopModal').classList.remove('active'); }
+        function editShop(index) {
+            const shop = shops[index];
+
+            document.getElementById('shopNameInput').value = shop.name;
+            document.getElementById('shopInstaInput').value = shop.insta || '';
+            document.getElementById('shopNoteInput').value = shop.note || '';
+
+            editingIndex = index; // ← ここ重要
+            openShopModal();
+        }
+
+        function closeDeleteModal() {
+            document.getElementById("deleteModal").classList.remove("active");
+        }
+
+        async function confirmDelete() {
+            const actualIdx = (photos.length - 1) - selectedPhotoIndex;
+
+            photos.splice(actualIdx, 1);
+            await updateCloudData();
+
+            selectedPhotoIndex = null;
+            closeDeleteModal();
+            renderGallery();
+        }
+
+        async function deleteFromViewer() {
+            if (currentViewerIndex === null) return;
+            if (!confirm("この写真を削除する？")) return;
+
+            const url = photos[currentViewerIndex];
+
+            // SupabaseStorageからも削除
+            const fileName = url.split('/').pop();
+            await db.storage.from('photos').remove([fileName]);
+
+            photos.splice(currentViewerIndex, 1);
+            await updateCloudData();
+
+            closeViewer();
+            renderGallery();
+            currentViewerIndex = null;
+            showToast("写真を削除しました🗑️");
+        }
+
+        function openInsta(url) {
+            window.open(url, '_blank');
+        }
+
+        let currentViewerIndex = null;
+
+        function openViewer(url, index) {
+            const viewer = document.getElementById('photoViewer');
+            const img = document.getElementById('viewerImg');
+
+            currentViewerIndex = index;
+            img.src = url;
+            viewer.style.display = 'flex';
+        }
+
+        function closeViewer() {
+            document.getElementById('photoViewer').style.display = 'none';
+        }
+
+        function viewerPrev() {
+            if (currentViewerIndex === null) return;
+            currentViewerIndex = (currentViewerIndex - 1 + photos.length) % photos.length;
+            document.getElementById('viewerImg').src = photos[currentViewerIndex];
+        }
+
+        function viewerNext() {
+            if (currentViewerIndex === null) return;
+            currentViewerIndex = (currentViewerIndex + 1) % photos.length;
+            document.getElementById('viewerImg').src = photos[currentViewerIndex];
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById("toast");
+            toast.textContent = msg;
+            toast.style.display = "block";
+
+            setTimeout(() => {
+                toast.style.display = "none";
+            }, 2000);
+        }
+
+        // --- 交換日記＆返信機能 ---
+        let currentReplyTarget = null; // どの記事に返信するか覚える変数
+
+        function renderDiaries() {
+            const container = document.getElementById('diaryListContainer');
+            if (!diaries.length) {
+                container.innerHTML = '<div style="text-align:center;font-size:12px;color:#999;padding:20px;">まだ日記がありません。＋ボタンで最初のページを書いてね！📔</div>';
+                return;
+            }
+            container.innerHTML = '';
+
+            // 新しい日記を一番上にする
+            [...diaries].reverse().forEach((diary, i) => {
+                const actualIdx = (diaries.length - 1) - i;
+                const div = document.createElement('div');
+                div.className = 'diary-entry';
+
+                // 返信一覧のHTMLを作成
+                let repliesHtml = '';
+                if (diary.replies && diary.replies.length > 0) {
+                    repliesHtml = '<div class="reply-list">';
+                    diary.replies.forEach((reply, rIdx) => {
+                        repliesHtml += `
+                            <div class="reply-entry">
+                                <button class="btn-delete-reply" onclick="deleteReply(${actualIdx}, ${rIdx})">🗑️</button>
+                                <div class="reply-header">
+                                    <span class="reply-author">↳ ${reply.author}</span>
+                                    <span class="reply-date">${reply.date}</span>
+                                </div>
+                                <div class="diary-content">${reply.content}</div>
+                            </div>
+                        `;
+                    });
+                    repliesHtml += '</div>';
+                }
+
+                div.innerHTML = `
+                    <button class="btn-delete-diary" onclick="deleteDiary(${actualIdx})">🗑️</button>
+                    <div class="diary-header">
+                        <span class="diary-author">✍️ ${diary.author}</span>
+                        <span class="diary-date">${diary.date}</span>
+                    </div>
+                    <div class="diary-content">${diary.content}</div>
+                    ${repliesHtml}
+                    <div style="text-align: right;">
+                        <button class="btn-reply" onclick="openReplyModal(${actualIdx})">💬 返信する</button>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        // --- 日記の保存 ---
+        async function saveDiary() {
+            const author = document.getElementById('diaryAuthorInput').value;
+            const content = document.getElementById('diaryContentInput').value;
+            if (!author || !content) { alert("名前とメッセージの内容を両方入れてね！"); return; }
+
+            // 🌟 追加：ボタンを「保存中」にして連打を防ぐ
+            const saveBtn = document.querySelector('#diaryModal .btn-save');
+            const originalText = saveBtn.innerText;
+            saveBtn.innerText = '保存中... ⏳';
+            saveBtn.disabled = true;
+
+            try {
+                const now = new Date();
+                const dateStr = `${now.getFullYear()}/${now.getMonth() + 1}/${now.getDate()} ${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')}`;
+
+                diaries.push({ author, content, date: dateStr, replies: [] });
+                await updateCloudData();
+                closeDiaryModal();
+                renderDiaries();
+                document.getElementById('diaryContentInput').value = '';
+            } finally {
+                // 🌟 追加：処理が終わったらボタンを元の状態に戻す
+                saveBtn.innerText = originalText;
+                saveBtn.disabled = false;
+            }
+        }
+
+        async function deleteDiary(idx) {
+            if (!confirm("このメッセージを消してもいい？（返信も全部消えます！）")) return;
+            diaries.splice(idx, 1);
+            await updateCloudData();
+            renderDiaries();
+        }
+
+        function openDiaryModal() { document.getElementById('diaryModal').classList.add('active'); }
+        function closeDiaryModal() { document.getElementById('diaryModal').classList.remove('active'); }
+
+        // --- 返信の保存・削除 ---
+        function openReplyModal(idx) {
+            currentReplyTarget = idx;
+            document.getElementById('replyModal').classList.add('active');
+        }
+
+        function closeReplyModal() {
+            currentReplyTarget = null;
+            document.getElementById('replyModal').classList.remove('active');
+        }
+
+        // --- 返信の保存 ---
+        async function saveReply() {
+            if (currentReplyTarget === null) return;
+            const author = document.getElementById('replyAuthorInput').value;
+            const content = document.getElementById('replyContentInput').value;
+            if (!author || !content) { alert("名前と返信の内容を入れてね！"); return; }
+
+            // 🌟 追加：ボタンを「送信中」にして連打を防ぐ
+            const saveBtn = document.querySelector('#replyModal .btn-save');
+            const originalText = saveBtn.innerText;
+            saveBtn.innerText = '送信中... 🚀';
+            saveBtn.disabled = true;
+
+            try {
+                const now = new Date();
+                const dateStr = `${now.getFullYear()}/${now.getMonth() + 1}/${now.getDate()} ${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')}`;
+
+                if (!diaries[currentReplyTarget].replies) {
+                    diaries[currentReplyTarget].replies = [];
+                }
+
+                diaries[currentReplyTarget].replies.push({ author, content, date: dateStr });
+                await updateCloudData();
+                closeReplyModal();
+                renderDiaries();
+                document.getElementById('replyContentInput').value = '';
+            } finally {
+                // 🌟 追加：処理が終わったらボタンを元の状態に戻す
+                saveBtn.innerText = originalText;
+                saveBtn.disabled = false;
+            }
+        }
+
+        async function deleteReply(diaryIdx, replyIdx) {
+            if (!confirm("この返信を消してもいい？")) return;
+            diaries[diaryIdx].replies.splice(replyIdx, 1);
+            await updateCloudData();
+            renderDiaries();
+        }
+
+        // --- 起動と自動同期 ---
+        // 🚀 画面を開いてから1.5秒後にスプラッシュスクリーンをフワッと消す
+        window.addEventListener('load', async () => {
+            try {
+                await loadData();
+                fetchWeather();
+                startRealtime();  // ← 常にリアルタイム同期を開始
+                await initPush(); // ← 通知は別で
+            } catch (e) {
+                console.error(e);
+            } finally {
+                setTimeout(() => {
+                    document.getElementById('splashScreen').classList.add('hidden');
+                }, 1500);
+            }
+        });
+        window.onclick = function (e) {
+            const modal = document.getElementById('shopModal');
+            if (e.target === modal) {
+                closeShopModal();
+            }
+        }
+
+        // --- カレンダー ---
+        let events = [];
+        let currentCalYear = new Date().getFullYear();
+        let currentCalMonth = new Date().getMonth();
+        let selectedDate = null;
+
+        function renderCalendar() {
+            const container = document.getElementById('calendarContainer');
+            const year = currentCalYear;
+            const month = currentCalMonth;
+
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const today = new Date();
+
+            const monthNames = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'];
+
+            let html = `
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+            <button class="btn-round" onclick="prevMonth()" style="width:30px;height:30px;font-size:14px;">‹</button>
+            <span style="font-weight:bold;font-size:16px;">${year}年 ${monthNames[month]}</span>
+            <button class="btn-round" onclick="nextMonth()" style="width:30px;height:30px;font-size:14px;">›</button>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center;">
+            <div style="font-size:11px;color:#e57373;font-weight:bold;">日</div>
+            <div style="font-size:11px;color:#888;font-weight:bold;">月</div>
+            <div style="font-size:11px;color:#888;font-weight:bold;">火</div>
+            <div style="font-size:11px;color:#888;font-weight:bold;">水</div>
+            <div style="font-size:11px;color:#888;font-weight:bold;">木</div>
+            <div style="font-size:11px;color:#888;font-weight:bold;">金</div>
+            <div style="font-size:11px;color:#6495ed;font-weight:bold;">土</div>
+    `;
+
+            for (let i = 0; i < firstDay; i++) {
+                html += `<div></div>`;
+            }
+
+            for (let d = 1; d <= daysInMonth; d++) {
+                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                const hasEvent = events.some(e => e.date === dateStr);
+                const isToday = today.getFullYear() === year && today.getMonth() === month && today.getDate() === d;
+                const isSun = (firstDay + d - 1) % 7 === 0;
+                const isSat = (firstDay + d - 1) % 7 === 6;
+
+                let color = isSun ? '#e57373' : isSat ? '#6495ed' : '#333';
+                let bg = isToday ? 'linear-gradient(135deg,#ff9a9e,#fecfef)' : 'transparent';
+                let textColor = isToday ? 'white' : color;
+
+                html += `
+            <div onclick="onDateClick('${dateStr}')" style="
+                cursor:pointer;
+                border-radius:50%;
+                width:32px;
+                height:32px;
+                display:flex;
+                flex-direction:column;
+                align-items:center;
+                justify-content:center;
+                margin:auto;
+                background:${bg};
+                color:${textColor};
+                font-size:13px;
+                font-weight:${isToday ? 'bold' : 'normal'};
+                position:relative;
+            ">
+                ${d}
+                ${hasEvent ? `<div style="width:8px;height:8px;background:#ff9a9e;border-radius:50%;position:absolute;bottom:2px;"></div>` : ''}
+            </div>
+        `;
+            }
+
+            html += `</div>`;
+
+            if (selectedDate) {
+                const dayEvents = events.filter(e => e.date === selectedDate);
+                html += `<div style="margin-top:15px;border-top:1px dashed #ffe3e6;padding-top:12px;">`;
+                html += `<div style="font-size:13px;font-weight:bold;color:#d81b60;margin-bottom:8px;">${selectedDate}の予定</div>`;
+                if (dayEvents.length === 0) {
+                    html += `<div style="font-size:12px;color:#999;">予定はありません</div>`;
+                } else {
+                    dayEvents.forEach((ev, i) => {
+                        const actualIdx = events.indexOf(ev);
+                        html += `
+                    <div style="background:#fff5f7;border-radius:10px;padding:10px;margin-bottom:8px;border-left:3px solid #ff9a9e;position:relative;">
+                        <div style="font-weight:bold;font-size:13px;">${ev.title}</div>
+                        ${ev.note ? `<div style="font-size:11px;color:#888;margin-top:4px;">${ev.note}</div>` : ''}
+                        <div style="position:absolute;top:8px;right:8px;display:flex;gap:6px;">
+                            <button onclick="editEvent(${actualIdx})" style="background:none;border:none;color:#ccc;font-size:12px;cursor:pointer;">✏️</button>
+                            <button onclick="deleteEvent(${actualIdx})" style="background:none;border:none;color:#ccc;font-size:12px;cursor:pointer;">🗑️</button>
+                        </div>
+                    </div>
+                `;
+                    });
+                }
+                html += `</div>`;
+            }
+
+            container.innerHTML = html;
+        }
+
+        function prevMonth() {
+            currentCalMonth--;
+            if (currentCalMonth < 0) { currentCalMonth = 11; currentCalYear--; }
+            renderCalendar();
+        }
+
+        function nextMonth() {
+            currentCalMonth++;
+            if (currentCalMonth > 11) { currentCalMonth = 0; currentCalYear++; }
+            renderCalendar();
+        }
+
+        function onDateClick(dateStr) {
+            selectedDate = dateStr;
+            renderCalendar();
+        }
+
+        function openEventModal() {
+            if (selectedDate) {
+                document.getElementById('eventDateInput').value = selectedDate;
+            }
+            document.getElementById('eventModal').classList.add('active');
+        }
+
+        function closeEventModal() {
+            document.getElementById('eventModal').classList.remove('active');
+            editingEventIndex = null;
+            document.getElementById('eventTitleInput').value = '';
+            document.getElementById('eventNoteInput').value = '';
+            document.getElementById('eventDateInput').value = '';
+        }
+
+        let editingEventIndex = null;
+
+        async function saveEvent() {
+            const date = document.getElementById('eventDateInput').value;
+            const title = document.getElementById('eventTitleInput').value;
+            const note = document.getElementById('eventNoteInput').value;
+
+            if (!date || !title) { alert('日付とタイトルを入れてね！'); return; }
+
+            const saveBtn = document.querySelector('#eventModal .btn-save');
+            saveBtn.innerText = '保存中... ⏳';
+            saveBtn.disabled = true;
+
+            try {
+                if (editingEventIndex !== null) {
+                    events[editingEventIndex] = { date, title, note };
+                    editingEventIndex = null;
+                } else {
+                    events.push({ date, title, note });
+                }
+                await updateCloudData();
+                closeEventModal();
+                renderCalendar();
+                document.getElementById('eventTitleInput').value = '';
+                document.getElementById('eventNoteInput').value = '';
+            } finally {
+                saveBtn.innerText = '保存';
+                saveBtn.disabled = false;
+            }
+        }
+
+        async function deleteEvent(idx) {
+            if (!confirm('この予定を削除する？')) return;
+            events.splice(idx, 1);
+            await updateCloudData();
+            renderCalendar();
+        }
+
+        function editEvent(idx) {
+            const ev = events[idx];
+            document.getElementById('eventDateInput').value = ev.date;
+            document.getElementById('eventTitleInput').value = ev.title;
+            document.getElementById('eventNoteInput').value = ev.note || '';
+            editingEventIndex = idx;
+            document.getElementById('eventModal').classList.add('active');
+        }
+
+
+
+        const DEFAULT_LOCATION = { lat: 35.6812, lon: 139.7671, name: '東京' };
+
+        async function fetchWeather() {
+            const container = document.getElementById('weatherContainer');
+            container.innerHTML = '<div class="loading-pulse">取得中... 🌤️</div>';
+
+            try {
+                const saved = localStorage.getItem('weatherLocation');
+                const loc = saved ? JSON.parse(saved) : DEFAULT_LOCATION;
+
+                const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${loc.lat}&longitude=${loc.lon}&current=temperature_2m,weathercode,windspeed_10m,relativehumidity_2m&timezone=Asia%2FTokyo`);
+                const data = await res.json();
+
+                const temp = data.current.temperature_2m;
+                const code = data.current.weathercode;
+                const humidity = data.current.relativehumidity_2m;
+                const wind = data.current.windspeed_10m;
+
+                const weatherInfo = getWeatherInfo(code);
+                const advice = getAdvice(temp, code);
+
+                container.innerHTML = `
+            <div style="font-size:60px;margin-bottom:8px;">${weatherInfo.icon}</div>
+            <div style="font-size:16px;font-weight:bold;color:#d81b60;margin-bottom:4px;">${weatherInfo.label}</div>
+            <div style="font-size:28px;font-weight:bold;margin-bottom:12px;">${temp}°C</div>
+            <div style="display:flex;justify-content:center;gap:20px;font-size:12px;color:#888;margin-bottom:15px;">
+                <div>💧 湿度 ${humidity}%</div>
+                <div>💨 風速 ${wind}m/s</div>
+            </div>
+            <div style="background:linear-gradient(135deg,#fff5f7,#ffe3e6);border-radius:14px;padding:12px;font-size:13px;color:#d81b60;font-weight:bold;">
+                👗 ${advice}
+            </div>
+            <div style="margin-top:12px;font-size:11px;color:#bbb;">
+                📍 ${loc.name}
+                <button onclick="changeLocation()" style="background:none;border:none;color:#ff9a9e;font-size:11px;cursor:pointer;margin-left:6px;">変更する</button>
+            </div>
+        `;
+            } catch (e) {
+                container.innerHTML = `<div style="font-size:12px;color:#999;text-align:center;padding:20px;">天気の取得に失敗しました🥲</div>`;
+            }
+        }
+
+        function changeLocation() {
+            const city = prompt('都市名を入力してください（例：大阪、名古屋）');
+            if (!city) return;
+            fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(city)}&format=json&limit=1`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.length === 0) { alert('都市が見つかりませんでした🥲'); return; }
+                    localStorage.setItem('weatherLocation', JSON.stringify({
+                        lat: parseFloat(data[0].lat),
+                        lon: parseFloat(data[0].lon),
+                        name: city
+                    }));
+                    fetchWeather();
+                });
+        }
+
+        function getWeatherInfo(code) {
+            if (code === 0) return { icon: '☀️', label: '快晴' };
+            if (code <= 2) return { icon: '🌤️', label: '晴れ時々曇り' };
+            if (code <= 3) return { icon: '☁️', label: '曇り' };
+            if (code <= 48) return { icon: '🌫️', label: '霧' };
+            if (code <= 57) return { icon: '🌦️', label: '霧雨' };
+            if (code <= 67) return { icon: '🌧️', label: '雨' };
+            if (code <= 77) return { icon: '❄️', label: '雪' };
+            if (code <= 82) return { icon: '🌧️', label: 'にわか雨' };
+            if (code <= 86) return { icon: '🌨️', label: 'にわか雪' };
+            if (code <= 99) return { icon: '⛈️', label: '雷雨' };
+            return { icon: '🌈', label: '不明' };
+        }
+
+        function getAdvice(temp, code) {
+            const isRain = code >= 51;
+            if (temp >= 28) return isRain ? '暑いけど雨だから折りたたみ傘持ってね☂️' : '暑いから薄着で！日焼け止めも忘れずに🌞';
+            if (temp >= 20) return isRain ? '過ごしやすいけど雨☂️ 上着あると安心！' : '過ごしやすい気温だね！デートにぴったり💕';
+            if (temp >= 12) return isRain ? '肌寒いし雨☂️ 上着と傘必須！' : '少し肌寒いから羽織りもの持ってね🧥';
+            if (temp >= 5) return isRain ? '寒いし雨だからしっかり防寒して☂️' : '寒いからコート必須！温かくしてね🧣';
+            return isRain ? '極寒＆雨！完全防備で行ってね🧥☂️' : 'めちゃ寒い！しっかり着込んでね🧤';
+        }
+
+        // --- ボイスメッセージ ---
+        let voices = [];
+        let mediaRecorder = null;
+        let audioChunks = [];
+        let isRecording = false;
+
+        function toggleRecording() {
+            if (isRecording) {
+                stopRecording();
+            } else {
+                startRecording();
+            }
+        }
+
+        async function startRecording() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
+                const mimeType = MediaRecorder.isTypeSupported('audio/mp4')
+                    ? 'audio/mp4'
+                    : MediaRecorder.isTypeSupported('audio/webm')
+                        ? 'audio/webm'
+                        : '';
+
+                mediaRecorder = new MediaRecorder(stream, mimeType ? { mimeType } : {});
+                audioChunks = [];
+
+                mediaRecorder.ondataavailable = (e) => {
+                    audioChunks.push(e.data);
+                };
+
+                mediaRecorder.onstop = async () => {
+                    const audioBlob = new Blob(audioChunks, { type: mediaRecorder.mimeType });
+                    await saveVoice(audioBlob);
+                    stream.getTracks().forEach(t => t.stop());
+                };
+
+                mediaRecorder.start();
+                isRecording = true;
+
+                const btn = document.getElementById('recordBtn');
+                const status = document.getElementById('recordStatus');
+                btn.innerText = '⏹';
+                btn.style.background = 'linear-gradient(135deg, #ff4d6d, #ff9a9e)';
+                btn.style.animation = 'pulse 1s infinite';
+                status.innerText = '録音中... タップで停止';
+                status.style.color = '#ff4d6d';
+
+            } catch (e) {
+                alert('マイクへのアクセスを許可してね！🎤');
+            }
+        }
+
+        function stopRecording() {
+            if (mediaRecorder) {
+                mediaRecorder.stop();
+                isRecording = false;
+
+                const btn = document.getElementById('recordBtn');
+                const status = document.getElementById('recordStatus');
+                btn.innerText = '🎤';
+                btn.style.background = 'linear-gradient(135deg, #ff9a9e, #fecfef)';
+                btn.style.animation = '';
+                status.innerText = '保存中... ⏳';
+                status.style.color = '#999';
+            }
+        }
+
+        async function saveVoice(audioBlob) {
+            const author = document.getElementById('voiceAuthorInput').value;
+            if (!author) {
+                alert('名前を入れてね！');
+                document.getElementById('recordStatus').innerText = 'タップして録音';
+                return;
+            }
+
+            const ext = audioBlob.type.includes('mp4') ? 'mp4' : 'webm';
+            const fileName = `${Date.now()}_voice.${ext}`;
+
+            try {
+                const { error } = await db.storage
+                    .from('voices')
+                    .upload(fileName, audioBlob, {
+                        cacheControl: '3600',
+                        upsert: false
+                    });
+
+                if (error) throw error;
+
+                const { data: urlData } = db.storage
+                    .from('voices')
+                    .getPublicUrl(fileName);
+
+                const now = new Date();
+                const dateStr = `${now.getFullYear()}/${now.getMonth() + 1}/${now.getDate()} ${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')}`;
+
+                voices.push({ author, url: urlData.publicUrl, date: dateStr, fileName });
+                await updateCloudData();
+                renderVoices();
+
+                document.getElementById('recordStatus').innerText = 'タップして録音';
+                showToast('ボイスメッセージを送信しました！🎤');
+
+            } catch (e) {
+                console.error(e);
+                alert('保存に失敗しました🥲');
+                document.getElementById('recordStatus').innerText = 'タップして録音';
+            }
+        }
+
+        function renderVoices() {
+            const container = document.getElementById('voiceListContainer');
+            if (!voices.length) {
+                container.innerHTML = '<div style="text-align:center;font-size:12px;color:#999;padding:20px;">ボイスメッセージはまだありません🎤</div>';
+                return;
+            }
+
+            container.innerHTML = '';
+            [...voices].reverse().forEach((voice, i) => {
+                const actualIdx = (voices.length - 1) - i;
+                const div = document.createElement('div');
+                div.style.cssText = `
+            background: #fff;
+            border: 1px solid #ffe3e6;
+            border-radius: 16px;
+            padding: 12px;
+            margin-bottom: 10px;
+            position: relative;
+        `;
+                div.innerHTML = `
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                <span style="font-weight:bold;font-size:13px;color:#d81b60;">🎤 ${voice.author}</span>
+                <span style="font-size:10px;color:#999;">${voice.date}</span>
+            </div>
+            <audio controls src="${voice.url}" style="width:100%;border-radius:8px;"></audio>
+            <button onclick="deleteVoice(${actualIdx})" style="
+                width: 100%;
+                padding: 8px;
+                margin-top: 8px;
+                background: #ffe3e6;
+                color: #d81b60;
+                border: none;
+                border-radius: 10px;
+                font-size: 12px;
+                font-weight: bold;
+                cursor: pointer;
+            ">🗑️ 削除</button>
+        `;
+                container.appendChild(div);
+            });
+        }
+
+        async function deleteVoice(idx) {
+            if (!confirm('このボイスメッセージを削除する？')) return;
+            const fileName = voices[idx].fileName;
+            await db.storage.from('voices').remove([fileName]);
+            voices.splice(idx, 1);
+            await updateCloudData();
+            renderVoices();
+        }
+
+        // --- NEW!バッジ管理 ---
+        let lastKnownCounts = {
+            photos: 0,
+            shops: 0,
+            diaries: 0,
+            voices: 0
+        };
+
+        function initLastKnownCounts() {
+            lastKnownCounts = {
+                photos: photos.length,
+                shops: shops.length,
+                diaries: diaries.length,
+                voices: voices.length
+            };
+        }
+
+        function checkAndShowNew(newData) {
+            if (newData.photos.length > lastKnownCounts.photos) showNewBadge('galleryNewBadge');
+            if (newData.shops.length > lastKnownCounts.shops) showNewBadge('shopNewBadge');
+            if (newData.diaries.length > lastKnownCounts.diaries) showNewBadge('diaryNewBadge');
+            if (newData.voices && newData.voices.length > lastKnownCounts.voices) showNewBadge('voiceNewBadge');
+
+            lastKnownCounts = {
+                photos: newData.photos.length,
+                shops: newData.shops.length,
+                diaries: newData.diaries.length,
+                voices: (newData.voices || []).length
+            };
+        }
+
+        function showNewBadge(id) {
+            const badge = document.getElementById(id);
+            if (badge) {
+                badge.style.display = 'inline';
+                setTimeout(() => { badge.style.display = 'none'; }, 10000);
+            }
+        }
+
+        // --- 記念日計算 ---
+        function updateCountdowns() {
+            const now = new Date();
+
+            const start = new Date(ANNIVERSARY_DATE);
+            const diffAnniv = Math.floor((now - start) / (1000 * 60 * 60 * 24));
+            document.getElementById('anniversaryDays').innerText = diffAnniv;
+        }
+
+        // --- 愛の送り合い機能 ---
+        function updateLoveDisplay() {
+            document.getElementById('loveCountDisplay').innerText = loveCount;
+        }
+
+        async function sendLove() {
+            loveCount++;
+            updateLoveDisplay();
+
+            // ハートを飛ばす演出
+            const btn = document.querySelector('.love-float-btn');
+            const heart = document.createElement('div');
+            heart.className = 'flying-heart';
+            heart.innerText = '🤍';
+            heart.style.left = (btn.offsetLeft + 20) + 'px';
+            heart.style.top = (btn.offsetTop) + 'px';
+            document.body.appendChild(heart);
+            setTimeout(() => heart.remove(), 1000);
+
+            // 保存（連打してもいいように少し待ってから保存するのが理想ですが、まずはシンプルに）
+            await updateCloudData();
+        }
+        // Service Worker登録 & 通知許可
+        async function initPush() {
+            if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+                console.log('このブラウザはプッシュ通知非対応');
+                return;
+            }
+
+            const reg = await navigator.serviceWorker.register('/loveeeee/sw.js');
+            const permission = await Notification.requestPermission();
+
+            if (permission !== 'granted') {
+                console.log('通知が拒否されました');
+                return;
+            }
+
+            console.log('通知の準備OK！');
+            listenForChanges(reg);
+        }
+
+        async function confirmShopDelete() {
+            if (pendingDeleteIndex === null) return;
+            shops.splice(pendingDeleteIndex, 1);
+            await updateCloudData();
+            closeShopDeleteModal();
+            renderShops();
+        }
+
+        function startRealtime() {
+            db.channel('memories-changes')
+                .on('postgres_changes',
+                    { event: 'UPDATE', schema: 'public', table: 'memories' },
+                    (payload) => {
+                        const newData = payload.new;
+
+                        checkAndShowNew(newData); // ← 追加
+
+                        photos = newData.photos || [];
+                        diaries = newData.diaries || [];
+                        shops = newData.shops || [];
+                        events = newData.events || [];
+                        voices = newData.voices || [];
+                        loveCount = newData.love_count || 0;
+
+                        renderGallery();
+                        renderDiaries();
+                        renderShops();
+                        renderCalendar();
+                        updateLoveDisplay();
+                        renderVoices();
+                    }
+                )
+                .subscribe();
+        }
+
+        // 通知用は別で残す
+        function listenForChanges(reg) {
+            db.channel('memories-notify')
+                .on('postgres_changes',
+                    { event: 'UPDATE', schema: 'public', table: 'memories' },
+                    (payload) => {
+                        const newData = payload.new;
+
+                        if (newData.photos.length > photos.length) {
+                            reg.showNotification('📸 新しい写真！', {
+                                body: '写真が追加されました！',
+                                icon: '/loveeeee/icon.png',
+                            });
+                        }
+
+                        if (newData.diaries.length > diaries.length) {
+                            reg.showNotification('💌 新しいメッセージ！', {
+                                body: `${newData.diaries.at(-1).author}からメッセージが届きました！`,
+                                icon: '/loveeeee/icon.png',
+                            });
+                        }
+                    }
+                )
+                .subscribe();
+        }
+        updateCountdowns();
+    </script>
+    <!-- 桜の花びら -->
+    <canvas id="sakura"
+        style="position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;"></canvas>
+
+    <script>
+        // 🌸 桜の花びらアニメーション
+        const canvas = document.getElementById('sakura');
+        const ctx = canvas.getContext('2d');
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+
+        const petals = Array.from({ length: 30 }, () => ({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height,
+            size: Math.random() * 8 + 4,
+            speedY: Math.random() * 1 + 0.5,
+            speedX: Math.random() * 0.8 - 0.4,
+            rotation: Math.random() * Math.PI * 2,
+            rotationSpeed: Math.random() * 0.02 - 0.01,
+            opacity: Math.random() * 0.5 + 0.3,
+        }));
+
+        function drawPetal(x, y, size, rotation, opacity) {
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.rotate(rotation);
+            ctx.globalAlpha = opacity;
+            ctx.beginPath();
+            ctx.fillStyle = '#ffb7c5';
+            ctx.ellipse(0, 0, size, size * 0.6, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            petals.forEach(p => {
+                drawPetal(p.x, p.y, p.size, p.rotation, p.opacity);
+                p.y += p.speedY;
+                p.x += p.speedX;
+                p.rotation += p.rotationSpeed;
+                if (p.y > canvas.height) {
+                    p.y = -10;
+                    p.x = Math.random() * canvas.width;
+                }
+            });
+            requestAnimationFrame(animate);
+        }
+        animate();
+    </script>
+    <div id="eventModal" class="modal-overlay">
+        <div class="modal-content">
+            <h3>予定を追加 📅</h3>
+            <div class="input-group">
+                <label>日付</label>
+                <input type="date" id="eventDateInput">
+            </div>
+            <div class="input-group">
+                <label>タイトル</label>
+                <input type="text" id="eventTitleInput" placeholder="例：ディナー🍽">
+            </div>
+            <div class="input-group">
+                <label>メモ</label>
+                <textarea id="eventNoteInput" rows="3" placeholder="詳細を書いてね！"></textarea>
+            </div>
+            <div class="modal-actions">
+                <button class="btn" onclick="closeEventModal()">キャンセル</button>
+                <button class="btn btn-save" onclick="saveEvent()">保存</button>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
