@@ -1996,7 +1996,14 @@
         async function startRecording() {
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                mediaRecorder = new MediaRecorder(stream);
+
+                const mimeType = MediaRecorder.isTypeSupported('audio/mp4')
+                    ? 'audio/mp4'
+                    : MediaRecorder.isTypeSupported('audio/webm')
+                        ? 'audio/webm'
+                        : '';
+
+                mediaRecorder = new MediaRecorder(stream, mimeType ? { mimeType } : {});
                 audioChunks = [];
 
                 mediaRecorder.ondataavailable = (e) => {
@@ -2004,7 +2011,7 @@
                 };
 
                 mediaRecorder.onstop = async () => {
-                    const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                    const audioBlob = new Blob(audioChunks, { type: mediaRecorder.mimeType });
                     await saveVoice(audioBlob);
                     stream.getTracks().forEach(t => t.stop());
                 };
@@ -2048,7 +2055,8 @@
                 return;
             }
 
-            const fileName = `${Date.now()}_voice.webm`;
+            const ext = audioBlob.type.includes('mp4') ? 'mp4' : 'webm';
+            const fileName = `${Date.now()}_voice.${ext}`;
 
             try {
                 const { error } = await db.storage
