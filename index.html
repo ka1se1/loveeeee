@@ -99,14 +99,12 @@
 
         .card {
             background: rgba(255, 255, 255, 0.85);
-            /* ちょい透け */
             backdrop-filter: blur(10px);
-            /* ガラス感 */
             border-radius: 24px;
             padding: 20px;
             margin-bottom: 20px;
-
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(255, 154, 158, 0.15);
+            /* ← ここだけ変更 */
             border: 1px solid rgba(255, 255, 255, 0.4);
         }
 
@@ -148,7 +146,7 @@
         }
 
         .slider {
-            overflow: hidden;
+            overflow: auto;
             border-radius: 16px;
             height: 220px;
             position: relative;
@@ -163,8 +161,10 @@
             gap: 12px;
             width: 100%;
             align-items: center;
-            justify-content: center;
+            justify-content: flex-start;
             transition: transform 0.3s ease;
+            padding: 0 20px;
+            box-sizing: border-box;
         }
 
         .slides img {
@@ -311,12 +311,12 @@
             text-align: center;
         }
 
-        /* 【新規】写真一覧（グリッド） */
         .gallery-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 10px;
             margin-top: 15px;
+            align-items: start;
         }
 
         .gallery-grid img {
@@ -945,6 +945,40 @@
             </div>
         </div>
 
+        <div class="card">
+            <div class="card-header-actions">
+                <h2>🎤 ボイスメッセージ</h2>
+            </div>
+            <div id="voiceListContainer" class="diary-container">
+                <div class="loading-pulse">読み込み中... 🎤</div>
+            </div>
+            <div style="margin-top:12px;text-align:center;">
+                <button id="recordBtn" onclick="toggleRecording()" style="
+            background: linear-gradient(135deg, #ff9a9e, #fecfef);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 64px;
+            height: 64px;
+            font-size: 28px;
+            cursor: pointer;
+            box-shadow: 0 6px 16px rgba(255,154,158,0.4);
+            transition: all 0.2s ease;
+        ">🎤</button>
+                <div id="recordStatus" style="font-size:12px;color:#999;margin-top:8px;">タップして録音</div>
+                <div style="margin-top:12px;">
+                    <input type="text" id="voiceAuthorInput" placeholder="名前を入れてね" style="
+                padding: 8px 12px;
+                border: 1px solid #ddd;
+                border-radius: 10px;
+                font-size: 16px;
+                width: 60%;
+                box-sizing: border-box;
+            ">
+                </div>
+            </div>
+        </div>
+
         <div class="card" style="text-align: center;">
             <h2 style="margin-bottom: 15px;">MAP</h2>
             <iframe id="map" src="https://maps.google.co.jp/maps?q=東京&output=embed"
@@ -1011,40 +1045,70 @@
         </div>
     </div>
 
-    <!-- 📸 フルスクリーンビュー -->
-    <div id="photoViewer" class="photo-viewer" onclick="closeViewer()">
-        <img id="viewerImg" src="">
+    <div id="photoViewer" class="photo-viewer">
+        <img id="viewerImg" src="" onclick="event.stopPropagation()">
         <div style="
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            display: flex;
-            gap: 10px;
-            z-index: 10000;
-        ">
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        display: flex;
+        gap: 10px;
+        z-index: 10000;
+    ">
             <button onclick="deleteFromViewer()" style="
-                background: rgba(255,255,255,0.95);
-                border: none;
-                padding: 10px 12px;
-                border-radius: 12px;
-                font-size: 14px;
-                font-weight: bold;
-                color: #ff4d6d;
-                box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-            ">
-                🗑 削除
-            </button>
-
+            background: rgba(255,255,255,0.95);
+            border: none;
+            padding: 10px 12px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: bold;
+            color: #ff4d6d;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        ">🗑 削除</button>
             <button onclick="closeViewer()" style="
-                background: rgba(255,255,255,0.95);
-                border: none;
-                padding: 10px 12px;
-                border-radius: 12px;
-                font-size: 14px;
-            ">
-                ✕
-            </button>
+            background: rgba(255,255,255,0.95);
+            border: none;
+            padding: 10px 12px;
+            border-radius: 12px;
+            font-size: 14px;
+        ">✕</button>
         </div>
+        <!-- 左右ボタン -->
+        <button onclick="viewerPrev()" style="
+        position: absolute;
+        left: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: rgba(255,255,255,0.9);
+        border: none;
+        border-radius: 50%;
+        width: 44px;
+        height: 44px;
+        font-size: 20px;
+        cursor: pointer;
+        z-index: 10000;
+    ">‹</button>
+        <button onclick="viewerNext()" style="
+        position: absolute;
+        right: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: rgba(255,255,255,0.9);
+        border: none;
+        border-radius: 50%;
+        width: 44px;
+        height: 44px;
+        font-size: 20px;
+        cursor: pointer;
+        z-index: 10000;
+    ">›</button>
+        <!-- 背景タップで閉じる -->
+        <div onclick="closeViewer()" style="
+        position: absolute;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        z-index: 9998;
+    "></div>
     </div>
 
     <div id="shopDeleteModal" class="delete-modal">
@@ -1120,6 +1184,8 @@
                 renderCalendar();  // ← 追加
                 updateLoveDisplay();
                 updateCountdowns();
+                voices = data.voices || [];
+                renderVoices();
             }
         }
 
@@ -1132,6 +1198,7 @@
                     photos,
                     diaries,
                     events,  // ← 追加
+                    voices,
                     love_count: loveCount,
                     updated_at: new Date().toISOString()
                 });
@@ -1219,27 +1286,76 @@
 
             slides.innerHTML = '';
             grid.innerHTML = '';
-            slides.classList.remove('active'); // ← 一旦外す
 
-            const displayPhotos = [...photos].reverse();
+            // 既存のボタンラッパーを削除
+            const oldWrapper = document.getElementById('galleryBtnWrapper');
+            if (oldWrapper) oldWrapper.remove();
 
-            // 👇 写真ない時（ここ重要）
-            if (displayPhotos.length === 0) {
-                slides.innerHTML = '<div class="loading-pulse">写真を読み込み中... 📸🔄</div>';
+            if (photos.length === 0) {
+                slides.innerHTML = '<div class="loading-pulse">写真を追加してね！📸</div>';
                 return;
             }
 
-            const loopPhotos = [...photos, ...photos];
-
-            loopPhotos.forEach((url, index) => {
+            // スライダーは最新6枚
+            const displayPhotos = [...photos].reverse();
+            const sliderPhotos = displayPhotos.slice(0, 6);
+            sliderPhotos.forEach((url, index) => {
+                const actualIndex = photos.length - 1 - index;
                 const img = document.createElement('img');
                 img.src = url;
-
-                const actualIndex = index % photos.length;
                 img.onclick = () => openViewer(url, actualIndex);
-
                 slides.appendChild(img);
             });
+
+            // 全部見るボタンをグリッドの外に配置
+            const btnWrapper = document.createElement('div');
+            btnWrapper.id = 'galleryBtnWrapper';
+            btnWrapper.style.cssText = `text-align: center; margin-top: 12px;`;
+
+            const btn = document.createElement('button');
+            btn.innerText = `📂 全部見る（${photos.length}枚）`;
+            btn.style.cssText = `
+                padding: 10px 24px;
+                background: linear-gradient(135deg, #ff9a9e, #fecfef);
+                color: white;
+                border: none;
+                border-radius: 12px;
+                font-size: 13px;
+                font-weight: bold;
+                cursor: pointer;
+            `;
+            btn.onclick = () => {
+                grid.innerHTML = '';
+                [...photos].reverse().forEach((url) => {
+                    const actualIndex = photos.indexOf(url);
+                    const img = document.createElement('img');
+                    img.src = url;
+                    img.onclick = () => openViewer(url, actualIndex);
+                    grid.appendChild(img);
+                });
+
+                const closeBtn = document.createElement('button');
+                closeBtn.innerText = '閉じる ▲';
+                closeBtn.style.cssText = `
+                    width: 100%;
+                    padding: 10px;
+                    margin-top: 8px;
+                    background: #eee;
+                    color: #666;
+                    border: none;
+                    border-radius: 12px;
+                    font-size: 13px;
+                    font-weight: bold;
+                    cursor: pointer;
+                    grid-column: 1 / -1;
+                `;
+                closeBtn.onclick = () => renderGallery();
+                grid.appendChild(closeBtn);
+                btnWrapper.style.display = 'none';
+            };
+
+            btnWrapper.appendChild(btn);
+            grid.after(btnWrapper);
         }
 
         function renderShops() {
@@ -1407,13 +1523,24 @@
             const img = document.getElementById('viewerImg');
 
             currentViewerIndex = index;
-
             img.src = url;
             viewer.style.display = 'flex';
         }
 
         function closeViewer() {
             document.getElementById('photoViewer').style.display = 'none';
+        }
+
+        function viewerPrev() {
+            if (currentViewerIndex === null) return;
+            currentViewerIndex = (currentViewerIndex - 1 + photos.length) % photos.length;
+            document.getElementById('viewerImg').src = photos[currentViewerIndex];
+        }
+
+        function viewerNext() {
+            if (currentViewerIndex === null) return;
+            currentViewerIndex = (currentViewerIndex + 1) % photos.length;
+            document.getElementById('viewerImg').src = photos[currentViewerIndex];
         }
 
         function showToast(msg) {
@@ -1656,7 +1783,7 @@
                 position:relative;
             ">
                 ${d}
-                ${hasEvent ? `<div style="width:5px;height:5px;background:#ff9a9e;border-radius:50%;position:absolute;bottom:2px;"></div>` : ''}
+                ${hasEvent ? `<div style="width:8px;height:8px;background:#ff9a9e;border-radius:50%;position:absolute;bottom:2px;"></div>` : ''}
             </div>
         `;
             }
@@ -1851,6 +1978,153 @@
             if (temp >= 5) return isRain ? '寒いし雨だからしっかり防寒して☂️' : '寒いからコート必須！温かくしてね🧣';
             return isRain ? '極寒＆雨！完全防備で行ってね🧥☂️' : 'めちゃ寒い！しっかり着込んでね🧤';
         }
+
+        // --- ボイスメッセージ ---
+        let voices = [];
+        let mediaRecorder = null;
+        let audioChunks = [];
+        let isRecording = false;
+
+        function toggleRecording() {
+            if (isRecording) {
+                stopRecording();
+            } else {
+                startRecording();
+            }
+        }
+
+        async function startRecording() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream);
+                audioChunks = [];
+
+                mediaRecorder.ondataavailable = (e) => {
+                    audioChunks.push(e.data);
+                };
+
+                mediaRecorder.onstop = async () => {
+                    const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                    await saveVoice(audioBlob);
+                    stream.getTracks().forEach(t => t.stop());
+                };
+
+                mediaRecorder.start();
+                isRecording = true;
+
+                const btn = document.getElementById('recordBtn');
+                const status = document.getElementById('recordStatus');
+                btn.innerText = '⏹';
+                btn.style.background = 'linear-gradient(135deg, #ff4d6d, #ff9a9e)';
+                btn.style.animation = 'pulse 1s infinite';
+                status.innerText = '録音中... タップで停止';
+                status.style.color = '#ff4d6d';
+
+            } catch (e) {
+                alert('マイクへのアクセスを許可してね！🎤');
+            }
+        }
+
+        function stopRecording() {
+            if (mediaRecorder) {
+                mediaRecorder.stop();
+                isRecording = false;
+
+                const btn = document.getElementById('recordBtn');
+                const status = document.getElementById('recordStatus');
+                btn.innerText = '🎤';
+                btn.style.background = 'linear-gradient(135deg, #ff9a9e, #fecfef)';
+                btn.style.animation = '';
+                status.innerText = '保存中... ⏳';
+                status.style.color = '#999';
+            }
+        }
+
+        async function saveVoice(audioBlob) {
+            const author = document.getElementById('voiceAuthorInput').value;
+            if (!author) {
+                alert('名前を入れてね！');
+                document.getElementById('recordStatus').innerText = 'タップして録音';
+                return;
+            }
+
+            const fileName = `${Date.now()}_voice.webm`;
+
+            try {
+                const { error } = await db.storage
+                    .from('voices')
+                    .upload(fileName, audioBlob, {
+                        cacheControl: '3600',
+                        upsert: false
+                    });
+
+                if (error) throw error;
+
+                const { data: urlData } = db.storage
+                    .from('voices')
+                    .getPublicUrl(fileName);
+
+                const now = new Date();
+                const dateStr = `${now.getFullYear()}/${now.getMonth() + 1}/${now.getDate()} ${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')}`;
+
+                voices.push({ author, url: urlData.publicUrl, date: dateStr, fileName });
+                await updateCloudData();
+                renderVoices();
+
+                document.getElementById('recordStatus').innerText = 'タップして録音';
+                showToast('ボイスメッセージを送信しました！🎤');
+
+            } catch (e) {
+                console.error(e);
+                alert('保存に失敗しました🥲');
+                document.getElementById('recordStatus').innerText = 'タップして録音';
+            }
+        }
+
+        function renderVoices() {
+            const container = document.getElementById('voiceListContainer');
+            if (!voices.length) {
+                container.innerHTML = '<div style="text-align:center;font-size:12px;color:#999;padding:20px;">ボイスメッセージはまだありません🎤</div>';
+                return;
+            }
+
+            container.innerHTML = '';
+            [...voices].reverse().forEach((voice, i) => {
+                const actualIdx = (voices.length - 1) - i;
+                const div = document.createElement('div');
+                div.style.cssText = `
+            background: #fff;
+            border: 1px solid #ffe3e6;
+            border-radius: 16px;
+            padding: 12px;
+            margin-bottom: 10px;
+            position: relative;
+        `;
+                div.innerHTML = `
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                <span style="font-weight:bold;font-size:13px;color:#d81b60;">🎤 ${voice.author}</span>
+                <span style="font-size:10px;color:#999;">${voice.date}</span>
+            </div>
+            <audio controls src="${voice.url}" style="width:100%;border-radius:8px;"></audio>
+            <button onclick="deleteVoice(${actualIdx})" style="
+                position:absolute;top:10px;right:10px;
+                background:none;border:none;color:#ccc;
+                font-size:12px;cursor:pointer;
+            ">🗑️</button>
+        `;
+                container.appendChild(div);
+            });
+        }
+
+        async function deleteVoice(idx) {
+            if (!confirm('このボイスメッセージを削除する？')) return;
+            const fileName = voices[idx].fileName;
+            await db.storage.from('voices').remove([fileName]);
+            voices.splice(idx, 1);
+            await updateCloudData();
+            renderVoices();
+        }
+
         // --- 記念日計算 ---
         function updateCountdowns() {
             const now = new Date();
@@ -1929,6 +2203,8 @@
                         renderShops();
                         renderCalendar();
                         updateLoveDisplay();
+                        voices = newData.voices || [];
+                        renderVoices();
                     }
                 )
                 .subscribe();
