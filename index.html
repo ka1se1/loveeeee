@@ -1610,26 +1610,15 @@
                 let textColor = isToday ? 'white' : color;
 
                 html += `
-            <div onclick="onDateClick('${dateStr}')" style="
-                cursor:pointer;
-                border-radius:50%;
-                width:32px;
-                height:32px;
-                display:flex;
-                flex-direction:column;
-                align-items:center;
-                justify-content:center;
-                margin:auto;
-                background:${bg};
-                color:${textColor};
-                font-size:13px;
-                font-weight:${isToday ? 'bold' : 'normal'};
-                position:relative;
-            ">
-                ${d}
-                ${hasEvent ? `<div style="width:5px;height:5px;background:#ff9a9e;border-radius:50%;position:absolute;bottom:2px;"></div>` : ''}
-            </div>
-        `;
+                    <div style="background:#fff5f7;border-radius:10px;padding:10px;margin-bottom:8px;border-left:3px solid #ff9a9e;position:relative;">
+                        <div style="font-weight:bold;font-size:13px;">${ev.title}</div>
+                        ${ev.note ? `<div style="font-size:11px;color:#888;margin-top:4px;">${ev.note}</div>` : ''}
+                        <div style="position:absolute;top:8px;right:8px;display:flex;gap:6px;">
+                            <button onclick="editEvent(${actualIdx})" style="background:none;border:none;color:#ccc;font-size:12px;cursor:pointer;">✏️</button>
+                            <button onclick="deleteEvent(${actualIdx})" style="background:none;border:none;color:#ccc;font-size:12px;cursor:pointer;">🗑️</button>
+                        </div>
+                    </div>
+                `;
             }
 
             html += `</div>`;
@@ -1685,7 +1674,13 @@
 
         function closeEventModal() {
             document.getElementById('eventModal').classList.remove('active');
+            editingEventIndex = null;
+            document.getElementById('eventTitleInput').value = '';
+            document.getElementById('eventNoteInput').value = '';
+            document.getElementById('eventDateInput').value = '';
         }
+
+        let editingEventIndex = null;
 
         async function saveEvent() {
             const date = document.getElementById('eventDateInput').value;
@@ -1699,7 +1694,12 @@
             saveBtn.disabled = true;
 
             try {
-                events.push({ date, title, note });
+                if (editingEventIndex !== null) {
+                    events[editingEventIndex] = { date, title, note };
+                    editingEventIndex = null;
+                } else {
+                    events.push({ date, title, note });
+                }
                 await updateCloudData();
                 closeEventModal();
                 renderCalendar();
@@ -1716,6 +1716,15 @@
             events.splice(idx, 1);
             await updateCloudData();
             renderCalendar();
+        }
+
+        function editEvent(idx) {
+            const ev = events[idx];
+            document.getElementById('eventDateInput').value = ev.date;
+            document.getElementById('eventTitleInput').value = ev.title;
+            document.getElementById('eventNoteInput').value = ev.note || '';
+            editingEventIndex = idx;
+            document.getElementById('eventModal').classList.add('active');
         }
 
         // --- 記念日計算 ---
