@@ -8,9 +8,6 @@
     <!-- ホーム画面アイコン -->
     <link rel="apple-touch-icon" href="/loveeeee/icon.png">
 
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
     <!-- PWA設定 -->
     <link rel="manifest" href="/loveeeee/manifest.json">
     <style>
@@ -950,9 +947,8 @@
 
         <div class="card" style="text-align: center;">
             <h2 style="margin-bottom: 15px;">MAP</h2>
-            <div id="map"
-                style="width:100%;height:300px;border-radius:16px;overflow:hidden;box-shadow:0 4px 10px rgba(0,0,0,0.05);">
-            </div>
+            <iframe id="map" src="https://maps.google.co.jp/maps?q=東京&output=embed"
+                style="width: 100%; max-width: 500px; height: 250px; border: none; border-radius: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); display: block; margin: 0 auto;"></iframe>
         </div>
 
         <div class="card">
@@ -1272,16 +1268,8 @@
                     const div = document.createElement('div');
                     div.className = 'shop-card';
                     div.onclick = () => {
-                        if (mapInstance) {
-                            fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(shop.name)}&format=json&limit=1`)
-                                .then(res => res.json())
-                                .then(data => {
-                                    if (data.length === 0) return;
-                                    const lat = parseFloat(data[0].lat);
-                                    const lon = parseFloat(data[0].lon);
-                                    mapInstance.setView([lat, lon], 16);
-                                });
-                        }
+                        document.getElementById('map').src =
+                            `https://maps.google.co.jp/maps?q=${encodeURIComponent(shop.name)}&output=embed`;
                     };
 
                     div.innerHTML = `
