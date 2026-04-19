@@ -879,15 +879,22 @@
     </div>
 
     <header>Our Memories
-        <div onclick="location.reload()" style="
+        <button onclick="location.reload()" style="
         position: absolute;
-        right: 20px;
+        right: 16px;
         top: 50%;
         transform: translateY(-50%);
-        font-size: 18px;
+        background: rgba(255,255,255,0.25);
+        border: 1px solid rgba(255,255,255,0.4);
+        border-radius: 20px;
+        padding: 5px 12px;
+        color: white;
+        font-size: 11px;
+        font-weight: bold;
         cursor: pointer;
-        opacity: 0.8;
-    ">🔄</div>
+        backdrop-filter: blur(4px);
+        letter-spacing: 1px;
+    ">更新</button>
     </header>
     <div class="container">
         <div class="card">
