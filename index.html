@@ -1115,7 +1115,6 @@
         function triggerPhotoUpload() { document.getElementById('photoUpload').click(); }
 
         async function handlePhotoUpload(input) {
-            // ★複数ファイルに対応★
             if (!input.files || input.files.length === 0) return;
 
             const totalFiles = input.files.length;
@@ -1125,57 +1124,49 @@
 
             uploadBtn.disabled = true;
             uploadLoading.style.display = 'flex';
-            uploadLoading.innerHTML = `アップロード中... 🚀 (1/${totalFiles}枚目)`; // 初期メッセージ
 
             let successCount = 0;
 
-            // ファイルリストをループ処理
             for (let i = 0; i < totalFiles; i++) {
-                // ローディングメッセージを更新
                 uploadLoading.innerHTML = `アップロード中... 🚀 (${i + 1}/${totalFiles}枚目)`;
 
                 const file = input.files[i];
-                const formData = new FormData();
-                formData.append('image', file);
+                const fileName = `${Date.now()}_${file.name}`;
 
                 try {
-                    const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
-                        method: 'POST',
-                        body: formData
-                    });
-                    const resData = await res.json();
+                    // Supabase Storageにアップロード
+                    const { data, error } = await db.storage
+                        .from('photos')
+                        .upload(fileName, file, {
+                            cacheControl: '3600',
+                            upsert: false
+                        });
 
-                    if (resData.status === 200) {
-                        newPhotoUrls.push(resData.data.url);
-                        successCount++;
-                    } else {
-                        throw new Error("アップロード失敗");
-                    }
+                    if (error) throw error;
+
+                    // 公開URLを取得
+                    const { data: urlData } = db.storage
+                        .from('photos')
+                        .getPublicUrl(fileName);
+
+                    newPhotoUrls.push(urlData.publicUrl);
+                    successCount++;
+
                 } catch (e) {
                     console.error(`${i + 1}枚目のアップロードに失敗しました🥲`, e);
                 }
             }
 
-            // すべて完了後、成功した写真をデータに追加
             if (newPhotoUrls.length > 0) {
-                photos.push(...newPhotoUrls); // 配列を展開して追加
+                photos.push(...newPhotoUrls);
                 await updateCloudData();
                 renderGallery();
             }
 
-            // メッセージを表示
-            if (successCount === totalFiles) {
-                alert(`${successCount}枚の写真をアップロードしました！✨`);
-            } else if (successCount > 0) {
-                alert(`${successCount}枚の写真をアップロードしました！(${totalFiles}枚中)\nいくつかの失敗がありました。🥲`);
-            } else {
-                alert("写真のアップロードに失敗しました。🥲\nIDやキーが合っているか確認してね！");
-            }
-
-            // ローディング解除
             uploadLoading.style.display = 'none';
             uploadBtn.disabled = false;
-            input.value = ""; // リセット
+            input.value = "";
+            alert(`${successCount}/${totalFiles}枚アップロードしました！✨`);
         }
         const slides = document.getElementById('slides');
         let startX = 0;
@@ -1349,20 +1340,20 @@
 
         async function deleteFromViewer() {
             if (currentViewerIndex === null) return;
-
-            // 確認
             if (!confirm("この写真を削除する？")) return;
 
-            // 削除
+            const url = photos[currentViewerIndex];
+
+            // SupabaseStorageからも削除
+            const fileName = url.split('/').pop();
+            await db.storage.from('photos').remove([fileName]);
+
             photos.splice(currentViewerIndex, 1);
             await updateCloudData();
 
-            // UI更新
             closeViewer();
             renderGallery();
-
             currentViewerIndex = null;
-
             showToast("写真を削除しました🗑️");
         }
 
@@ -1544,7 +1535,8 @@
         window.addEventListener('load', async () => {
             try {
                 await loadData();
-                await initPush(); // ← これを追加
+                startRealtime();  // ← 常にリアルタイム同期を開始
+                await initPush(); // ← 通知は別で
             } catch (e) {
                 console.error(e);
             } finally {
@@ -1785,44 +1777,52 @@
             renderShops();
         }
 
-        // Supabaseの変更をリアルタイムで監視
-        function listenForChanges(reg) {
-            let prevPhotosLength = photos.length;
-            let prevDiariesLength = diaries.length;
-
+        function startRealtime() {
             db.channel('memories-changes')
                 .on('postgres_changes',
                     { event: 'UPDATE', schema: 'public', table: 'memories' },
                     (payload) => {
                         const newData = payload.new;
 
-                        // 写真が増えた時
-                        if (newData.photos.length > prevPhotosLength) {
-                            reg.showNotification('📸 新しい写真！', {
-                                body: '写真が追加されました！',
-                                icon: '/icon.png',
-                            });
-                            prevPhotosLength = newData.photos.length;
-                        }
+                        // データを更新
+                        photos = newData.photos || [];
+                        diaries = newData.diaries || [];
+                        shops = newData.shops || [];
+                        events = newData.events || [];
+                        loveCount = newData.love_count || 0;
 
-                        // メッセージが増えた時
-                        if (newData.diaries.length > prevDiariesLength) {
-                            reg.showNotification('💌 新しいメッセージ！', {
-                                body: `${newData.diaries.at(-1).author}からメッセージが届きました！`,
-                                icon: '/icon.png',
-                            });
-                            prevDiariesLength = newData.diaries.length;
-                        }
-
-                        // データも更新
-                        photos = newData.photos;
-                        diaries = newData.diaries;
-                        shops = newData.shops;
-                        loveCount = newData.love_count;
+                        // 画面を更新
                         renderGallery();
                         renderDiaries();
                         renderShops();
+                        renderCalendar();
                         updateLoveDisplay();
+                    }
+                )
+                .subscribe();
+        }
+
+        // 通知用は別で残す
+        function listenForChanges(reg) {
+            db.channel('memories-notify')
+                .on('postgres_changes',
+                    { event: 'UPDATE', schema: 'public', table: 'memories' },
+                    (payload) => {
+                        const newData = payload.new;
+
+                        if (newData.photos.length > photos.length) {
+                            reg.showNotification('📸 新しい写真！', {
+                                body: '写真が追加されました！',
+                                icon: '/loveeeee/icon.png',
+                            });
+                        }
+
+                        if (newData.diaries.length > diaries.length) {
+                            reg.showNotification('💌 新しいメッセージ！', {
+                                body: `${newData.diaries.at(-1).author}からメッセージが届きました！`,
+                                icon: '/loveeeee/icon.png',
+                            });
+                        }
                     }
                 )
                 .subscribe();
