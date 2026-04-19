@@ -898,6 +898,15 @@
     </header>
     <div class="container">
         <div class="card">
+            <div class="card" id="weatherCard">
+                <div class="card-header-actions">
+                    <h2>🌤️ 今日の天気</h2>
+                    <button class="btn-round" onclick="fetchWeather()">🔄</button>
+                </div>
+                <div id="weatherContainer" style="text-align:center;padding:10px;">
+                    <div class="loading-pulse">天気を読み込み中... 🌤️</div>
+                </div>
+            </div>
             <div class="card-header-actions">
                 <h2>📸 共有ギャラリー</h2>
                 <div style="display: flex; gap: 8px;">
@@ -1562,6 +1571,7 @@
         window.addEventListener('load', async () => {
             try {
                 await loadData();
+                fetchWeather();
                 startRealtime();  // ← 常にリアルタイム同期を開始
                 await initPush(); // ← 通知は別で
             } catch (e) {
@@ -1757,7 +1767,80 @@
             editingEventIndex = idx;
             document.getElementById('eventModal').classList.add('active');
         }
+        // --- 天気 ---
+        async function fetchWeather() {
+            const container = document.getElementById('weatherContainer');
+            container.innerHTML = '<div class="loading-pulse">取得中... 🌤️</div>';
 
+            try {
+                // 現在地を取得
+                const pos = await new Promise((resolve, reject) => {
+                    navigator.geolocation.getCurrentPosition(resolve, reject);
+                });
+
+                const lat = pos.coords.latitude;
+                const lon = pos.coords.longitude;
+
+                // Open-Meteo APIで天気取得
+                const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weathercode,windspeed_10m,relativehumidity_2m&timezone=Asia%2FTokyo`);
+                const data = await res.json();
+
+                const temp = data.current.temperature_2m;
+                const code = data.current.weathercode;
+                const humidity = data.current.relativehumidity_2m;
+                const wind = data.current.windspeed_10m;
+
+                const weatherInfo = getWeatherInfo(code);
+
+                // 服装アドバイス
+                const advice = getAdvice(temp, code);
+
+                container.innerHTML = `
+            <div style="font-size:60px;margin-bottom:8px;">${weatherInfo.icon}</div>
+            <div style="font-size:16px;font-weight:bold;color:#d81b60;margin-bottom:4px;">${weatherInfo.label}</div>
+            <div style="font-size:28px;font-weight:bold;margin-bottom:12px;">${temp}°C</div>
+            <div style="display:flex;justify-content:center;gap:20px;font-size:12px;color:#888;margin-bottom:15px;">
+                <div>💧 湿度 ${humidity}%</div>
+                <div>💨 風速 ${wind}m/s</div>
+            </div>
+            <div style="
+                background: linear-gradient(135deg,#fff5f7,#ffe3e6);
+                border-radius:14px;
+                padding:12px;
+                font-size:13px;
+                color:#d81b60;
+                font-weight:bold;
+            ">
+                👗 ${advice}
+            </div>
+        `;
+            } catch (e) {
+                container.innerHTML = `<div style="font-size:12px;color:#999;text-align:center;padding:20px;">位置情報を許可してね！📍</div>`;
+            }
+        }
+
+        function getWeatherInfo(code) {
+            if (code === 0) return { icon: '☀️', label: '快晴' };
+            if (code <= 2) return { icon: '🌤️', label: '晴れ時々曇り' };
+            if (code <= 3) return { icon: '☁️', label: '曇り' };
+            if (code <= 48) return { icon: '🌫️', label: '霧' };
+            if (code <= 57) return { icon: '🌦️', label: '霧雨' };
+            if (code <= 67) return { icon: '🌧️', label: '雨' };
+            if (code <= 77) return { icon: '❄️', label: '雪' };
+            if (code <= 82) return { icon: '🌧️', label: 'にわか雨' };
+            if (code <= 86) return { icon: '🌨️', label: 'にわか雪' };
+            if (code <= 99) return { icon: '⛈️', label: '雷雨' };
+            return { icon: '🌈', label: '不明' };
+        }
+
+        function getAdvice(temp, code) {
+            const isRain = code >= 51;
+            if (temp >= 28) return isRain ? '暑いけど雨だから折りたたみ傘持ってね☂️' : '暑いから薄着で！日焼け止めも忘れずに🌞';
+            if (temp >= 20) return isRain ? '過ごしやすいけど雨☂️ 上着あると安心！' : '過ごしやすい気温だね！デートにぴったり💕';
+            if (temp >= 12) return isRain ? '肌寒いし雨☂️ 上着と傘必須！' : '少し肌寒いから羽織りもの持ってね🧥';
+            if (temp >= 5) return isRain ? '寒いし雨だからしっかり防寒して☂️' : '寒いからコート必須！温かくしてね🧣';
+            return isRain ? '極寒＆雨！完全防備で行ってね🧥☂️' : 'めちゃ寒い！しっかり着込んでね🧤';
+        }
         // --- 記念日計算 ---
         function updateCountdowns() {
             const now = new Date();
