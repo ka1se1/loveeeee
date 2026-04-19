@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
     <title>Memories Shared</title>
     <style>
         body {
@@ -50,7 +50,7 @@
             width: 100%;
             height: 100%;
 
-            background: rgba(0,0,0,0.9);
+            background: rgba(0, 0, 0, 0.9);
             display: none;
 
             align-items: center;
@@ -64,7 +64,7 @@
             max-height: 90%;
             border-radius: 16px;
 
-            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
             animation: zoomIn 0.3s ease;
         }
 
@@ -73,6 +73,7 @@
                 transform: scale(0.8);
                 opacity: 0;
             }
+
             to {
                 transform: scale(1);
                 opacity: 1;
@@ -86,14 +87,16 @@
         }
 
         .card {
-            background: rgba(255, 255, 255, 0.85); /* ちょい透け */
-            backdrop-filter: blur(10px); /* ガラス感 */
+            background: rgba(255, 255, 255, 0.85);
+            /* ちょい透け */
+            backdrop-filter: blur(10px);
+            /* ガラス感 */
             border-radius: 24px;
             padding: 20px;
             margin-bottom: 20px;
 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-            border: 1px solid rgba(255,255,255,0.4);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.4);
         }
 
         .card-header-actions {
@@ -112,8 +115,10 @@
             background: linear-gradient(135deg, #ff9a9e, #fecfef);
             color: white;
 
-            border: none;              /* ← これで縁消える */
-            outline: none;             /* ← 念のため */
+            border: none;
+            /* ← これで縁消える */
+            outline: none;
+            /* ← 念のため */
 
             border-radius: 50%;
             width: 36px;
@@ -158,15 +163,19 @@
             object-fit: cover;
             flex-shrink: 0;
             scroll-snap-align: center;
-            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
 
-            transition: all 0.25s ease; /* ← 追加 */
-            cursor: pointer;            /* ← 追加 */
+            transition: all 0.25s ease;
+            /* ← 追加 */
+            cursor: pointer;
+            /* ← 追加 */
         }
 
         .slides img:hover {
-            transform: translateY(-8px) scale(1.05); /* ← 浮いて拡大 */
-            box-shadow: 0 12px 28px rgba(0,0,0,0.25); /* ← 影強く */
+            transform: translateY(-8px) scale(1.05);
+            /* ← 浮いて拡大 */
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.25);
+            /* ← 影強く */
             z-index: 5;
         }
 
@@ -174,6 +183,7 @@
             0% {
                 transform: translateX(0);
             }
+
             100% {
                 transform: translateX(-50%);
             }
@@ -184,8 +194,8 @@
             bottom: 0;
             left: 0;
             width: 100%;
-            
-            background: rgba(0,0,0,0.3);
+
+            background: rgba(0, 0, 0, 0.3);
             display: none;
             justify-content: center;
             align-items: flex-end;
@@ -215,7 +225,7 @@
             width: 100%;
             height: 100%;
 
-            background: rgba(0,0,0,0.3);
+            background: rgba(0, 0, 0, 0.3);
             backdrop-filter: blur(4px);
 
             display: none;
@@ -245,6 +255,7 @@
                 transform: scale(0.8);
                 opacity: 0;
             }
+
             to {
                 transform: scale(1);
                 opacity: 1;
@@ -344,7 +355,8 @@
         .shop-page {
             flex: 0 0 100%;
             width: 100%;
-            max-width: 100%; /* ← これ追加 */
+            max-width: 100%;
+            /* ← これ追加 */
             box-sizing: border-box;
             scroll-snap-align: start;
 
@@ -352,7 +364,8 @@
             flex-direction: column;
             gap: 10px;
 
-            padding: 0 5px; /* ← 左右に少し余白つける */
+            padding: 0 5px;
+            /* ← 左右に少し余白つける */
         }
 
         .shop-card {
@@ -362,7 +375,7 @@
             background: #ffffff;
             box-sizing: border-box;
 
-            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
 
             transition: all 0.25s ease;
             cursor: pointer;
@@ -370,7 +383,7 @@
 
         .shop-card:hover {
             transform: translateY(-6px) scale(1.02);
-            box-shadow: 0 10px 24px rgba(0,0,0,0.12);
+            box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12);
         }
 
         .shop-card:active {
@@ -382,12 +395,52 @@
             opacity: 0;
             transition: transform 0.25s ease, opacity 0.25s ease;
         }
-        
-        .shop-title { font-weight: bold; font-size: 12px; margin-bottom: 4px; word-break: break-word; line-height: 1.2; }
-        .shop-note { font-size: 10px; color: #666; flex-grow: 1; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; margin-bottom: 6px; }
-        .shop-actions { display: flex; flex-direction: column; gap: 4px; margin-top: auto; }
-        .insta-link { font-size: 9px; color: #fff; text-decoration: none; background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); padding: 4px; border-radius: 8px; font-weight: bold; text-align: center; }
-        .btn-delete-small { background: #ffe3e6; color: #d81b60; border: none; border-radius: 8px; padding: 4px; font-size: 9px; }
+
+        .shop-title {
+            font-weight: bold;
+            font-size: 12px;
+            margin-bottom: 4px;
+            word-break: break-word;
+            line-height: 1.2;
+        }
+
+        .shop-note {
+            font-size: 10px;
+            color: #666;
+            flex-grow: 1;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            margin-bottom: 6px;
+        }
+
+        .shop-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            margin-top: auto;
+        }
+
+        .insta-link {
+            font-size: 9px;
+            color: #fff;
+            text-decoration: none;
+            background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+            padding: 4px;
+            border-radius: 8px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .btn-delete-small {
+            background: #ffe3e6;
+            color: #d81b60;
+            border: none;
+            border-radius: 8px;
+            padding: 4px;
+            font-size: 9px;
+        }
 
         .modal-overlay.active {
             display: flex;
@@ -438,72 +491,206 @@
             background: #ff9a9e;
             color: white;
         }
+
         /* 🚀 スプラッシュスクリーン（ようこそ画面） */
         .splash-screen {
             position: fixed;
-            top: 0; left: 0; width: 100vw; height: 100vh;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
             background: linear-gradient(135deg, #ff9a9e, #fecfef, #fad0c4);
             background-size: 200% 200%;
             animation: gradientMove 5s ease infinite;
             display: flex;
-            align-items: center; justify-content: center;
-            z-index: 9999; /* 一番手前に表示 */
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            /* 一番手前に表示 */
             color: white;
             transition: opacity 0.8s ease, visibility 0.8s ease;
         }
+
         .splash-screen.hidden {
             opacity: 0;
             visibility: hidden;
             pointer-events: none;
         }
+
         .splash-content {
             text-align: center;
             animation: popIn 1s cubic-bezier(0.28, 0.84, 0.42, 1);
         }
+
         .splash-content h1 {
-            font-size: 40px; margin: 0; letter-spacing: 2px;
-            text-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            font-size: 40px;
+            margin: 0;
+            letter-spacing: 2px;
+            text-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
         }
+
         .splash-content p {
-            font-size: 16px; margin-top: 10px; font-weight: bold;
+            font-size: 16px;
+            margin-top: 10px;
+            font-weight: bold;
         }
+
         @keyframes popIn {
-            0% { transform: scale(0.8); opacity: 0; }
-            50% { transform: scale(1.05); opacity: 1; }
-            100% { transform: scale(1); opacity: 1; }
+            0% {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+
+            50% {
+                transform: scale(1.05);
+                opacity: 1;
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
         }
+
         .modal-overlay {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0,0,0,0.4);
+            background: rgba(0, 0, 0, 0.4);
             display: none;
             align-items: center;
             justify-content: center;
             z-index: 999;
         }
+
         /* 📔 交換日記 */
-        .diary-container { max-height: 300px; overflow-y: auto; padding-right: 5px; }
-        .diary-container::-webkit-scrollbar { width: 4px; }
-        .diary-container::-webkit-scrollbar-thumb { background: #fad0c4; border-radius: 10px; }
-        .diary-entry { background: #fff; border: 1px solid #ffe3e6; border-radius: 16px; padding: 15px; margin-bottom: 12px; position: relative; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
-        .diary-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px; border-bottom: 1px dashed #ffe3e6; padding-bottom: 6px; }
-        .diary-author { font-weight: bold; font-size: 14px; color: #d81b60; }
-        .diary-date { font-size: 10px; color: #999; margin-right: 20px; }
-        .diary-content { font-size: 13px; line-height: 1.6; white-space: pre-wrap; word-break: break-word; color: #444; }
-        .btn-delete-diary { background: none; border: none; color: #ccc; font-size: 12px; cursor: pointer; padding: 4px; position: absolute; top: 10px; right: 10px; }
-        
+        .diary-container {
+            max-height: 300px;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+
+        .diary-container::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .diary-container::-webkit-scrollbar-thumb {
+            background: #fad0c4;
+            border-radius: 10px;
+        }
+
+        .diary-entry {
+            background: #fff;
+            border: 1px solid #ffe3e6;
+            border-radius: 16px;
+            padding: 15px;
+            margin-bottom: 12px;
+            position: relative;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+        }
+
+        .diary-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 10px;
+            border-bottom: 1px dashed #ffe3e6;
+            padding-bottom: 6px;
+        }
+
+        .diary-author {
+            font-weight: bold;
+            font-size: 14px;
+            color: #d81b60;
+        }
+
+        .diary-date {
+            font-size: 10px;
+            color: #999;
+            margin-right: 20px;
+        }
+
+        .diary-content {
+            font-size: 13px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-break: break-word;
+            color: #444;
+        }
+
+        .btn-delete-diary {
+            background: none;
+            border: none;
+            color: #ccc;
+            font-size: 12px;
+            cursor: pointer;
+            padding: 4px;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+
         /* 💬 返信用のデザイン */
-        .reply-list { margin-top: 10px; padding-top: 10px; border-top: 1px dashed #eee; }
-        .reply-entry { background: #fdfdfd; border-radius: 10px; padding: 10px; margin-bottom: 6px; font-size: 12px; position: relative; border-left: 3px solid #ff9a9e; }
-        .reply-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; }
-        .reply-author { font-weight: bold; color: #e6683c; }
-        .reply-date { font-size: 9px; color: #999; margin-right: 15px; }
-        .btn-reply { background: #ffe3e6; color: #d81b60; border: none; border-radius: 8px; padding: 6px 12px; font-size: 10px; cursor: pointer; margin-top: 5px; font-weight: bold; }
-        .btn-delete-reply { background: none; border: none; color: #ccc; font-size: 10px; cursor: pointer; padding: 2px; position: absolute; top: 5px; right: 5px; }
-        
+        .reply-list {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px dashed #eee;
+        }
+
+        .reply-entry {
+            background: #fdfdfd;
+            border-radius: 10px;
+            padding: 10px;
+            margin-bottom: 6px;
+            font-size: 12px;
+            position: relative;
+            border-left: 3px solid #ff9a9e;
+        }
+
+        .reply-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 4px;
+        }
+
+        .reply-author {
+            font-weight: bold;
+            color: #e6683c;
+        }
+
+        .reply-date {
+            font-size: 9px;
+            color: #999;
+            margin-right: 15px;
+        }
+
+        .btn-reply {
+            background: #ffe3e6;
+            color: #d81b60;
+            border: none;
+            border-radius: 8px;
+            padding: 6px 12px;
+            font-size: 10px;
+            cursor: pointer;
+            margin-top: 5px;
+            font-weight: bold;
+        }
+
+        .btn-delete-reply {
+            background: none;
+            border: none;
+            color: #ccc;
+            font-size: 10px;
+            cursor: pointer;
+            padding: 2px;
+            position: absolute;
+            top: 5px;
+            right: 5px;
+        }
+
         /* ⏳ ボタンが押せない時（保存中）のデザイン */
         .btn-save:disabled {
             background: #ccc;
@@ -521,50 +708,88 @@
             border: 2px solid #fff;
             box-shadow: 0 4px 15px rgba(255, 182, 193, 0.3);
         }
-        .countdown-item { margin: 5px 0; font-size: 14px; color: #d81b60; }
-        .countdown-number { font-size: 20px; font-weight: bold; margin: 0 4px; }
+
+        .countdown-item {
+            margin: 5px 0;
+            font-size: 14px;
+            color: #d81b60;
+        }
+
+        .countdown-number {
+            font-size: 20px;
+            font-weight: bold;
+            margin: 0 4px;
+        }
 
         /* 🤍 スタイリッシュなすりガラス風カプセルボタン */
         .love-float-btn {
             position: fixed;
             bottom: 25px;
             right: 20px;
-            background: rgba(255, 255, 255, 0.85); /* 半透明の白 */
-            backdrop-filter: blur(8px); /* 背景をぼかす（すりガラス効果） */
+            background: rgba(255, 255, 255, 0.85);
+            /* 半透明の白 */
+            backdrop-filter: blur(8px);
+            /* 背景をぼかす（すりガラス効果） */
             -webkit-backdrop-filter: blur(8px);
             border: 1px solid rgba(255, 182, 193, 0.4);
-            border-radius: 30px; /* 横長のカプセル型 */
+            border-radius: 30px;
+            /* 横長のカプセル型 */
             padding: 10px 18px;
             display: flex;
-            flex-direction: row; /* 縦積みではなく横並びにする */
+            flex-direction: row;
+            /* 縦積みではなく横並びにする */
             align-items: center;
-            gap: 6px; /* アイコンと数字の隙間 */
-            box-shadow: 0 4px 15px rgba(0,0,0,0.06); /* 影をふんわり薄く */
+            gap: 6px;
+            /* アイコンと数字の隙間 */
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+            /* 影をふんわり薄く */
             cursor: pointer;
             z-index: 1000;
             transition: transform 0.1s;
         }
-        .love-float-btn:active { transform: scale(0.92); }
-        .love-icon { font-size: 18px; line-height: 1; }
+
+        .love-float-btn:active {
+            transform: scale(0.92);
+        }
+
+        .love-icon {
+            font-size: 18px;
+            line-height: 1;
+        }
+
         .love-count-badge {
             font-size: 14px;
             font-weight: bold;
-            color: #d81b60; /* 数字の色はアクセントで残す */
+            color: #d81b60;
+            /* 数字の色はアクセントで残す */
             background: transparent;
             padding: 0;
         }
 
         /* ハートが飛ぶアニメーション */
         @keyframes floatUp {
-            0% { transform: translateY(0) scale(1); opacity: 1; }
-            100% { transform: translateY(-100px) scale(1.5); opacity: 0; }
+            0% {
+                transform: translateY(0) scale(1);
+                opacity: 1;
+            }
+
+            100% {
+                transform: translateY(-100px) scale(1.5);
+                opacity: 0;
+            }
         }
+
         .flying-heart {
             position: fixed;
             pointer-events: none;
             font-size: 24px;
             z-index: 999;
             animation: floatUp 1s ease-out forwards;
+        }
+
+        .love-float-btn {
+            /* 既存のスタイルはそのままで、以下を追加 */
+            touch-action: manipulation;
         }
     </style>
 </head>
@@ -654,7 +879,8 @@
         <div class="modal-content">
             <h3>メッセージを書く 🖋</h3>
             <div class="input-group"><label>名前</label><input type="text" id="diaryAuthorInput" placeholder="例：ぼく"></div>
-            <div class="input-group"><label>内容</label><textarea id="diaryContentInput" rows="5" placeholder="今日の出来事や気持ちを書いてね！"></textarea></div>
+            <div class="input-group"><label>内容</label><textarea id="diaryContentInput" rows="5"
+                    placeholder="今日の出来事や気持ちを書いてね！"></textarea></div>
             <div class="modal-actions">
                 <button class="btn" onclick="closeDiaryModal()">キャンセル</button>
                 <button class="btn btn-save" onclick="saveDiary()">保存</button>
@@ -665,8 +891,10 @@
     <div id="replyModal" class="modal-overlay">
         <div class="modal-content">
             <h3>返信を書く 💬</h3>
-            <div class="input-group"><label>名前</label><input type="text" id="replyAuthorInput" placeholder="例：わたし"></div>
-            <div class="input-group"><label>内容</label><textarea id="replyContentInput" rows="3" placeholder="返信を書いてね！"></textarea></div>
+            <div class="input-group"><label>名前</label><input type="text" id="replyAuthorInput" placeholder="例：わたし">
+            </div>
+            <div class="input-group"><label>内容</label><textarea id="replyContentInput" rows="3"
+                    placeholder="返信を書いてね！"></textarea></div>
             <div class="modal-actions">
                 <button class="btn" onclick="closeReplyModal()">キャンセル</button>
                 <button class="btn btn-save" onclick="saveReply()">送信</button>
@@ -746,7 +974,7 @@
     </div>
 
     <div class="countdown-container">
-            <div class="countdown-item">Days - <span id="anniversaryDays" class="countdown-number">-</span> 日</div>
+        <div class="countdown-item">Days - <span id="anniversaryDays" class="countdown-number">-</span> 日</div>
     </div>
 
     <button class="love-float-btn" onclick="sendLove()">
@@ -757,11 +985,11 @@
 
     <script>
         const IMGBB_API_KEY = "98846b51d380b3b2c66f74b7875c4707";
-        
+
         // 接続情報を1回だけ書く！
         const SUPABASE_URL = 'https://aelvmpvgzvaiomqimzgo.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_q0Zo34coaQEx57ey6DO84w_E71EljZD';
-        
+
         // パソコンが混乱しないように初期化
         const { createClient } = window.supabase;
         const db = createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -817,14 +1045,6 @@
         let prevTranslate = 0;
         let loveCount = 0;
         const ANNIVERSARY_DATE = "2026/01/21"; // 例: 付き合い始めた日
-
-        // ページを開いた時にデータを読み込む
-        window.onload = () => {
-            loadData();
-            setTimeout(() => {
-                document.getElementById('splashScreen').classList.add('hidden');
-            }, 2000);
-        };
 
         // --- 写真アップロード (ImgBB) ・一括対応 ---
         function triggerPhotoUpload() { document.getElementById('photoUpload').click(); }
@@ -916,11 +1136,12 @@
 
             const loopPhotos = [...photos, ...photos];
 
-            loopPhotos.forEach((url) => {
+            loopPhotos.forEach((url, index) => {
                 const img = document.createElement('img');
                 img.src = url;
 
-                img.onclick = () => openViewer(url);
+                const actualIndex = index % photos.length;
+                img.onclick = () => openViewer(url, actualIndex);
 
                 slides.appendChild(img);
             });
@@ -1088,12 +1309,11 @@
 
         let currentViewerIndex = null;
 
-        function openViewer(url) {
+        function openViewer(url, index) {
             const viewer = document.getElementById('photoViewer');
             const img = document.getElementById('viewerImg');
 
-            currentViewerIndex = photos.lastIndexOf(url); 
-            // ← 同じURL対策で「最後の一致」を使う
+            currentViewerIndex = index;
 
             img.src = url;
             viewer.style.display = 'flex';
@@ -1123,7 +1343,7 @@
                 return;
             }
             container.innerHTML = '';
-            
+
             // 新しい日記を一番上にする
             [...diaries].reverse().forEach((diary, i) => {
                 const actualIdx = (diaries.length - 1) - i;
@@ -1169,8 +1389,8 @@
         async function saveDiary() {
             const author = document.getElementById('diaryAuthorInput').value;
             const content = document.getElementById('diaryContentInput').value;
-            if(!author || !content) { alert("名前とメッセージの内容を両方入れてね！"); return; }
-            
+            if (!author || !content) { alert("名前とメッセージの内容を両方入れてね！"); return; }
+
             // 🌟 追加：ボタンを「保存中」にして連打を防ぐ
             const saveBtn = document.querySelector('#diaryModal .btn-save');
             const originalText = saveBtn.innerText;
@@ -1179,13 +1399,13 @@
 
             try {
                 const now = new Date();
-                const dateStr = `${now.getFullYear()}/${now.getMonth()+1}/${now.getDate()} ${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')}`;
-                
+                const dateStr = `${now.getFullYear()}/${now.getMonth() + 1}/${now.getDate()} ${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')}`;
+
                 diaries.push({ author, content, date: dateStr, replies: [] });
                 await updateCloudData();
                 closeDiaryModal();
                 renderDiaries();
-                document.getElementById('diaryContentInput').value = ''; 
+                document.getElementById('diaryContentInput').value = '';
             } finally {
                 // 🌟 追加：処理が終わったらボタンを元の状態に戻す
                 saveBtn.innerText = originalText;
@@ -1194,7 +1414,7 @@
         }
 
         async function deleteDiary(idx) {
-            if(!confirm("このメッセージを消してもいい？（返信も全部消えます！）")) return;
+            if (!confirm("このメッセージを消してもいい？（返信も全部消えます！）")) return;
             diaries.splice(idx, 1);
             await updateCloudData();
             renderDiaries();
@@ -1219,8 +1439,8 @@
             if (currentReplyTarget === null) return;
             const author = document.getElementById('replyAuthorInput').value;
             const content = document.getElementById('replyContentInput').value;
-            if(!author || !content) { alert("名前と返信の内容を入れてね！"); return; }
-            
+            if (!author || !content) { alert("名前と返信の内容を入れてね！"); return; }
+
             // 🌟 追加：ボタンを「送信中」にして連打を防ぐ
             const saveBtn = document.querySelector('#replyModal .btn-save');
             const originalText = saveBtn.innerText;
@@ -1229,17 +1449,17 @@
 
             try {
                 const now = new Date();
-                const dateStr = `${now.getFullYear()}/${now.getMonth()+1}/${now.getDate()} ${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')}`;
-                
+                const dateStr = `${now.getFullYear()}/${now.getMonth() + 1}/${now.getDate()} ${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')}`;
+
                 if (!diaries[currentReplyTarget].replies) {
                     diaries[currentReplyTarget].replies = [];
                 }
-                
+
                 diaries[currentReplyTarget].replies.push({ author, content, date: dateStr });
                 await updateCloudData();
                 closeReplyModal();
                 renderDiaries();
-                document.getElementById('replyContentInput').value = ''; 
+                document.getElementById('replyContentInput').value = '';
             } finally {
                 // 🌟 追加：処理が終わったらボタンを元の状態に戻す
                 saveBtn.innerText = originalText;
@@ -1248,7 +1468,7 @@
         }
 
         async function deleteReply(diaryIdx, replyIdx) {
-            if(!confirm("この返信を消してもいい？")) return;
+            if (!confirm("この返信を消してもいい？")) return;
             diaries[diaryIdx].replies.splice(replyIdx, 1);
             await updateCloudData();
             renderDiaries();
@@ -1259,6 +1479,7 @@
         window.addEventListener('load', async () => {
             try {
                 await loadData();
+                await initPush(); // ← これを追加
             } catch (e) {
                 console.error(e);
             } finally {
@@ -1267,7 +1488,7 @@
                 }, 1500);
             }
         });
-        window.onclick = function(e) {
+        window.onclick = function (e) {
             const modal = document.getElementById('shopModal');
             if (e.target === modal) {
                 closeShopModal();
@@ -1276,10 +1497,10 @@
         // --- 記念日計算 ---
         function updateCountdowns() {
             const now = new Date();
-            
+
             const start = new Date(ANNIVERSARY_DATE);
             const diffAnniv = Math.floor((now - start) / (1000 * 60 * 60 * 24));
-            document.getElementById('anniversaryDays').innerText = diffAnniv;  
+            document.getElementById('anniversaryDays').innerText = diffAnniv;
         }
 
         // --- 愛の送り合い機能 ---
@@ -1290,7 +1511,7 @@
         async function sendLove() {
             loveCount++;
             updateLoveDisplay();
-            
+
             // ハートを飛ばす演出
             const btn = document.querySelector('.love-float-btn');
             const heart = document.createElement('div');
@@ -1303,6 +1524,67 @@
 
             // 保存（連打してもいいように少し待ってから保存するのが理想ですが、まずはシンプルに）
             await updateCloudData();
+        }
+        // Service Worker登録 & 通知許可
+        async function initPush() {
+            if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+                console.log('このブラウザはプッシュ通知非対応');
+                return;
+            }
+
+            const reg = await navigator.serviceWorker.register('/loveeeee/sw.js');
+            const permission = await Notification.requestPermission();
+
+            if (permission !== 'granted') {
+                console.log('通知が拒否されました');
+                return;
+            }
+
+            console.log('通知の準備OK！');
+            listenForChanges(reg);
+        }
+
+        // Supabaseの変更をリアルタイムで監視
+        function listenForChanges(reg) {
+            let prevPhotosLength = photos.length;
+            let prevDiariesLength = diaries.length;
+
+            db.channel('memories-changes')
+                .on('postgres_changes',
+                    { event: 'UPDATE', schema: 'public', table: 'memories' },
+                    (payload) => {
+                        const newData = payload.new;
+
+                        // 写真が増えた時
+                        if (newData.photos.length > prevPhotosLength) {
+                            reg.showNotification('📸 新しい写真！', {
+                                body: '写真が追加されました！',
+                                icon: '/icon.png',
+                            });
+                            prevPhotosLength = newData.photos.length;
+                        }
+
+                        // メッセージが増えた時
+                        if (newData.diaries.length > prevDiariesLength) {
+                            reg.showNotification('💌 新しいメッセージ！', {
+                                body: `${newData.diaries.at(-1).author}からメッセージが届きました！`,
+                                icon: '/icon.png',
+                            });
+                            prevDiariesLength = newData.diaries.length;
+                        }
+
+                        // データも更新
+                        photos = newData.photos;
+                        diaries = newData.diaries;
+                        shops = newData.shops;
+                        loveCount = newData.love_count;
+                        renderGallery();
+                        renderDiaries();
+                        renderShops();
+                        updateLoveDisplay();
+                    }
+                )
+                .subscribe();
         }
         updateCountdowns();
     </script>
