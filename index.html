@@ -32,6 +32,7 @@
             box-shadow: 0 4px 12px rgba(255, 154, 158, 0.3);
             border-bottom-left-radius: 20px;
             border-bottom-right-radius: 20px;
+            position: relative;
         }
 
         @keyframes gradientMove {
@@ -854,6 +855,17 @@
             opacity: 0;
             transition: 0s;
         }
+
+        input[type="date"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            box-sizing: border-box;
+            font-size: 16px;
+            appearance: none;
+            -webkit-appearance: none;
+        }
     </style>
 </head>
 
@@ -866,7 +878,17 @@
         </div>
     </div>
 
-    <header>Our Memories</header>
+    <header>Our Memories
+        <div onclick="location.reload()" style="
+        position: absolute;
+        right: 20px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 18px;
+        cursor: pointer;
+        opacity: 0.8;
+    ">🔄</div>
+    </header>
     <div class="container">
         <div class="card">
             <div class="card-header-actions">
