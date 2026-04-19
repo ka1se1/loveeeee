@@ -977,12 +977,19 @@
                 <div id="recordStatus" style="font-size:12px;color:#999;margin-top:8px;">タップして録音</div>
                 <div style="margin-top:12px;">
                     <input type="text" id="voiceAuthorInput" placeholder="名前を入れてね" style="
-                padding: 8px 12px;
-                border: 1px solid #ddd;
-                border-radius: 10px;
+                padding: 12px 16px;
+                border: none;
+                border-radius: 16px;
                 font-size: 16px;
-                width: 60%;
+                width: 80%;
                 box-sizing: border-box;
+                margin-bottom: 14px;
+                display: block;
+                margin-left: auto;
+                margin-right: auto;
+                outline: none;
+                background: white;
+                box-shadow: 0 4px 12px rgba(255, 154, 158, 0.15);
             ">
                 </div>
             </div>
@@ -2190,7 +2197,8 @@
             const badge = document.getElementById(id);
             if (badge) {
                 badge.style.display = 'inline';
-                setTimeout(() => { badge.style.display = 'none'; }, 10000);
+                badge.onclick = () => { badge.style.display = 'none'; };
+                badge.style.cursor = 'pointer';
             }
         }
 
