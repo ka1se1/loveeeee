@@ -1,0 +1,20 @@
+{
+    "name": "Our Memories",
+    "short_name": "Memories",
+    "start_url": "/loveeeee/",
+    "display": "standalone",
+    "background_color": "#ff9a9e",
+    "theme_color": "#ff9a9e",
+    "icons": [
+        {
+            "src": "/loveeeee/icon.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "/loveeeee/icon.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ]
+}
