@@ -1357,8 +1357,6 @@
             showToast("写真を削除しました🗑️");
         }
 
-
-
         function openInsta(url) {
             window.open(url, '_blank');
         }
@@ -1585,7 +1583,6 @@
             <div style="font-size:11px;color:#6495ed;font-weight:bold;">土</div>
     `;
 
-            // 空白
             for (let i = 0; i < firstDay; i++) {
                 html += `<div></div>`;
             }
@@ -1602,20 +1599,30 @@
                 let textColor = isToday ? 'white' : color;
 
                 html += `
-                    <div style="background:#fff5f7;border-radius:10px;padding:10px;margin-bottom:8px;border-left:3px solid #ff9a9e;position:relative;">
-                        <div style="font-weight:bold;font-size:13px;">${ev.title}</div>
-                        ${ev.note ? `<div style="font-size:11px;color:#888;margin-top:4px;">${ev.note}</div>` : ''}
-                        <div style="position:absolute;top:8px;right:8px;display:flex;gap:6px;">
-                            <button onclick="editEvent(${actualIdx})" style="background:none;border:none;color:#ccc;font-size:12px;cursor:pointer;">✏️</button>
-                            <button onclick="deleteEvent(${actualIdx})" style="background:none;border:none;color:#ccc;font-size:12px;cursor:pointer;">🗑️</button>
-                        </div>
-                    </div>
-                `;
+            <div onclick="onDateClick('${dateStr}')" style="
+                cursor:pointer;
+                border-radius:50%;
+                width:32px;
+                height:32px;
+                display:flex;
+                flex-direction:column;
+                align-items:center;
+                justify-content:center;
+                margin:auto;
+                background:${bg};
+                color:${textColor};
+                font-size:13px;
+                font-weight:${isToday ? 'bold' : 'normal'};
+                position:relative;
+            ">
+                ${d}
+                ${hasEvent ? `<div style="width:5px;height:5px;background:#ff9a9e;border-radius:50%;position:absolute;bottom:2px;"></div>` : ''}
+            </div>
+        `;
             }
 
             html += `</div>`;
 
-            // 選択した日の予定表示
             if (selectedDate) {
                 const dayEvents = events.filter(e => e.date === selectedDate);
                 html += `<div style="margin-top:15px;border-top:1px dashed #ffe3e6;padding-top:12px;">`;
@@ -1629,7 +1636,10 @@
                     <div style="background:#fff5f7;border-radius:10px;padding:10px;margin-bottom:8px;border-left:3px solid #ff9a9e;position:relative;">
                         <div style="font-weight:bold;font-size:13px;">${ev.title}</div>
                         ${ev.note ? `<div style="font-size:11px;color:#888;margin-top:4px;">${ev.note}</div>` : ''}
-                        <button onclick="deleteEvent(${actualIdx})" style="position:absolute;top:8px;right:8px;background:none;border:none;color:#ccc;font-size:12px;cursor:pointer;">🗑️</button>
+                        <div style="position:absolute;top:8px;right:8px;display:flex;gap:6px;">
+                            <button onclick="editEvent(${actualIdx})" style="background:none;border:none;color:#ccc;font-size:12px;cursor:pointer;">✏️</button>
+                            <button onclick="deleteEvent(${actualIdx})" style="background:none;border:none;color:#ccc;font-size:12px;cursor:pointer;">🗑️</button>
+                        </div>
                     </div>
                 `;
                     });
