@@ -796,6 +796,59 @@
             /* 既存のスタイルはそのままで、以下を追加 */
             touch-action: manipulation;
         }
+
+        /* ✨ ボタンキラキラエフェクト */
+        .btn-round {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-round::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.4s ease, height 0.4s ease, opacity 0.4s ease;
+            opacity: 0;
+        }
+
+        .btn-round:active::after {
+            width: 80px;
+            height: 80px;
+            opacity: 0;
+            transition: 0s;
+        }
+
+        .btn-save {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-save::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.4s ease, height 0.4s ease, opacity 0.4s ease;
+            opacity: 0;
+        }
+
+        .btn-save:active::after {
+            width: 200px;
+            height: 200px;
+            opacity: 0;
+            transition: 0s;
+        }
     </style>
 </head>
 
@@ -1600,6 +1653,62 @@
                 .subscribe();
         }
         updateCountdowns();
+    </script>
+    <!-- 桜の花びら -->
+    <canvas id="sakura"
+        style="position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;"></canvas>
+
+    <script>
+        // 🌸 桜の花びらアニメーション
+        const canvas = document.getElementById('sakura');
+        const ctx = canvas.getContext('2d');
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+
+        const petals = Array.from({ length: 30 }, () => ({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height,
+            size: Math.random() * 8 + 4,
+            speedY: Math.random() * 1 + 0.5,
+            speedX: Math.random() * 0.8 - 0.4,
+            rotation: Math.random() * Math.PI * 2,
+            rotationSpeed: Math.random() * 0.02 - 0.01,
+            opacity: Math.random() * 0.5 + 0.3,
+        }));
+
+        function drawPetal(x, y, size, rotation, opacity) {
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.rotate(rotation);
+            ctx.globalAlpha = opacity;
+            ctx.beginPath();
+            ctx.fillStyle = '#ffb7c5';
+            ctx.ellipse(0, 0, size, size * 0.6, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            petals.forEach(p => {
+                drawPetal(p.x, p.y, p.size, p.rotation, p.opacity);
+                p.y += p.speedY;
+                p.x += p.speedX;
+                p.rotation += p.rotationSpeed;
+                if (p.y > canvas.height) {
+                    p.y = -10;
+                    p.x = Math.random() * canvas.width;
+                }
+            });
+            requestAnimationFrame(animate);
+        }
+        animate();
     </script>
 </body>
 
