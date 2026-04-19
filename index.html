@@ -900,16 +900,17 @@
     ">更新</button>
     </header>
     <div class="container">
-        <div class="card">
-            <div class="card" id="weatherCard">
-                <div class="card-header-actions">
-                    <h2>🌤️ 今日の天気</h2>
-                    <button class="btn-round" onclick="fetchWeather()">🔄</button>
-                </div>
-                <div id="weatherContainer" style="text-align:center;padding:10px;">
-                    <div class="loading-pulse">天気を読み込み中... 🌤️</div>
-                </div>
+        <div class="card" id="weatherCard">
+            <div class="card-header-actions">
+                <h2>🌤️ 今日の天気</h2>
+                <button class="btn-round" onclick="fetchWeather()">🔄</button>
             </div>
+            <div id="weatherContainer" style="text-align:center;padding:10px;">
+                <div class="loading-pulse">天気を読み込み中... 🌤️</div>
+            </div>
+        </div>
+
+        <div class="card">
             <div class="card-header-actions">
                 <h2>📸 共有ギャラリー</h2>
                 <div style="display: flex; gap: 8px;">
@@ -1271,8 +1272,16 @@
                     const div = document.createElement('div');
                     div.className = 'shop-card';
                     div.onclick = () => {
-                        document.getElementById('map').src =
-                            `https://maps.google.co.jp/maps?q=${encodeURIComponent(shop.name)}&output=embed`;
+                        if (mapInstance) {
+                            fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(shop.name)}&format=json&limit=1`)
+                                .then(res => res.json())
+                                .then(data => {
+                                    if (data.length === 0) return;
+                                    const lat = parseFloat(data[0].lat);
+                                    const lon = parseFloat(data[0].lon);
+                                    mapInstance.setView([lat, lon], 16);
+                                });
+                        }
                     };
 
                     div.innerHTML = `
