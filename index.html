@@ -5,6 +5,11 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
     <title>Memories Shared</title>
+    <!-- ホーム画面アイコン -->
+    <link rel="apple-touch-icon" href="/loveeeee/icon.png">
+
+    <!-- PWA設定 -->
+    <link rel="manifest" href="/loveeeee/manifest.json">
     <style>
         body {
             margin: 0;
@@ -1542,6 +1547,14 @@
 
             console.log('通知の準備OK！');
             listenForChanges(reg);
+        }
+
+        async function confirmShopDelete() {
+            if (pendingDeleteIndex === null) return;
+            shops.splice(pendingDeleteIndex, 1);
+            await updateCloudData();
+            closeShopDeleteModal();
+            renderShops();
         }
 
         // Supabaseの変更をリアルタイムで監視
