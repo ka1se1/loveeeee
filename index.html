@@ -1537,10 +1537,8 @@
             }
 
             container.innerHTML = '';
-
             const displayShops = [...shops].reverse();
 
-            // 👉 3件ずつグループ化
             for (let i = 0; i < displayShops.length; i += 3) {
                 const page = document.createElement('div');
                 page.className = 'shop-page';
@@ -1549,23 +1547,38 @@
 
                 group.forEach((shop, j) => {
                     const actualIdx = (shops.length - 1) - (i + j);
+                    // 古いデータ（数字）を配列に変換
+                    let likes = shop.likes;
+                    if (!Array.isArray(likes)) likes = [];
+                    const iLiked = USER_ID && likes.includes(USER_ID);
+                    const bothLiked = likes.length >= 2;
 
                     const div = document.createElement('div');
                     div.className = 'shop-card';
+
+                    if (bothLiked) {
+                        div.style.background = 'linear-gradient(135deg, #fff5f7, #ffe3e6)';
+                        div.style.border = '2px solid #ff9a9e';
+                    }
+
                     div.onclick = () => {
                         document.getElementById('map').src =
                             `https://maps.google.co.jp/maps?q=${encodeURIComponent(shop.name)}&output=embed`;
                     };
 
                     div.innerHTML = `
+                        ${bothLiked ? '<div style="text-align:center;color:#d81b60;font-size:10px;font-weight:bold;margin-bottom:4px;">💕 ここ行こう！</div>' : ''}
                         <div class="shop-title">${shop.name}</div>
                         <div class="shop-note">${shop.note || ''}</div>
-                        ${shop.insta ? `<a href="${shop.insta}" class="insta-link"onclick="openInsta('${shop.insta}'); event.stopPropagation(); return false;">Instagram</a>` : ''}
+                        ${shop.insta ? `<a href="${shop.insta}" class="insta-link" onclick="openInsta('${shop.insta}'); event.stopPropagation(); return false;">Instagram</a>` : ''}
                         <button class="btn-delete-small" style="background:#e3f2fd;color:#1976d2;"
-                        onclick="editShop(${actualIdx}); event.stopPropagation();">編集</button>
+                            onclick="editShop(${actualIdx}); event.stopPropagation();">編集</button>
                         <button class="btn-delete-small" onclick="deleteShop(${actualIdx}); event.stopPropagation();">削除</button>
-                        <button class="btn-like-small"
-                        onclick="likeShop(${actualIdx}); event.stopPropagation();">🥰</button>
+                        <button onclick="likeShop(${actualIdx}); event.stopPropagation();" style="
+                            border:none;border-radius:8px;padding:4px;font-size:9px;font-weight:bold;cursor:pointer;
+                            background:${iLiked ? '#ff9a9e' : '#ffe3e6'};
+                            color:${iLiked ? 'white' : '#d81b60'};
+                        ">${iLiked ? '💕' : '🤍'} ${likes.length}</button>
                     `;
 
                     page.appendChild(div);
@@ -1576,11 +1589,22 @@
         }
 
         async function likeShop(index) {
-            if (!shops[index].likes) {
-                shops[index].likes = 0;
+            if (!USER_ID) {
+                alert('ログインが必要だよ！');
+                return;
             }
 
-            shops[index].likes++;
+            // 古いデータ（数字）を配列に変換
+            if (!Array.isArray(shops[index].likes)) {
+                shops[index].likes = [];
+            }
+
+            if (shops[index].likes.includes(USER_ID)) {
+                shops[index].likes = shops[index].likes.filter(id => id !== USER_ID);
+            } else {
+                shops[index].likes.push(USER_ID);
+            }
+
             await updateCloudData();
             renderShops();
         }
