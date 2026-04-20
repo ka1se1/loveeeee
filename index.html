@@ -901,15 +901,28 @@
 <body>
     <div id="authScreen" class="auth-screen">
         <div class="auth-card">
-            <h2>Welcome</h2>
-            <p class="auth-sub">ログイン</p>
 
-            <input id="name" placeholder="名前（表示用）">
-            <input id="email" placeholder="メールアドレス">
-            <input id="password" type="password" placeholder="パスワード">
+            <!-- 🔐 ログインUI -->
+            <div id="loginUI">
+                <h2>Welcome</h2>
+                <p class="auth-sub">ログイン</p>
 
-            <button class="btn-primary" onclick="signUp()">新規登録</button>
-            <button class="btn-secondary" onclick="signIn()">ログイン</button>
+                <input id="email" placeholder="メールアドレス">
+                <input id="password" type="password" placeholder="パスワード">
+
+                <button class="btn-primary" onclick="signUp()">新規登録</button>
+                <button class="btn-secondary" onclick="signIn()">ログイン</button>
+            </div>
+
+            <!-- 👤 初回だけ表示する名前入力 -->
+            <div id="nameSetup" style="display:none;">
+                <h2>はじめまして 👋</h2>
+                <p class="auth-sub">名前を入力してね</p>
+
+                <input id="firstNameInput" placeholder="名前">
+                <button class="btn-primary" onclick="saveFirstName()">はじめる</button>
+            </div>
+
         </div>
     </div>
     <div id="splashScreen" class="splash-screen">
@@ -1161,7 +1174,6 @@
 
         let currentUser = null;
 
-        // 初期チェック（これが超重要）
         async function checkLogin() {
             const {
                 data
@@ -1174,22 +1186,48 @@
                 let savedName = localStorage.getItem("user_name");
 
                 if (!savedName) {
-                    savedName = prompt("名前を入れてね！");
-                    localStorage.setItem("user_name", savedName);
+                    // 👇 初回だけ名前入力画面出す
+                    document.getElementById("nameSetup").style.display = "block";
+
+                    // 👇 メール入力UIは隠す
+                    document.getElementById("email").style.display = "none";
+                    document.getElementById("password").style.display = "none";
+                    document.querySelector(".btn-primary").style.display = "none";
+                    document.querySelector(".btn-secondary").style.display = "none";
+
+                    return;
                 }
 
                 USER_NAME = savedName;
 
-                await db.from("profiles").upsert({
-                    id: USER_ID,
-                    name: USER_NAME
-                });
-
                 document.getElementById("authScreen").style.display = "none";
-                loadData();
+
+                await loadData();
+
             } else {
                 document.getElementById("authScreen").style.display = "flex";
             }
+        }
+
+        async function saveFirstName() {
+            const name = document.getElementById("firstNameInput").value;
+
+            if (!name) {
+                alert("名前を入れてね！");
+                return;
+            }
+
+            localStorage.setItem("user_name", name);
+            USER_NAME = name;
+
+            await db.from("profiles").upsert({
+                id: USER_ID,
+                name: name
+            });
+
+            document.getElementById("authScreen").style.display = "none";
+
+            loadData();
         }
 
         async function signUp() {
