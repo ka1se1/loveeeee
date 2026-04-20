@@ -120,6 +120,8 @@
             margin: 0;
         }
 
+
+
         .btn-round {
             background: linear-gradient(135deg, #ff9a9e, #fecfef);
             color: white;
@@ -498,6 +500,113 @@
             cursor: pointer;
         }
 
+        .auth-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 99999;
+            background: linear-gradient(135deg, #ff9a9e, #fecfef);
+        }
+
+        .auth-card {
+            background: white;
+            padding: 30px 20px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 320px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .auth-card input {
+            width: 100%;
+            max-width: 260px;
+            padding: 12px;
+            margin-bottom: 10px;
+            border-radius: 10px;
+            border: 1px solid #eee;
+            box-sizing: border-box;
+        }
+
+        .btn-primary,
+        .btn-secondary {
+            width: 100%;
+            max-width: 260px;
+            padding: 12px;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #ff9a9e, #fecfef);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #eee;
+        }
+
+        /* hover */
+        .btn-primary:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary:hover {
+            background: #ddd;
+        }
+
+        /* click */
+        .btn-primary:active,
+        .btn-secondary:active {
+            transform: scale(0.95);
+        }
+
+        /* ローディング */
+        .btn-loading {
+            position: relative;
+            pointer-events: none;
+            opacity: 0.8;
+        }
+
+        .btn-loading::after {
+            content: "";
+            width: 16px;
+            height: 16px;
+            border: 2px solid white;
+            border-top: 2px solid transparent;
+            border-radius: 50%;
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            animation: spin 0.7s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: translateY(-50%) rotate(360deg);
+            }
+        }
+
+        .btn-like-small {
+            background: #fff0f3;
+            color: #d81b60;
+            border: none;
+            border-radius: 8px;
+            padding: 4px;
+            font-size: 12px;
+        }
+
         .btn-save {
             background: #ff9a9e;
             color: white;
@@ -870,6 +979,32 @@
 </head>
 
 <body>
+    <div id="authScreen" class="auth-screen">
+        <div class="auth-card">
+
+            <!-- 🔐 ログイン -->
+            <div id="loginUI">
+                <h2>Welcome</h2>
+                <p class="auth-sub">ログイン</p>
+
+                <input id="email" placeholder="メールアドレス">
+                <input id="password" type="password" placeholder="パスワード">
+
+                <button id="signupBtn" class="btn-primary" onclick="signUp()">新規登録</button>
+                <button id="loginBtn" class="btn-secondary" onclick="signIn()">ログイン</button>
+            </div>
+
+            <!-- 👤 初回 名前入力 -->
+            <div id="nameSetup" style="display:none;">
+                <h2>はじめまして 👋</h2>
+                <p class="auth-sub">名前を入力してね</p>
+
+                <input id="firstNameInput" placeholder="名前">
+                <button id="startBtn" class="btn-primary" onclick="saveFirstName()">はじめる</button>
+            </div>
+
+        </div>
+    </div>
 
     <div id="splashScreen" class="splash-screen">
         <div class="splash-content">
@@ -1164,6 +1299,7 @@
     </button>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
+
     <script>
         const IMGBB_API_KEY = "98846b51d380b3b2c66f74b7875c4707";
 
@@ -1172,11 +1308,16 @@
         const SUPABASE_KEY = 'sb_publishable_q0Zo34coaQEx57ey6DO84w_E71EljZD';
 
         // パソコンが混乱しないように初期化
-        const { createClient } = window.supabase;
+        const {
+            createClient
+        } = window.supabase;
         const db = createClient(SUPABASE_URL, SUPABASE_KEY);
 
         async function loadData() {
-            const { data, error } = await db
+            const {
+                data,
+                error
+            } = await db
                 .from('memories')
                 .select('*')
                 .eq('id', 'main')
@@ -1192,12 +1333,12 @@
                 photos = data.photos || [];
                 diaries = data.diaries || [];
                 loveCount = data.love_count || 0;
-                events = data.events || [];  // ← 追加
+                events = data.events || []; // ← 追加
 
                 renderShops();
                 renderGallery();
                 renderDiaries();
-                renderCalendar();  // ← 追加
+                renderCalendar(); // ← 追加
                 updateLoveDisplay();
                 updateCountdowns();
                 voices = data.voices || [];
@@ -1206,15 +1347,19 @@
             }
         }
 
+
+
         async function updateCloudData() {
-            const { error } = await db
+            const {
+                error
+            } = await db
                 .from('memories')
                 .upsert({
                     id: "main",
                     shops,
                     photos,
                     diaries,
-                    events,  // ← 追加
+                    events, // ← 追加
                     voices,
                     love_count: loveCount,
                     updated_at: new Date().toISOString()
@@ -1235,7 +1380,9 @@
         const ANNIVERSARY_DATE = "2026/01/21"; // 例: 付き合い始めた日
 
         // --- 写真アップロード (ImgBB) ・一括対応 ---
-        function triggerPhotoUpload() { document.getElementById('photoUpload').click(); }
+        function triggerPhotoUpload() {
+            document.getElementById('photoUpload').click();
+        }
 
         async function handlePhotoUpload(input) {
             if (!input.files || input.files.length === 0) return;
@@ -1258,7 +1405,10 @@
 
                 try {
                     // Supabase Storageにアップロード
-                    const { data, error } = await db.storage
+                    const {
+                        data,
+                        error
+                    } = await db.storage
                         .from('photos')
                         .upload(fileName, file, {
                             cacheControl: '3600',
@@ -1268,7 +1418,9 @@
                     if (error) throw error;
 
                     // 公開URLを取得
-                    const { data: urlData } = db.storage
+                    const {
+                        data: urlData
+                    } = db.storage
                         .from('photos')
                         .getPublicUrl(fileName);
 
@@ -1379,7 +1531,8 @@
             const container = document.getElementById('shopListContainer');
 
             if (!shops.length) {
-                container.innerHTML = '<div style="width:100%; text-align:center; font-size:12px; color:#999; padding:20px;">リストが空です🍽️</div>';
+                container.innerHTML =
+                    '<div style="width:100%; text-align:center; font-size:12px; color:#999; padding:20px;">リストが空です🍽️</div>';
                 return;
             }
 
@@ -1411,6 +1564,8 @@
                         <button class="btn-delete-small" style="background:#e3f2fd;color:#1976d2;"
                         onclick="editShop(${actualIdx}); event.stopPropagation();">編集</button>
                         <button class="btn-delete-small" onclick="deleteShop(${actualIdx}); event.stopPropagation();">削除</button>
+                        <button class="btn-like-small"
+                        onclick="likeShop(${actualIdx}); event.stopPropagation();">🥰</button>
                     `;
 
                     page.appendChild(div);
@@ -1418,6 +1573,16 @@
 
                 container.appendChild(page);
             }
+        }
+
+        async function likeShop(index) {
+            if (!shops[index].likes) {
+                shops[index].likes = 0;
+            }
+
+            shops[index].likes++;
+            await updateCloudData();
+            renderShops();
         }
 
         // --- お店リストの保存 ---
@@ -1437,7 +1602,11 @@
             saveBtn.disabled = true;
 
             try {
-                const data = { name, note, insta };
+                const data = {
+                    name,
+                    note,
+                    insta
+                };
 
                 if (editingIndex !== null) {
                     // ✏️ 編集モード
@@ -1482,8 +1651,14 @@
             document.getElementById("shopDeleteSheet").classList.remove("active");
         }
 
-        function openShopModal() { document.getElementById('shopModal').classList.add('active'); }
-        function closeShopModal() { document.getElementById('shopModal').classList.remove('active'); }
+        function openShopModal() {
+            document.getElementById('shopModal').classList.add('active');
+        }
+
+        function closeShopModal() {
+            document.getElementById('shopModal').classList.remove('active');
+        }
+
         function editShop(index) {
             const shop = shops[index];
 
@@ -1576,7 +1751,8 @@
         function renderDiaries() {
             const container = document.getElementById('diaryListContainer');
             if (!diaries.length) {
-                container.innerHTML = '<div style="text-align:center;font-size:12px;color:#999;padding:20px;">まだ日記がありません。＋ボタンで最初のページを書いてね！📔</div>';
+                container.innerHTML =
+                    '<div style="text-align:center;font-size:12px;color:#999;padding:20px;">まだ日記がありません。＋ボタンで最初のページを書いてね！📔</div>';
                 return;
             }
             container.innerHTML = '';
@@ -1626,7 +1802,10 @@
         async function saveDiary() {
             const author = document.getElementById('diaryAuthorInput').value;
             const content = document.getElementById('diaryContentInput').value;
-            if (!author || !content) { alert("名前とメッセージの内容を両方入れてね！"); return; }
+            if (!author || !content) {
+                alert("名前とメッセージの内容を両方入れてね！");
+                return;
+            }
 
             // 🌟 追加：ボタンを「保存中」にして連打を防ぐ
             const saveBtn = document.querySelector('#diaryModal .btn-save');
@@ -1636,9 +1815,15 @@
 
             try {
                 const now = new Date();
-                const dateStr = `${now.getFullYear()}/${now.getMonth() + 1}/${now.getDate()} ${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')}`;
+                const dateStr =
+                    `${now.getFullYear()}/${now.getMonth() + 1}/${now.getDate()} ${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')}`;
 
-                diaries.push({ author, content, date: dateStr, replies: [] });
+                diaries.push({
+                    author,
+                    content,
+                    date: dateStr,
+                    replies: []
+                });
                 await updateCloudData();
                 closeDiaryModal();
                 renderDiaries();
@@ -1657,8 +1842,13 @@
             renderDiaries();
         }
 
-        function openDiaryModal() { document.getElementById('diaryModal').classList.add('active'); }
-        function closeDiaryModal() { document.getElementById('diaryModal').classList.remove('active'); }
+        function openDiaryModal() {
+            document.getElementById('diaryModal').classList.add('active');
+        }
+
+        function closeDiaryModal() {
+            document.getElementById('diaryModal').classList.remove('active');
+        }
 
         // --- 返信の保存・削除 ---
         function openReplyModal(idx) {
@@ -1676,7 +1866,10 @@
             if (currentReplyTarget === null) return;
             const author = document.getElementById('replyAuthorInput').value;
             const content = document.getElementById('replyContentInput').value;
-            if (!author || !content) { alert("名前と返信の内容を入れてね！"); return; }
+            if (!author || !content) {
+                alert("名前と返信の内容を入れてね！");
+                return;
+            }
 
             // 🌟 追加：ボタンを「送信中」にして連打を防ぐ
             const saveBtn = document.querySelector('#replyModal .btn-save');
@@ -1686,13 +1879,18 @@
 
             try {
                 const now = new Date();
-                const dateStr = `${now.getFullYear()}/${now.getMonth() + 1}/${now.getDate()} ${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')}`;
+                const dateStr =
+                    `${now.getFullYear()}/${now.getMonth() + 1}/${now.getDate()} ${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')}`;
 
                 if (!diaries[currentReplyTarget].replies) {
                     diaries[currentReplyTarget].replies = [];
                 }
 
-                diaries[currentReplyTarget].replies.push({ author, content, date: dateStr });
+                diaries[currentReplyTarget].replies.push({
+                    author,
+                    content,
+                    date: dateStr
+                });
                 await updateCloudData();
                 closeReplyModal();
                 renderDiaries();
@@ -1717,7 +1915,7 @@
             try {
                 await loadData();
                 fetchWeather();
-                startRealtime();  // ← 常にリアルタイム同期を開始
+                startRealtime(); // ← 常にリアルタイム同期を開始
                 await initPush(); // ← 通知は別で
             } catch (e) {
                 console.error(e);
@@ -1810,7 +2008,8 @@
             if (selectedDate) {
                 const dayEvents = events.filter(e => e.date === selectedDate);
                 html += `<div style="margin-top:15px;border-top:1px dashed #ffe3e6;padding-top:12px;">`;
-                html += `<div style="font-size:13px;font-weight:bold;color:#d81b60;margin-bottom:8px;">${selectedDate}の予定</div>`;
+                html +=
+                    `<div style="font-size:13px;font-weight:bold;color:#d81b60;margin-bottom:8px;">${selectedDate}の予定</div>`;
                 if (dayEvents.length === 0) {
                     html += `<div style="font-size:12px;color:#999;">予定はありません</div>`;
                 } else {
@@ -1836,13 +2035,19 @@
 
         function prevMonth() {
             currentCalMonth--;
-            if (currentCalMonth < 0) { currentCalMonth = 11; currentCalYear--; }
+            if (currentCalMonth < 0) {
+                currentCalMonth = 11;
+                currentCalYear--;
+            }
             renderCalendar();
         }
 
         function nextMonth() {
             currentCalMonth++;
-            if (currentCalMonth > 11) { currentCalMonth = 0; currentCalYear++; }
+            if (currentCalMonth > 11) {
+                currentCalMonth = 0;
+                currentCalYear++;
+            }
             renderCalendar();
         }
 
@@ -1873,7 +2078,10 @@
             const title = document.getElementById('eventTitleInput').value;
             const note = document.getElementById('eventNoteInput').value;
 
-            if (!date || !title) { alert('日付とタイトルを入れてね！'); return; }
+            if (!date || !title) {
+                alert('日付とタイトルを入れてね！');
+                return;
+            }
 
             const saveBtn = document.querySelector('#eventModal .btn-save');
             saveBtn.innerText = '保存中... ⏳';
@@ -1881,10 +2089,18 @@
 
             try {
                 if (editingEventIndex !== null) {
-                    events[editingEventIndex] = { date, title, note };
+                    events[editingEventIndex] = {
+                        date,
+                        title,
+                        note
+                    };
                     editingEventIndex = null;
                 } else {
-                    events.push({ date, title, note });
+                    events.push({
+                        date,
+                        title,
+                        note
+                    });
                 }
                 await updateCloudData();
                 closeEventModal();
@@ -1915,7 +2131,11 @@
 
 
 
-        const DEFAULT_LOCATION = { lat: 35.6812, lon: 139.7671, name: '東京' };
+        const DEFAULT_LOCATION = {
+            lat: 35.6812,
+            lon: 139.7671,
+            name: '東京'
+        };
 
         async function fetchWeather() {
             const container = document.getElementById('weatherContainer');
@@ -1925,7 +2145,9 @@
                 const saved = localStorage.getItem('weatherLocation');
                 const loc = saved ? JSON.parse(saved) : DEFAULT_LOCATION;
 
-                const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${loc.lat}&longitude=${loc.lon}&current=temperature_2m,weathercode,windspeed_10m,relativehumidity_2m&timezone=Asia%2FTokyo`);
+                const res = await fetch(
+                    `https://api.open-meteo.com/v1/forecast?latitude=${loc.lat}&longitude=${loc.lon}&current=temperature_2m,weathercode,windspeed_10m,relativehumidity_2m&timezone=Asia%2FTokyo`
+                );
                 const data = await res.json();
 
                 const temp = data.current.temperature_2m;
@@ -1953,7 +2175,8 @@
             </div>
         `;
             } catch (e) {
-                container.innerHTML = `<div style="font-size:12px;color:#999;text-align:center;padding:20px;">天気の取得に失敗しました🥲</div>`;
+                container.innerHTML =
+                    `<div style="font-size:12px;color:#999;text-align:center;padding:20px;">天気の取得に失敗しました🥲</div>`;
             }
         }
 
@@ -1963,7 +2186,10 @@
             fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(city)}&format=json&limit=1`)
                 .then(res => res.json())
                 .then(data => {
-                    if (data.length === 0) { alert('都市が見つかりませんでした🥲'); return; }
+                    if (data.length === 0) {
+                        alert('都市が見つかりませんでした🥲');
+                        return;
+                    }
                     localStorage.setItem('weatherLocation', JSON.stringify({
                         lat: parseFloat(data[0].lat),
                         lon: parseFloat(data[0].lon),
@@ -1974,17 +2200,50 @@
         }
 
         function getWeatherInfo(code) {
-            if (code === 0) return { icon: '☀️', label: '快晴' };
-            if (code <= 2) return { icon: '🌤️', label: '晴れ時々曇り' };
-            if (code <= 3) return { icon: '☁️', label: '曇り' };
-            if (code <= 48) return { icon: '🌫️', label: '霧' };
-            if (code <= 57) return { icon: '🌦️', label: '霧雨' };
-            if (code <= 67) return { icon: '🌧️', label: '雨' };
-            if (code <= 77) return { icon: '❄️', label: '雪' };
-            if (code <= 82) return { icon: '🌧️', label: 'にわか雨' };
-            if (code <= 86) return { icon: '🌨️', label: 'にわか雪' };
-            if (code <= 99) return { icon: '⛈️', label: '雷雨' };
-            return { icon: '🌈', label: '不明' };
+            if (code === 0) return {
+                icon: '☀️',
+                label: '快晴'
+            };
+            if (code <= 2) return {
+                icon: '🌤️',
+                label: '晴れ時々曇り'
+            };
+            if (code <= 3) return {
+                icon: '☁️',
+                label: '曇り'
+            };
+            if (code <= 48) return {
+                icon: '🌫️',
+                label: '霧'
+            };
+            if (code <= 57) return {
+                icon: '🌦️',
+                label: '霧雨'
+            };
+            if (code <= 67) return {
+                icon: '🌧️',
+                label: '雨'
+            };
+            if (code <= 77) return {
+                icon: '❄️',
+                label: '雪'
+            };
+            if (code <= 82) return {
+                icon: '🌧️',
+                label: 'にわか雨'
+            };
+            if (code <= 86) return {
+                icon: '🌨️',
+                label: 'にわか雪'
+            };
+            if (code <= 99) return {
+                icon: '⛈️',
+                label: '雷雨'
+            };
+            return {
+                icon: '🌈',
+                label: '不明'
+            };
         }
 
         function getAdvice(temp, code) {
@@ -2017,15 +2276,19 @@
                 return;
             }
             try {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    audio: true
+                });
 
-                const mimeType = MediaRecorder.isTypeSupported('audio/mp4')
-                    ? 'audio/mp4'
-                    : MediaRecorder.isTypeSupported('audio/webm')
-                        ? 'audio/webm'
-                        : '';
+                const mimeType = MediaRecorder.isTypeSupported('audio/mp4') ?
+                    'audio/mp4' :
+                    MediaRecorder.isTypeSupported('audio/webm') ?
+                    'audio/webm' :
+                    '';
 
-                mediaRecorder = new MediaRecorder(stream, mimeType ? { mimeType } : {});
+                mediaRecorder = new MediaRecorder(stream, mimeType ? {
+                    mimeType
+                } : {});
                 audioChunks = [];
 
                 mediaRecorder.ondataavailable = (e) => {
@@ -2033,7 +2296,9 @@
                 };
 
                 mediaRecorder.onstop = async () => {
-                    const audioBlob = new Blob(audioChunks, { type: mediaRecorder.mimeType });
+                    const audioBlob = new Blob(audioChunks, {
+                        type: mediaRecorder.mimeType
+                    });
                     await saveVoice(audioBlob);
                     stream.getTracks().forEach(t => t.stop());
                 };
@@ -2081,7 +2346,9 @@
             const fileName = `${Date.now()}_voice.${ext}`;
 
             try {
-                const { error } = await db.storage
+                const {
+                    error
+                } = await db.storage
                     .from('voices')
                     .upload(fileName, audioBlob, {
                         cacheControl: '3600',
@@ -2090,14 +2357,22 @@
 
                 if (error) throw error;
 
-                const { data: urlData } = db.storage
+                const {
+                    data: urlData
+                } = db.storage
                     .from('voices')
                     .getPublicUrl(fileName);
 
                 const now = new Date();
-                const dateStr = `${now.getFullYear()}/${now.getMonth() + 1}/${now.getDate()} ${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')}`;
+                const dateStr =
+                    `${now.getFullYear()}/${now.getMonth() + 1}/${now.getDate()} ${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')}`;
 
-                voices.push({ author, url: urlData.publicUrl, date: dateStr, fileName });
+                voices.push({
+                    author,
+                    url: urlData.publicUrl,
+                    date: dateStr,
+                    fileName
+                });
                 await updateCloudData();
                 renderVoices();
 
@@ -2114,7 +2389,8 @@
         function renderVoices() {
             const container = document.getElementById('voiceListContainer');
             if (!voices.length) {
-                container.innerHTML = '<div style="text-align:center;font-size:12px;color:#999;padding:20px;">ボイスメッセージはまだありません🎤</div>';
+                container.innerHTML =
+                    '<div style="text-align:center;font-size:12px;color:#999;padding:20px;">ボイスメッセージはまだありません🎤</div>';
                 return;
             }
 
@@ -2197,7 +2473,9 @@
             const badge = document.getElementById(id);
             if (badge) {
                 badge.style.display = 'inline';
-                badge.onclick = () => { badge.style.display = 'none'; };
+                badge.onclick = () => {
+                    badge.style.display = 'none';
+                };
                 badge.style.cursor = 'pointer';
             }
         }
@@ -2262,8 +2540,11 @@
 
         function startRealtime() {
             db.channel('memories-changes')
-                .on('postgres_changes',
-                    { event: 'UPDATE', schema: 'public', table: 'memories' },
+                .on('postgres_changes', {
+                        event: 'UPDATE',
+                        schema: 'public',
+                        table: 'memories'
+                    },
                     (payload) => {
                         const newData = payload.new;
 
@@ -2290,8 +2571,11 @@
         // 通知用は別で残す
         function listenForChanges(reg) {
             db.channel('memories-notify')
-                .on('postgres_changes',
-                    { event: 'UPDATE', schema: 'public', table: 'memories' },
+                .on('postgres_changes', {
+                        event: 'UPDATE',
+                        schema: 'public',
+                        table: 'memories'
+                    },
                     (payload) => {
                         const newData = payload.new;
 
@@ -2314,6 +2598,7 @@
         }
         updateCountdowns();
     </script>
+
     <!-- 桜の花びら -->
     <canvas id="sakura"
         style="position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;"></canvas>
@@ -2331,7 +2616,9 @@
             canvas.height = window.innerHeight;
         });
 
-        const petals = Array.from({ length: 30 }, () => ({
+        const petals = Array.from({
+            length: 30
+        }, () => ({
             x: Math.random() * canvas.width,
             y: Math.random() * canvas.height,
             size: Math.random() * 8 + 4,
@@ -2391,6 +2678,135 @@
             </div>
         </div>
     </div>
+    <script>
+        let currentUser = null;
+        let USER_ID = null;
+        let USER_NAME = null;
+
+        /* 🔐 ログインチェック */
+        async function checkLogin() {
+            const {
+                data
+            } = await db.auth.getUser();
+
+            if (data.user) {
+                currentUser = data.user;
+                USER_ID = currentUser.id;
+
+                const savedName = localStorage.getItem("user_name");
+
+                if (!savedName) {
+                    // 👤 初回だけ名前入力
+                    document.getElementById("loginUI").style.display = "none";
+                    document.getElementById("nameSetup").style.display = "block";
+                    return;
+                }
+
+                USER_NAME = savedName;
+
+                document.getElementById("authScreen").style.display = "none";
+                loadData();
+            }
+        }
+
+        /* 👤 名前保存 */
+        async function saveFirstName() {
+            const btn = document.getElementById("startBtn");
+
+            btn.classList.add("btn-loading");
+            btn.innerText = "開始中...";
+
+            const name = document.getElementById("firstNameInput").value;
+
+            if (!name) {
+                alert("名前を入れてね！");
+                btn.classList.remove("btn-loading");
+                btn.innerText = "はじめる";
+                return;
+            }
+
+            localStorage.setItem("user_name", name);
+            USER_NAME = name;
+
+            await db.from("profiles").upsert({
+                id: USER_ID,
+                name: name
+            });
+
+            document.getElementById("authScreen").style.display = "none";
+            loadData();
+        }
+
+        /* 🆕 新規登録 */
+        async function signUp() {
+            const btn = document.getElementById("signupBtn");
+
+            btn.classList.add("btn-loading");
+            btn.innerText = "登録中...";
+
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
+
+            const {
+                error
+            } = await db.auth.signUp({
+                email,
+                password
+            });
+
+            btn.classList.remove("btn-loading");
+            btn.innerText = "新規登録";
+
+            if (error) {
+                alert(error.message);
+            } else {
+                alert("登録成功！ログインしてね");
+            }
+        }
+
+        /* 🔑 ログイン */
+        async function signIn() {
+            const btn = document.getElementById("loginBtn");
+
+            btn.classList.add("btn-loading");
+            btn.innerText = "ログイン中...";
+
+            const email = document.getElementById("email").value.trim();
+            const password = document.getElementById("password").value.trim();
+
+            const {
+                data,
+                error
+            } = await db.auth.signInWithPassword({
+                email,
+                password
+            });
+
+            btn.classList.remove("btn-loading");
+            btn.innerText = "ログイン";
+
+            if (error) {
+                alert("ログイン失敗: " + error.message);
+                return;
+            }
+
+            currentUser = data.user;
+            USER_ID = currentUser.id;
+
+            document.getElementById("authScreen").style.display = "none";
+            loadData();
+        }
+
+        /* 🚀 起動 */
+        window.onload = () => {
+            checkLogin();
+        };
+
+        /* 仮 */
+        function loadData() {
+            console.log("ログイン成功！");
+        }
+    </script>
 </body>
 
 </html>
