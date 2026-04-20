@@ -101,7 +101,7 @@
             max-width: 260px;
             border: 1px solid #eee;
             border-radius: 12px;
-
+            box-sizing: border-box;
             font-size: 14px;
         }
 
@@ -1219,13 +1219,6 @@
                     // 👇 初回だけ名前入力画面出す
                     document.getElementById("loginUI").style.display = "none";
                     document.getElementById("nameSetup").style.display = "block";
-
-                    // 👇 メール入力UIは隠す
-                    document.getElementById("email").style.display = "none";
-                    document.getElementById("password").style.display = "none";
-                    document.querySelector(".btn-primary").style.display = "none";
-                    document.querySelector(".btn-secondary").style.display = "none";
-
                     return;
                 }
 
