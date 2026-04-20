@@ -16,6 +16,14 @@
             scroll-behavior: smooth;
         }
 
+        #loginUI {
+            display: block;
+        }
+
+        #nameSetup {
+            display: none;
+        }
+
         header {
             background: linear-gradient(135deg, #ff9a9e, #fecfef, #fad0c4);
             background-size: 200% 200%;
@@ -71,9 +79,8 @@
             padding: 30px 20px;
             width: 85%;
             max-width: 320px;
-
+            gap: 10px;
             text-align: center;
-
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
         }
 
@@ -120,6 +127,29 @@
             border-radius: 12px;
 
             background: #eee;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(255, 154, 158, 0.4);
+        }
+
+        .btn-secondary:hover {
+            background: #ddd;
+        }
+
+        /* 押した時 */
+        .btn-primary:active,
+        .btn-secondary:active {
+            transform: scale(0.95);
+            box-shadow: none;
+        }
+
+        /* 無効時（disabled） */
+        .btn-primary:disabled,
+        .btn-secondary:disabled {
+            cursor: not-allowed;
+            opacity: 0.6;
         }
 
         .photo-viewer {
@@ -1232,9 +1262,6 @@
         }
 
         async function signUp() {
-            const name = document.getElementById("name").value;
-            localStorage.setItem("user_name", name);
-            USER_NAME = name;
             const email = document.getElementById("email").value;
             const password = document.getElementById("password").value;
 
@@ -1253,24 +1280,16 @@
         }
 
         async function signIn() {
-            const name = document.getElementById("name").value;
-            localStorage.setItem("user_name", name);
-            USER_NAME = name;
             const email = document.getElementById("email").value.trim();
             const password = document.getElementById("password").value.trim();
-
-            console.log("email:", email);
-            console.log("password:", password);
 
             const {
                 data,
                 error
             } = await db.auth.signInWithPassword({
-                email: email,
-                password: password
+                email,
+                password
             });
-
-            console.log("LOGIN RESULT", data, error);
 
             if (error) {
                 alert("ログイン失敗: " + error.message);
@@ -1281,7 +1300,6 @@
             USER_ID = currentUser.id;
 
             document.getElementById("authScreen").style.display = "none";
-
             loadData();
         }
 
