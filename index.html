@@ -1626,11 +1626,7 @@
             saveBtn.disabled = true;
 
             try {
-                const data = {
-                    name,
-                    note,
-                    insta
-                };
+                const data = { name, note, insta, likes: editingIndex !== null ? (shops[editingIndex].likes || []) : [] };
 
                 if (editingIndex !== null) {
                     // ✏️ 編集モード
