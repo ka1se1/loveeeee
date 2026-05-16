@@ -1230,10 +1230,17 @@
 
             <!-- ゲーム中（描く側） -->
             <div id="drawerScreen" style="display:none;">
-                <div style="text-align:center;background:linear-gradient(135deg,#fff5f7,#ffe3e6);border-radius:14px;padding:10px;margin-bottom:10px;">
-                    <div style="font-size:11px;color:#888;">お題</div>
-                    <div id="drawWord" style="font-size:24px;font-weight:bold;color:#d81b60;margin-top:4px;">-</div>
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+                    <div style="background:linear-gradient(135deg,#fff5f7,#ffe3e6);border-radius:14px;padding:8px 14px;flex:1;text-align:center;margin-right:8px;">
+                        <div style="font-size:10px;color:#888;">お題</div>
+                        <div id="drawWord" style="font-size:22px;font-weight:bold;color:#d81b60;">-</div>
+                    </div>
+                    <div style="background:white;border-radius:14px;padding:10px 14px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.1);">
+                        <div style="font-size:10px;color:#888;">残り</div>
+                        <div id="gameTimer" style="font-size:22px;font-weight:bold;color:#666;">30秒</div>
+                    </div>
                 </div>
+
                 <canvas id="drawCanvas" width="300" height="300" style="
                     width:100%;height:300px;
                     background:white;border-radius:14px;
@@ -1260,9 +1267,13 @@
 
             <!-- ゲーム中（当てる側） -->
             <div id="guesserScreen" style="display:none;">
-                <p style="text-align:center;font-size:12px;color:#666;margin:5px 0;">
-                    👀 相手が描いてるよ！
-                </p>
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                    <p style="font-size:12px;color:#666;margin:0;">👀 相手が描いてるよ！</p>
+                    <div style="background:white;border-radius:14px;padding:6px 12px;text-align:center;box-shadow:0 2px 6px rgba(0,0,0,0.1);">
+                        <div style="font-size:9px;color:#888;">残り</div>
+                        <div id="gameTimerGuesser" style="font-size:18px;font-weight:bold;color:#666;">30秒</div>
+                    </div>
+                </div>
                 <canvas id="watchCanvas" width="300" height="300" style="
                     width:100%;height:300px;
                     background:white;border-radius:14px;
@@ -3230,36 +3241,89 @@
         }
 
         // --- お絵かきゲーム ---
+        // --- お絵かきゲーム ---
         const DRAW_WORDS = [
-            'りんご', 'バナナ', 'ねこ', 'いぬ', 'ぞう', 'ペンギン',
-            'スマホ', 'ピザ', 'すし', 'ラーメン', 'ケーキ', 'アイス',
-            '車', '電車', '飛行機', '家', 'ビル', '東京タワー',
-            '太陽', '月', '雲', '虹', '花', '木',
-            'ハート', '星', '王様', 'お姫様', 'ロボット', 'ドラゴン',
-            '富士山', '海', '川', '山', 'プール', 'ベッド',
-            'メガネ', '帽子', '靴', 'カバン', '時計', 'ピアノ',
-            'ギター', 'カメラ', 'テレビ', 'パソコン', '本', '鉛筆'
+            // 動物
+            'ねこ', 'いぬ', 'ぞう', 'きりん', 'パンダ', 'うさぎ', 'りす', 'くま', 'ライオン', 'とら',
+            'さる', 'ペンギン', 'ぶた', 'うし', 'うま', 'ひつじ', 'にわとり', 'カエル', 'ヘビ', 'カメ',
+            'ワニ', 'イルカ', 'クジラ', 'サメ', 'タコ', 'イカ', 'カニ', 'エビ', 'クラゲ', 'カタツムリ',
+            'ちょうちょ', 'てんとう虫', 'カブトムシ', 'ハチ', 'クモ', 'スズメ', 'カラス', 'ハト', 'フクロウ', 'ハムスター',
+            'カピバラ', 'コアラ', 'カンガルー', 'シマウマ', 'サイ', 'カバ', 'キツネ', 'タヌキ', 'イノシシ', 'シカ',
+            // 食べ物
+            'りんご', 'バナナ', 'みかん', 'ぶどう', 'いちご', 'スイカ', 'メロン', 'パイナップル', 'キウイ', 'マンゴー',
+            'トマト', 'にんじん', 'じゃがいも', 'たまねぎ', 'キャベツ', 'きゅうり', 'なす', 'ピーマン', 'かぼちゃ', 'とうもろこし',
+            'ごはん', 'パン', 'うどん', 'そば', 'ラーメン', 'パスタ', 'ピザ', 'ハンバーガー', 'サンドイッチ', 'おにぎり',
+            'すし', 'てんぷら', 'カレー', 'オムライス', 'たこ焼き', 'お好み焼き', 'やきとり', 'ぎょうざ', 'からあげ', 'ステーキ',
+            'たまご', 'チーズ', 'ソーセージ', '牛乳', 'ヨーグルト', 'プリン', 'ケーキ', 'アイス', 'ドーナツ', 'クッキー',
+            'チョコレート', 'キャンディ', 'せんべい', 'もち', 'たい焼き', 'たこ', 'パンケーキ', 'クレープ', 'ワッフル', 'マカロン',
+            // 身近なもの
+            'スマホ', 'パソコン', 'タブレット', 'テレビ', 'カメラ', 'ヘッドホン', 'マイク', 'スピーカー', 'リモコン', '時計',
+            'メガネ', '帽子', '靴', 'カバン', '財布', '傘', '鍵', '指輪', 'ネックレス', 'マスク',
+            'コップ', 'お皿', 'はし', 'スプーン', 'フォーク', 'なべ', 'フライパン', 'いす', 'つくえ', 'ベッド',
+            'ソファ', '本棚', 'カーテン', 'まくら', 'ふとん', '本', 'ノート', '鉛筆', '消しゴム', 'ハサミ',
+            '電卓', '定規', 'ボール', '風船', 'おもちゃ', '人形', 'ぬいぐるみ', 'ロボット', 'ブロック', 'パズル',
+            // 乗り物
+            '車', '電車', 'バス', 'タクシー', 'トラック', '飛行機', 'ヘリコプター', '船', 'ヨット', '潜水艦',
+            'バイク', '自転車', 'ロケット', '戦車', 'パトカー', '消防車', '救急車', 'ゴンドラ', '気球', 'はしご車',
+            // 自然
+            '太陽', '月', '星', '雲', '虹', '雨', '雪', '雷', '海', '川',
+            '山', '森', '砂漠', '島', '滝', '花', '木', '葉っぱ', '桜', 'バラ',
+            'チューリップ', 'ひまわり', 'タンポポ', 'もみじ', 'いちょう', 'たけのこ', 'きのこ', 'サボテン', '岩', '雲',
+            // スポーツ
+            '野球', 'サッカー', 'バスケ', 'バレー', 'テニス', '卓球', 'ゴルフ', 'ボウリング', 'スキー', 'スケート',
+            '水泳', 'マラソン', '体操', '柔道', '剣道', '将棋', 'けん玉', 'なわとび', 'てつぼう', 'シーソー',
+            // 建物・場所
+            '家', 'ビル', 'マンション', '学校', '病院', '駅', '空港', '公園', '遊園地', 'プール',
+            '映画館', '図書館', '神社', 'お寺', '城', 'タワー', '東京タワー', '富士山', 'スカイツリー', 'ピラミッド',
+            // 人・キャラ
+            '王様', 'お姫様', '勇者', '魔法使い', '騎士', '忍者', '侍', '海賊', '宇宙人', '幽霊',
+            'お化け', '魔女', '天使', '悪魔', '人魚', '恐竜', 'ドラゴン', 'ユニコーン', '妖精', '雪だるま',
+            'ドラえもん', 'アンパンマン', 'ハローキティ', 'ミッキーマウス', 'スヌーピー', 'リラックマ', 'ちいかわ', 'くまモン', 'ふなっしー', 'ガチャピン',
+            // 形・記号
+            'ハート', '星マーク', '矢印', '稲妻', 'クラウン', 'リボン', 'プレゼント', '吹き出し', '十字', 'お金',
+            // イベント
+            '鳥居', 'こいのぼり', 'クリスマスツリー', 'サンタクロース', 'トナカイ', 'カボチャお化け', '鬼', '節分の豆', '門松', 'お雛様'
         ];
+
+        async function getRandomWord() {
+            // 30%でポケモン、70%で内蔵リスト
+            const usePokemon = Math.random() < 0.3;
+            
+            if (usePokemon) {
+                try {
+                    const id = Math.floor(Math.random() * 1010) + 1;
+                    const res = await fetch(`https://pokeapi.co/api/v2/pokemon-species/${id}/`);
+                    if (res.ok) {
+                        const data = await res.json();
+                        const jaName = data.names.find(n => n.language.name === 'ja-Hrkt' || n.language.name === 'ja');
+                        if (jaName && jaName.name) return jaName.name;
+                    }
+                } catch(e) {
+                    console.error('ポケモンAPI失敗', e);
+                }
+            }
+            
+            return DRAW_WORDS[Math.floor(Math.random() * DRAW_WORDS.length)];
+        }
 
         let drawGameChannel = null;
         let drawCtx = null;
         let watchCtx = null;
         let isDrawing = false;
-        let myRole = null; // 'drawer' or 'guesser'
+        let myRole = null;
         let currentWord = '';
+        let gameTimer = null;
+        let timeLeft = 30;
 
         function startDrawGame() {
             myRole = 'drawer_waiting';
-            currentWord = DRAW_WORDS[Math.floor(Math.random() * DRAW_WORDS.length)];
             
-            // ボタン2つを非表示、待機画面表示
             document.querySelector('#gameStartScreen p').style.display = 'none';
             document.querySelectorAll('#gameStartScreen button').forEach(b => b.style.display = 'none');
             document.getElementById('waitingScreen').style.display = 'block';
             
             connectGameChannel();
             
-            // 参加表明を繰り返し送信
             setTimeout(() => {
                 if (drawGameChannel) {
                     drawGameChannel.send({
@@ -3295,6 +3359,74 @@
             endDrawGame();
         }
 
+        function endDrawGame() {
+            stopTimer();
+            const overlay = document.getElementById('roundEndOverlay');
+            if (overlay) overlay.remove();
+            
+            if (drawGameChannel) {
+                db.removeChannel(drawGameChannel);
+                drawGameChannel = null;
+            }
+            document.querySelector('#gameStartScreen p').style.display = 'block';
+            document.querySelectorAll('#gameStartScreen button').forEach(b => b.style.display = '');
+            document.getElementById('waitingScreen').style.display = 'none';
+            document.getElementById('gameStartScreen').style.display = 'block';
+            document.getElementById('drawerScreen').style.display = 'none';
+            document.getElementById('guesserScreen').style.display = 'none';
+            myRole = null;
+            currentWord = '';
+        }
+
+        // タイマー
+        function startTimer() {
+            timeLeft = 30;
+            updateTimerDisplay();
+            if (gameTimer) clearInterval(gameTimer);
+            gameTimer = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay();
+                if (timeLeft <= 0) {
+                    clearInterval(gameTimer);
+                    onTimeUp();
+                }
+            }, 1000);
+        }
+
+        function stopTimer() {
+            if (gameTimer) {
+                clearInterval(gameTimer);
+                gameTimer = null;
+            }
+        }
+
+        function updateTimerDisplay() {
+            const els = [document.getElementById('gameTimer'), document.getElementById('gameTimerGuesser')];
+            els.forEach(el => {
+                if (el) {
+                    el.innerText = timeLeft + '秒';
+                    if (timeLeft <= 10) {
+                        el.style.color = '#ff4d6d';
+                    } else {
+                        el.style.color = '#666';
+                    }
+                }
+            });
+        }
+
+        function onTimeUp() {
+            if (myRole === 'drawer') {
+                if (drawGameChannel) {
+                    drawGameChannel.send({
+                        type: 'broadcast',
+                        event: 'time_up',
+                        payload: { word: currentWord }
+                    });
+                }
+                showRoundEnd(false, currentWord);
+            }
+        }
+
         function connectGameChannel() {
             drawGameChannel = db.channel('draw-game', {
                 config: { broadcast: { self: false } }
@@ -3302,13 +3434,12 @@
             
             drawGameChannel
                 .on('broadcast', { event: 'drawer_ready' }, () => {
-                    // 自分が当てる側で待機中なら開始
                     if (myRole === 'guesser_waiting') {
                         myRole = 'guesser';
                         document.getElementById('waitingScreen').style.display = 'none';
                         document.getElementById('guesserScreen').style.display = 'block';
                         setupWatchCanvas();
-                        // 自分も準備OKを返す
+                        startTimer();
                         drawGameChannel.send({
                             type: 'broadcast',
                             event: 'guesser_ready',
@@ -3316,16 +3447,16 @@
                         });
                     }
                 })
-                .on('broadcast', { event: 'guesser_ready' }, () => {
-                    // 自分が描く側で待機中なら開始
+                .on('broadcast', { event: 'guesser_ready' }, async () => {
                     if (myRole === 'drawer_waiting') {
                         myRole = 'drawer';
+                        currentWord = await getRandomWord();
                         document.getElementById('waitingScreen').style.display = 'none';
                         document.getElementById('drawerScreen').style.display = 'block';
                         document.getElementById('drawWord').innerText = currentWord;
                         document.getElementById('guessDisplay').innerHTML = '<div style="color:#999;">相手の回答がここに表示されるよ</div>';
                         setupDrawCanvas();
-                        // 自分も準備OKを返す
+                        startTimer();
                         drawGameChannel.send({
                             type: 'broadcast',
                             event: 'drawer_ready',
@@ -3364,38 +3495,46 @@
                         display.scrollTop = display.scrollHeight;
                         
                         if (isCorrect) {
+                            stopTimer();
                             drawGameChannel.send({
                                 type: 'broadcast',
                                 event: 'correct',
                                 payload: { word: currentWord }
                             });
-                            showGameCelebration(currentWord);
+                            showRoundEnd(true, currentWord);
                         }
                     }
                 })
                 .on('broadcast', { event: 'correct' }, (msg) => {
                     if (myRole === 'guesser') {
-                        showGameCelebration(msg.payload.word);
+                        stopTimer();
+                        showRoundEnd(true, msg.payload.word);
+                    }
+                })
+                .on('broadcast', { event: 'time_up' }, (msg) => {
+                    if (myRole === 'guesser') {
+                        stopTimer();
+                        showRoundEnd(false, msg.payload.word);
+                    }
+                })
+                .on('broadcast', { event: 'next_round' }, async (msg) => {
+                    if (myRole === 'guesser') {
+                        const overlay = document.getElementById('roundEndOverlay');
+                        if (overlay) overlay.remove();
+                        if (watchCtx) watchCtx.clearRect(0, 0, 300, 300);
+                        startTimer();
                     }
                 })
                 .subscribe();
         }
 
-        function endDrawGame() {
-            if (drawGameChannel) {
-                db.removeChannel(drawGameChannel);
-                drawGameChannel = null;
-            }
-            // 全画面リセット
-            document.querySelector('#gameStartScreen p').style.display = 'block';
-            document.querySelectorAll('#gameStartScreen button').forEach(b => b.style.display = '');
-            document.getElementById('waitingScreen').style.display = 'none';
-            document.getElementById('gameStartScreen').style.display = 'block';
-            document.getElementById('drawerScreen').style.display = 'none';
-            document.getElementById('guesserScreen').style.display = 'none';
-            myRole = null;
-            currentWord = '';
+        
+
+        function cancelGame() {
+            endDrawGame();
         }
+
+        
 
         function setupDrawCanvas() {
             const canvas = document.getElementById('drawCanvas');
@@ -3501,40 +3640,227 @@
             input.value = '';
         }
 
-        function showGameCelebration(word) {
-            const overlay = document.createElement('div');
-            overlay.style.cssText = `
-                position: fixed;
-                top: 0; left: 0;
-                width: 100%; height: 100%;
-                background: rgba(255,107,157,0.95);
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: center;
-                z-index: 99999;
-                color: white;
-                text-align: center;
-                animation: fadeIn 0.5s ease;
-            `;
-            overlay.innerHTML = `
-                <div style="font-size:80px;animation:bounce 1s infinite;">🎉</div>
-                <h1 style="font-size:36px;margin:20px 0;">正解！</h1>
-                <p style="font-size:20px;font-weight:bold;">答え：${word}</p>
-                <button onclick="this.parentElement.remove()" style="
-                    margin-top:20px;background:rgba(255,255,255,0.3);
-                    border:2px solid white;color:white;
-                    border-radius:30px;padding:10px 24px;
-                    font-size:14px;font-weight:bold;cursor:pointer;
-                ">閉じる</button>
-            `;
-            document.body.appendChild(overlay);
+        let drawGameChannel = null;
+        let drawCtx = null;
+        let watchCtx = null;
+        let isDrawing = false;
+        let myRole = null;
+        let currentWord = '';
+        let gameTimer = null;
+        let timeLeft = 30;
+
+        function startDrawGame() {
+            myRole = 'drawer_waiting';
+            
+            document.querySelector('#gameStartScreen p').style.display = 'none';
+            document.querySelectorAll('#gameStartScreen button').forEach(b => b.style.display = 'none');
+            document.getElementById('waitingScreen').style.display = 'block';
+            
+            connectGameChannel();
             
             setTimeout(() => {
-                if (overlay.parentElement) overlay.remove();
-            }, 5000);
+                if (drawGameChannel) {
+                    drawGameChannel.send({
+                        type: 'broadcast',
+                        event: 'drawer_ready',
+                        payload: {}
+                    });
+                }
+            }, 500);
         }
 
+        function joinDrawGame() {
+            myRole = 'guesser_waiting';
+            
+            document.querySelector('#gameStartScreen p').style.display = 'none';
+            document.querySelectorAll('#gameStartScreen button').forEach(b => b.style.display = 'none');
+            document.getElementById('waitingScreen').style.display = 'block';
+            
+            connectGameChannel();
+            
+            setTimeout(() => {
+                if (drawGameChannel) {
+                    drawGameChannel.send({
+                        type: 'broadcast',
+                        event: 'guesser_ready',
+                        payload: {}
+                    });
+                }
+            }, 500);
+        }
+
+        function cancelGame() {
+            endDrawGame();
+        }
+
+        function endDrawGame() {
+            stopTimer();
+            const overlay = document.getElementById('roundEndOverlay');
+            if (overlay) overlay.remove();
+            
+            if (drawGameChannel) {
+                db.removeChannel(drawGameChannel);
+                drawGameChannel = null;
+            }
+            document.querySelector('#gameStartScreen p').style.display = 'block';
+            document.querySelectorAll('#gameStartScreen button').forEach(b => b.style.display = '');
+            document.getElementById('waitingScreen').style.display = 'none';
+            document.getElementById('gameStartScreen').style.display = 'block';
+            document.getElementById('drawerScreen').style.display = 'none';
+            document.getElementById('guesserScreen').style.display = 'none';
+            myRole = null;
+            currentWord = '';
+        }
+
+        // タイマー
+        function startTimer() {
+            timeLeft = 30;
+            updateTimerDisplay();
+            if (gameTimer) clearInterval(gameTimer);
+            gameTimer = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay();
+                if (timeLeft <= 0) {
+                    clearInterval(gameTimer);
+                    onTimeUp();
+                }
+            }, 1000);
+        }
+
+        function stopTimer() {
+            if (gameTimer) {
+                clearInterval(gameTimer);
+                gameTimer = null;
+            }
+        }
+
+        function updateTimerDisplay() {
+            const els = [document.getElementById('gameTimer'), document.getElementById('gameTimerGuesser')];
+            els.forEach(el => {
+                if (el) {
+                    el.innerText = timeLeft + '秒';
+                    if (timeLeft <= 10) {
+                        el.style.color = '#ff4d6d';
+                    } else {
+                        el.style.color = '#666';
+                    }
+                }
+            });
+        }
+
+        function onTimeUp() {
+            if (myRole === 'drawer') {
+                if (drawGameChannel) {
+                    drawGameChannel.send({
+                        type: 'broadcast',
+                        event: 'time_up',
+                        payload: { word: currentWord }
+                    });
+                }
+                showRoundEnd(false, currentWord);
+            }
+        }
+
+        function connectGameChannel() {
+            drawGameChannel = db.channel('draw-game', {
+                config: { broadcast: { self: false } }
+            });
+            
+            drawGameChannel
+                .on('broadcast', { event: 'drawer_ready' }, () => {
+                    if (myRole === 'guesser_waiting') {
+                        myRole = 'guesser';
+                        document.getElementById('waitingScreen').style.display = 'none';
+                        document.getElementById('guesserScreen').style.display = 'block';
+                        setupWatchCanvas();
+                        startTimer();
+                        drawGameChannel.send({
+                            type: 'broadcast',
+                            event: 'guesser_ready',
+                            payload: {}
+                        });
+                    }
+                })
+                .on('broadcast', { event: 'guesser_ready' }, async () => {
+                    if (myRole === 'drawer_waiting') {
+                        myRole = 'drawer';
+                        currentWord = await getRandomWord();
+                        document.getElementById('waitingScreen').style.display = 'none';
+                        document.getElementById('drawerScreen').style.display = 'block';
+                        document.getElementById('drawWord').innerText = currentWord;
+                        document.getElementById('guessDisplay').innerHTML = '<div style="color:#999;">相手の回答がここに表示されるよ</div>';
+                        setupDrawCanvas();
+                        startTimer();
+                        drawGameChannel.send({
+                            type: 'broadcast',
+                            event: 'drawer_ready',
+                            payload: {}
+                        });
+                    }
+                })
+                .on('broadcast', { event: 'draw' }, (msg) => {
+                    if (myRole === 'guesser' && watchCtx) {
+                        const { x0, y0, x1, y1 } = msg.payload;
+                        watchCtx.strokeStyle = '#333';
+                        watchCtx.lineWidth = 3;
+                        watchCtx.lineCap = 'round';
+                        watchCtx.beginPath();
+                        watchCtx.moveTo(x0, y0);
+                        watchCtx.lineTo(x1, y1);
+                        watchCtx.stroke();
+                    }
+                })
+                .on('broadcast', { event: 'clear' }, () => {
+                    if (myRole === 'guesser' && watchCtx) {
+                        watchCtx.clearRect(0, 0, 300, 300);
+                    }
+                })
+                .on('broadcast', { event: 'guess' }, (msg) => {
+                    if (myRole === 'drawer') {
+                        const guess = msg.payload.text;
+                        const isCorrect = guess === currentWord;
+                        
+                        const display = document.getElementById('guessDisplay');
+                        const time = new Date().toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' });
+                        const newGuess = document.createElement('div');
+                        newGuess.style.cssText = `padding:4px;margin-top:4px;${isCorrect ? 'background:#ffe3e6;color:#d81b60;font-weight:bold;border-radius:6px;' : 'color:#666;'}`;
+                        newGuess.innerText = `${time} 💬 ${guess}${isCorrect ? ' 🎉 正解！' : ''}`;
+                        display.appendChild(newGuess);
+                        display.scrollTop = display.scrollHeight;
+                        
+                        if (isCorrect) {
+                            stopTimer();
+                            drawGameChannel.send({
+                                type: 'broadcast',
+                                event: 'correct',
+                                payload: { word: currentWord }
+                            });
+                            showRoundEnd(true, currentWord);
+                        }
+                    }
+                })
+                .on('broadcast', { event: 'correct' }, (msg) => {
+                    if (myRole === 'guesser') {
+                        stopTimer();
+                        showRoundEnd(true, msg.payload.word);
+                    }
+                })
+                .on('broadcast', { event: 'time_up' }, (msg) => {
+                    if (myRole === 'guesser') {
+                        stopTimer();
+                        showRoundEnd(false, msg.payload.word);
+                    }
+                })
+                .on('broadcast', { event: 'next_round' }, async (msg) => {
+                    if (myRole === 'guesser') {
+                        const overlay = document.getElementById('roundEndOverlay');
+                        if (overlay) overlay.remove();
+                        if (watchCtx) watchCtx.clearRect(0, 0, 300, 300);
+                        startTimer();
+                    }
+                })
+                .subscribe();
+        }
     </script>
 
     <div id="anniversaryModal" class="modal-overlay">
