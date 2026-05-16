@@ -992,6 +992,11 @@
                 opacity: 0;
             }
         }
+        #annivTitleInput,
+        #annivDateInput,
+        #annivTypeInput {
+            font-size: 16px !important;
+        }
     </style>
 </head>
 
@@ -2729,6 +2734,8 @@
             document.getElementById('loveCountDisplay').innerText = loveCount;
         }
 
+        let loveSaveTimer = null;
+
         async function sendLove() {
             loveCount++;
             updateLoveDisplay();
@@ -2743,8 +2750,11 @@
             document.body.appendChild(heart);
             setTimeout(() => heart.remove(), 1000);
 
-            // 保存（連打してもいいように少し待ってから保存するのが理想ですが、まずはシンプルに）
-            await updateCloudData();
+            // 連打対策：最後の押下から1秒後にまとめて保存
+            if (loveSaveTimer) clearTimeout(loveSaveTimer);
+            loveSaveTimer = setTimeout(async () => {
+                await updateCloudData();
+            }, 1000);
         }
         // Service Worker登録 & 通知許可
         async function initPush() {
@@ -2790,7 +2800,10 @@
                         shops = newData.shops || [];
                         events = newData.events || [];
                         voices = newData.voices || [];
-                        loveCount = newData.love_count || 0;
+                        // 自分のローカルが大きければ上書きしない（連打中の保護）
+                        if ((newData.love_count || 0) > loveCount) {
+                            loveCount = newData.love_count;
+                        }
 
                         renderGallery();
                         renderDiaries();
