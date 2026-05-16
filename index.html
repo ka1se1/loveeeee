@@ -975,11 +975,28 @@
             appearance: none;
             -webkit-appearance: none;
         }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes fall {
+            to {
+                transform: translateY(110vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
     </style>
 </head>
 
 <body>
-    <div id="authScreen" class="auth-screen">
+    <div id="authScreen" class="auth-screen" style="display:none;">
         <div class="auth-card">
 
             <!-- 🔐 ログイン -->
@@ -1291,6 +1308,18 @@
 
     <div class="countdown-container">
         <div class="countdown-item">Days - <span id="anniversaryDays" class="countdown-number">-</span> 日</div>
+        <div id="anniversaryList" style="margin-top:12px;"></div>
+        <button onclick="openAnniversaryModal()" style="
+            margin-top:10px;
+            background: rgba(255,255,255,0.3);
+            border: 1px solid rgba(255,255,255,0.5);
+            color: white;
+            border-radius: 20px;
+            padding: 6px 14px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+        ">＋ 記念日を追加</button>
     </div>
 
     <button class="love-float-btn" onclick="sendLove()">
@@ -1333,17 +1362,20 @@
                 photos = data.photos || [];
                 diaries = data.diaries || [];
                 loveCount = data.love_count || 0;
-                events = data.events || []; // ← 追加
+                events = data.events || [];
+                anniversaries = data.anniversaries || [];
 
                 renderShops();
                 renderGallery();
                 renderDiaries();
-                renderCalendar(); // ← 追加
+                renderCalendar();
                 updateLoveDisplay();
                 updateCountdowns();
                 voices = data.voices || [];
                 renderVoices();
                 initLastKnownCounts();
+                renderAnniversaries();
+                
             }
         }
 
@@ -1361,6 +1393,7 @@
                     diaries,
                     events, // ← 追加
                     voices,
+                    anniversaries,
                     love_count: loveCount,
                     updated_at: new Date().toISOString()
                 });
@@ -2500,6 +2533,188 @@
             }
         }
 
+        // --- 記念日機能 ---
+        let anniversaries = [];
+
+        function openAnniversaryModal() {
+            document.getElementById('anniversaryModal').classList.add('active');
+        }
+
+        function closeAnniversaryModal() {
+            document.getElementById('anniversaryModal').classList.remove('active');
+            document.getElementById('annivTitleInput').value = '';
+            document.getElementById('annivDateInput').value = '';
+        }
+
+        async function saveAnniversary() {
+            const title = document.getElementById('annivTitleInput').value;
+            const date = document.getElementById('annivDateInput').value;
+            const type = document.getElementById('annivTypeInput').value;
+
+            if (!title || !date) {
+                alert('タイトルと日付を入れてね！');
+                return;
+            }
+
+            anniversaries.push({ title, date, type });
+            await updateCloudData();
+            closeAnniversaryModal();
+            renderAnniversaries();
+            checkSpecialDay();
+        }
+
+        async function deleteAnniversary(idx) {
+            if (!confirm('この記念日を削除する？')) return;
+            anniversaries.splice(idx, 1);
+            await updateCloudData();
+            renderAnniversaries();
+        }
+
+        function renderAnniversaries() {
+            const container = document.getElementById('anniversaryList');
+            if (!anniversaries.length) {
+                container.innerHTML = '';
+                return;
+            }
+
+            const now = new Date();
+            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+            // 次の日付までの日数を計算してソート
+            const sorted = anniversaries.map((a, idx) => {
+                const target = new Date(a.date);
+                let nextDate;
+
+                if (a.type === 'countdown') {
+                    nextDate = target;
+                } else {
+                    // 毎年系：今年または来年の同じ日
+                    nextDate = new Date(now.getFullYear(), target.getMonth(), target.getDate());
+                    if (nextDate < today) {
+                        nextDate = new Date(now.getFullYear() + 1, target.getMonth(), target.getDate());
+                    }
+                }
+
+                const diff = Math.ceil((nextDate - today) / (1000 * 60 * 60 * 24));
+                return { ...a, idx, diff, nextDate };
+            }).sort((a, b) => a.diff - b.diff);
+
+            container.innerHTML = sorted.map(a => {
+                const icon = a.type === 'birthday' ? '🎂' : a.type === 'countdown' ? '⏰' : '📅';
+                const dayText = a.diff === 0 ? '今日！🎉' : a.diff < 0 ? `${Math.abs(a.diff)}日経過` : `あと ${a.diff} 日`;
+                const isToday = a.diff === 0;
+                
+                return `
+                    <div style="
+                        display:flex;
+                        justify-content:space-between;
+                        align-items:center;
+                        background:${isToday ? 'rgba(255,255,255,0.4)' : 'rgba(255,255,255,0.2)'};
+                        border-radius:14px;
+                        padding:8px 12px;
+                        margin-bottom:6px;
+                        ${isToday ? 'animation: pulse 1.5s infinite;' : ''}
+                    ">
+                        <div style="text-align:left;">
+                            <div style="font-size:13px;font-weight:bold;">${icon} ${a.title}</div>
+                            <div style="font-size:10px;opacity:0.9;">${a.date}</div>
+                        </div>
+                        <div style="display:flex;align-items:center;gap:8px;">
+                            <div style="font-size:14px;font-weight:bold;">${dayText}</div>
+                            <button onclick="deleteAnniversary(${a.idx})" style="
+                                background:none;border:none;color:rgba(255,255,255,0.7);
+                                font-size:12px;cursor:pointer;
+                            ">🗑️</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // --- 特別な日のお祝い演出 ---
+        function checkSpecialDay() {
+            const now = new Date();
+            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+            const todayEvents = anniversaries.filter(a => {
+                const target = new Date(a.date);
+                if (a.type === 'countdown') {
+                    return target.getTime() === today.getTime();
+                } else {
+                    return target.getMonth() === today.getMonth() && target.getDate() === today.getDate();
+                }
+            });
+
+            if (todayEvents.length > 0) {
+                showCelebration(todayEvents[0]);
+            }
+        }
+
+        function showCelebration(event) {
+            // 既に表示中ならスキップ
+            if (document.getElementById('celebrationOverlay')) return;
+
+            const overlay = document.createElement('div');
+            overlay.id = 'celebrationOverlay';
+            overlay.style.cssText = `
+                position: fixed;
+                top: 0; left: 0;
+                width: 100%; height: 100%;
+                background: linear-gradient(135deg, rgba(255,107,157,0.95), rgba(255,154,158,0.95), rgba(254,207,239,0.95));
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                z-index: 99999;
+                color: white;
+                text-align: center;
+                animation: fadeIn 0.5s ease;
+            `;
+
+            const icon = event.type === 'birthday' ? '🎂' : event.type === 'countdown' ? '⏰' : '🎉';
+            
+            overlay.innerHTML = `
+                <div style="font-size:100px;margin-bottom:20px;animation: bounce 1s infinite;">${icon}</div>
+                <h1 style="font-size:42px;margin:0;letter-spacing:2px;text-shadow:0 4px 10px rgba(0,0,0,0.2);">${event.title}</h1>
+                <p style="font-size:24px;margin-top:16px;font-weight:bold;">今日だよ！💕</p>
+                <button onclick="document.getElementById('celebrationOverlay').remove()" style="
+                    margin-top:30px;
+                    background: rgba(255,255,255,0.3);
+                    border: 2px solid white;
+                    color: white;
+                    border-radius: 30px;
+                    padding: 12px 30px;
+                    font-size: 16px;
+                    font-weight: bold;
+                    cursor: pointer;
+                    backdrop-filter: blur(8px);
+                ">閉じる</button>
+            `;
+
+            document.body.appendChild(overlay);
+
+            // 花びらを大量に降らせる演出
+            for (let i = 0; i < 50; i++) {
+                setTimeout(() => createCelebrationPetal(), i * 50);
+            }
+        }
+
+        function createCelebrationPetal() {
+            const petal = document.createElement('div');
+            petal.style.cssText = `
+                position: fixed;
+                top: -20px;
+                left: ${Math.random() * 100}%;
+                font-size: ${Math.random() * 20 + 20}px;
+                z-index: 100000;
+                pointer-events: none;
+                animation: fall ${Math.random() * 3 + 3}s linear forwards;
+            `;
+            petal.innerText = ['🌸', '💕', '🎉', '✨'][Math.floor(Math.random() * 4)];
+            document.body.appendChild(petal);
+            setTimeout(() => petal.remove(), 6000);
+        }
+
         // --- 記念日計算 ---
         function updateCountdowns() {
             const now = new Date();
@@ -2654,10 +2869,46 @@
             ctx.translate(x, y);
             ctx.rotate(rotation);
             ctx.globalAlpha = opacity;
+            
+            // 花びらのグラデーション
+            const gradient = ctx.createRadialGradient(0, -size * 0.3, 0, 0, 0, size);
+            gradient.addColorStop(0, '#ffd6e0');
+            gradient.addColorStop(0.6, '#ffb7c5');
+            gradient.addColorStop(1, '#ff9ab0');
+            ctx.fillStyle = gradient;
+            
+            // 桜の花びらの形（ハート型の切れ込み付き）
             ctx.beginPath();
-            ctx.fillStyle = '#ffb7c5';
-            ctx.ellipse(0, 0, size, size * 0.6, 0, 0, Math.PI * 2);
+            ctx.moveTo(0, size * 0.8);
+            // 右側の曲線
+            ctx.bezierCurveTo(
+                size * 0.6, size * 0.5,
+                size * 0.5, -size * 0.3,
+                size * 0.1, -size * 0.6
+            );
+            // 上部の切れ込み（桜の特徴）
+            ctx.bezierCurveTo(
+                size * 0.05, -size * 0.5,
+                -size * 0.05, -size * 0.5,
+                -size * 0.1, -size * 0.6
+            );
+            // 左側の曲線
+            ctx.bezierCurveTo(
+                -size * 0.5, -size * 0.3,
+                -size * 0.6, size * 0.5,
+                0, size * 0.8
+            );
+            ctx.closePath();
             ctx.fill();
+            
+            // 中心の線（葉脈っぽい）
+            ctx.strokeStyle = 'rgba(255, 150, 180, 0.4)';
+            ctx.lineWidth = 0.5;
+            ctx.beginPath();
+            ctx.moveTo(0, size * 0.8);
+            ctx.lineTo(0, -size * 0.5);
+            ctx.stroke();
+            
             ctx.restore();
         }
 
@@ -2666,10 +2917,11 @@
             petals.forEach(p => {
                 drawPetal(p.x, p.y, p.size, p.rotation, p.opacity);
                 p.y += p.speedY;
-                p.x += p.speedX;
+                // 横にゆらゆら揺れる
+                p.x += p.speedX + Math.sin(p.y * 0.01) * 0.5;
                 p.rotation += p.rotationSpeed;
-                if (p.y > canvas.height) {
-                    p.y = -10;
+                if (p.y > canvas.height + 20) {
+                    p.y = -20;
                     p.x = Math.random() * canvas.width;
                 }
             });
@@ -2705,27 +2957,30 @@
 
         /* 🔐 ログインチェック */
         async function checkLogin() {
-            const {
-                data
-            } = await db.auth.getUser();
+            const { data } = await db.auth.getUser();
 
             if (data.user) {
+                // ログイン済み
                 currentUser = data.user;
                 USER_ID = currentUser.id;
 
                 const savedName = localStorage.getItem("user_name");
 
                 if (!savedName) {
-                    // 👤 初回だけ名前入力
+                    // 初回だけ名前入力画面を表示
+                    document.getElementById("authScreen").style.display = "flex";
                     document.getElementById("loginUI").style.display = "none";
                     document.getElementById("nameSetup").style.display = "block";
                     return;
                 }
 
                 USER_NAME = savedName;
-
-                document.getElementById("authScreen").style.display = "none";
                 loadData();
+            } else {
+                // 未ログインならログイン画面を表示
+                document.getElementById("authScreen").style.display = "flex";
+                document.getElementById("loginUI").style.display = "block";
+                document.getElementById("nameSetup").style.display = "none";
             }
         }
 
@@ -2822,6 +3077,39 @@
             checkLogin();
         };
     </script>
+
+    <div id="anniversaryModal" class="modal-overlay">
+        <div class="modal-content">
+            <h3>記念日・誕生日を追加 🎉</h3>
+            <div class="input-group">
+                <label>タイトル</label>
+                <input type="text" id="annivTitleInput" placeholder="例：誕生日🎂、初デート💕">
+            </div>
+            <div class="input-group">
+                <label>日付</label>
+                <input type="date" id="annivDateInput">
+            </div>
+            <div class="input-group">
+                <label>種類</label>
+                <select id="annivTypeInput" style="
+                    width: 100%;
+                    padding: 10px;
+                    border: 1px solid #ddd;
+                    border-radius: 10px;
+                    font-size: 16px;
+                    background: white;
+                ">
+                    <option value="anniversary">📅 毎年の記念日</option>
+                    <option value="birthday">🎂 誕生日</option>
+                    <option value="countdown">⏰ カウントダウン（1回だけ）</option>
+                </select>
+            </div>
+            <div class="modal-actions">
+                <button class="btn" onclick="closeAnniversaryModal()">キャンセル</button>
+                <button class="btn btn-save" onclick="saveAnniversary()">保存</button>
+            </div>
+        </div>
+    </div>
 </body>
 
 </html>
