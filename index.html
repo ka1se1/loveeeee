@@ -3381,16 +3381,6 @@
                 .subscribe();
         }
 
-        function joinDrawGame() {
-            myRole = 'guesser';
-            
-            document.getElementById('gameStartScreen').style.display = 'none';
-            document.getElementById('guesserScreen').style.display = 'block';
-            
-            setupWatchCanvas();
-            connectGameChannel();
-        }
-
         function endDrawGame() {
             if (drawGameChannel) {
                 db.removeChannel(drawGameChannel);
@@ -3405,65 +3395,6 @@
             document.getElementById('guesserScreen').style.display = 'none';
             myRole = null;
             currentWord = '';
-        }
-
-        function connectGameChannel() {
-            drawGameChannel = db.channel('draw-game', {
-                config: { broadcast: { self: false } }
-            });
-            
-            drawGameChannel
-                .on('broadcast', { event: 'draw' }, (msg) => {
-                    if (myRole === 'guesser' && watchCtx) {
-                        const { x0, y0, x1, y1 } = msg.payload;
-                        watchCtx.strokeStyle = '#333';
-                        watchCtx.lineWidth = 3;
-                        watchCtx.lineCap = 'round';
-                        watchCtx.beginPath();
-                        watchCtx.moveTo(x0, y0);
-                        watchCtx.lineTo(x1, y1);
-                        watchCtx.stroke();
-                    }
-                })
-                .on('broadcast', { event: 'clear' }, () => {
-                    if (myRole === 'guesser' && watchCtx) {
-                        watchCtx.clearRect(0, 0, 300, 300);
-                    }
-                })
-                .on('broadcast', { event: 'guess' }, (msg) => {
-                    if (myRole === 'drawer') {
-                        const guess = msg.payload.text;
-                        const isCorrect = guess === currentWord;
-                        
-                        const display = document.getElementById('guessDisplay');
-                        const time = new Date().toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' });
-                        const newGuess = document.createElement('div');
-                        newGuess.style.cssText = `padding:4px;margin-top:4px;${isCorrect ? 'background:#ffe3e6;color:#d81b60;font-weight:bold;border-radius:6px;' : 'color:#666;'}`;
-                        newGuess.innerText = `${time} 💬 ${guess}${isCorrect ? ' 🎉 正解！' : ''}`;
-                        display.appendChild(newGuess);
-                        display.scrollTop = display.scrollHeight;
-                        
-                        if (isCorrect) {
-                            drawGameChannel.send({
-                                type: 'broadcast',
-                                event: 'correct',
-                                payload: { word: currentWord }
-                            });
-                            showGameCelebration(currentWord);
-                        }
-                    }
-                })
-                .on('broadcast', { event: 'correct' }, (msg) => {
-                    if (myRole === 'guesser') {
-                        showGameCelebration(msg.payload.word);
-                    }
-                })
-                .on('broadcast', { event: 'game_start' }, (msg) => {
-                    if (myRole === 'guesser') {
-                        alert('相手がお絵かきを始めたよ！🎨');
-                    }
-                })
-                .subscribe();
         }
 
         function setupDrawCanvas() {
