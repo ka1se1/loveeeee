@@ -3639,6 +3639,87 @@
             }
             input.value = '';
         }
+
+        function showRoundEnd(isCorrect, word) {
+            const existing = document.getElementById('roundEndOverlay');
+            if (existing) existing.remove();
+            
+            const overlay = document.createElement('div');
+            overlay.id = 'roundEndOverlay';
+            overlay.style.cssText = `
+                position: fixed;
+                top: 0; left: 0;
+                width: 100%; height: 100%;
+                background: ${isCorrect ? 'rgba(255,107,157,0.95)' : 'rgba(100,100,120,0.95)'};
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                z-index: 99999;
+                color: white;
+                text-align: center;
+                animation: fadeIn 0.4s ease;
+            `;
+            
+            const nextBtnHtml = myRole === 'drawer' ? `
+                <button onclick="nextRound()" style="
+                    margin-top:30px;background:white;color:#d81b60;
+                    border:none;border-radius:30px;padding:14px 32px;
+                    font-size:16px;font-weight:bold;cursor:pointer;
+                    box-shadow:0 4px 14px rgba(0,0,0,0.2);
+                ">次のお題へ ➔</button>
+            ` : `
+                <p style="margin-top:30px;font-size:14px;opacity:0.9;">
+                    ⏳ 相手がお題を選んでます...
+                </p>
+            `;
+            
+            overlay.innerHTML = `
+                <div style="font-size:80px;animation:bounce 1s infinite;">${isCorrect ? '🎉' : '⏰'}</div>
+                <h1 style="font-size:36px;margin:20px 0;">${isCorrect ? '正解！' : '時間切れ'}</h1>
+                <p style="font-size:22px;font-weight:bold;">答え：${word}</p>
+                ${nextBtnHtml}
+                <button onclick="endDrawGame()" style="
+                    margin-top:14px;background:rgba(255,255,255,0.2);
+                    border:1px solid white;color:white;
+                    border-radius:20px;padding:8px 20px;
+                    font-size:12px;font-weight:bold;cursor:pointer;
+                ">ゲーム終了</button>
+            `;
+            document.body.appendChild(overlay);
+        }
+
+        async function nextRound() {
+            const overlay = document.getElementById('roundEndOverlay');
+            if (overlay) {
+                overlay.innerHTML = `
+                    <div style="font-size:60px;">🎲</div>
+                    <h1 style="font-size:24px;margin:20px 0;">次のお題を準備中...</h1>
+                `;
+            }
+            
+            currentWord = await getRandomWord();
+            document.getElementById('drawWord').innerText = currentWord;
+            
+            if (drawCtx) drawCtx.clearRect(0, 0, 300, 300);
+            document.getElementById('guessDisplay').innerHTML = '<div style="color:#999;">相手の回答がここに表示されるよ</div>';
+            
+            if (drawGameChannel) {
+                drawGameChannel.send({
+                    type: 'broadcast',
+                    event: 'next_round',
+                    payload: {}
+                });
+                drawGameChannel.send({
+                    type: 'broadcast',
+                    event: 'clear',
+                    payload: {}
+                });
+            }
+            
+            if (overlay) overlay.remove();
+            startTimer();
+        }
         
     </script>
 
