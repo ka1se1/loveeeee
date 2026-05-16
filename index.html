@@ -1036,6 +1036,21 @@
         </div>
     </div>
 
+    <button onclick="showGame()" style="
+        position: absolute;
+        left: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: rgba(255,255,255,0.25);
+        border: 1px solid rgba(255,255,255,0.4);
+        border-radius: 12px;
+        padding: 6px 10px;
+        color: white;
+        font-size: 18px;
+        cursor: pointer;
+        backdrop-filter: blur(4px);
+    ">☰</button>
+
     <header>Our Memories
         <button onclick="location.reload()" style="
         position: absolute;
@@ -1054,123 +1069,215 @@
         letter-spacing: 1px;
     ">更新</button>
     </header>
-    <div class="container">
-        <div class="card" id="weatherCard">
-            <div class="card-header-actions">
-                <h2>🌤️ 今日の天気</h2>
-                <button class="btn-round" onclick="fetchWeather()">🔄</button>
-            </div>
-            <div id="weatherContainer" style="text-align:center;padding:10px;">
-                <div class="loading-pulse">天気を読み込み中... 🌤️</div>
-            </div>
-        </div>
-
-        <div class="card">
-            <div class="card-header-actions">
-                <h2>📸 共有ギャラリー <span id="galleryNewBadge"
-                        style="display:none;font-size:11px;color:#ff4d6d;font-weight:bold;background:#ffe3e6;padding:2px 8px;border-radius:20px;">✨
-                        NEW!</span></h2>
-                <div style="display: flex; gap: 8px;">
-                    <button class="btn-round" id="uploadBtn" onclick="triggerPhotoUpload()">＋</button>
+    <div id="homeScreen">
+        <div class="container">
+            <div class="card" id="weatherCard">
+                <div class="card-header-actions">
+                    <h2>🌤️ 今日の天気</h2>
+                    <button class="btn-round" onclick="fetchWeather()">🔄</button>
+                </div>
+                <div id="weatherContainer" style="text-align:center;padding:10px;">
+                    <div class="loading-pulse">天気を読み込み中... 🌤️</div>
                 </div>
             </div>
-            <div class="slider">
-                <div class="loading-overlay" id="uploadLoading">アップロード中... 🚀 (1/○枚目)</div>
-                <div class="slides" id="slides">
-                    <div class="loading-pulse">写真を読み込み中... 📸🔄</div>
+
+            <div class="card">
+                <div class="card-header-actions">
+                    <h2>📸 共有ギャラリー <span id="galleryNewBadge"
+                            style="display:none;font-size:11px;color:#ff4d6d;font-weight:bold;background:#ffe3e6;padding:2px 8px;border-radius:20px;">✨
+                            NEW!</span></h2>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="btn-round" id="uploadBtn" onclick="triggerPhotoUpload()">＋</button>
+                    </div>
+                </div>
+                <div class="slider">
+                    <div class="loading-overlay" id="uploadLoading">アップロード中... 🚀 (1/○枚目)</div>
+                    <div class="slides" id="slides">
+                        <div class="loading-pulse">写真を読み込み中... 📸🔄</div>
+                    </div>
+                </div>
+                <div class="gallery-grid" id="galleryGrid"></div>
+                <input type="file" id="photoUpload" accept="image/*" multiple style="display: none;"
+                    onchange="handlePhotoUpload(this)">
+            </div>
+
+            <div class="card">
+                <div class="card-header-actions">
+                    <h2>🍽 お店リスト <span id="shopNewBadge"
+                            style="display:none;font-size:11px;color:#ff4d6d;font-weight:bold;background:#ffe3e6;padding:2px 8px;border-radius:20px;">✨
+                            NEW!</span>
+                    </h2>
+                    <button class="btn-round" onclick="openShopModal()">＋</button>
+                </div>
+                <div id="shopListContainer">
+                    <div class="loading-pulse">お店リストを読み込み中... 🍽️🔄</div>
                 </div>
             </div>
-            <div class="gallery-grid" id="galleryGrid"></div>
-            <input type="file" id="photoUpload" accept="image/*" multiple style="display: none;"
-                onchange="handlePhotoUpload(this)">
-        </div>
 
-        <div class="card">
-            <div class="card-header-actions">
-                <h2>🍽 お店リスト <span id="shopNewBadge"
-                        style="display:none;font-size:11px;color:#ff4d6d;font-weight:bold;background:#ffe3e6;padding:2px 8px;border-radius:20px;">✨
-                        NEW!</span>
-                </h2>
-                <button class="btn-round" onclick="openShopModal()">＋</button>
+            <div class="card">
+                <div class="card-header-actions">
+                    <h2>メッセージ <span id="diaryNewBadge"
+                            style="display:none;font-size:11px;color:#ff4d6d;font-weight:bold;background:#ffe3e6;padding:2px 8px;border-radius:20px;">✨
+                            NEW!</span></h2>
+                    <button class="btn-round" onclick="openDiaryModal()">＋</button>
+                </div>
+                <div id="diaryListContainer" class="diary-container">
+                    <div class="loading-pulse">メッセージを読み込み中... 📔🔄</div>
+                </div>
             </div>
-            <div id="shopListContainer">
-                <div class="loading-pulse">お店リストを読み込み中... 🍽️🔄</div>
-            </div>
-        </div>
 
-        <div class="card">
-            <div class="card-header-actions">
-                <h2>メッセージ <span id="diaryNewBadge"
-                        style="display:none;font-size:11px;color:#ff4d6d;font-weight:bold;background:#ffe3e6;padding:2px 8px;border-radius:20px;">✨
-                        NEW!</span></h2>
-                <button class="btn-round" onclick="openDiaryModal()">＋</button>
-            </div>
-            <div id="diaryListContainer" class="diary-container">
-                <div class="loading-pulse">メッセージを読み込み中... 📔🔄</div>
-            </div>
-        </div>
-
-        <div class="card">
-            <div class="card-header-actions">
-                <h2>🎤 ボイスメッセージ <span id="voiceNewBadge"
-                        style="display:none;font-size:11px;color:#ff4d6d;font-weight:bold;background:#ffe3e6;padding:2px 8px;border-radius:20px;">✨
-                        NEW!</span></h2>
-            </div>
-            <div id="voiceListContainer" class="diary-container">
-                <div class="loading-pulse">読み込み中... 🎤</div>
-            </div>
-            <div style="margin-top:12px;text-align:center;">
-                <button id="recordBtn" onclick="toggleRecording()" style="
-            background: linear-gradient(135deg, #ff9a9e, #fecfef);
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 64px;
-            height: 64px;
-            font-size: 28px;
-            cursor: pointer;
-            box-shadow: 0 6px 16px rgba(255,154,158,0.4);
-            transition: all 0.2s ease;
-        ">🎤</button>
-                <div id="recordStatus" style="font-size:12px;color:#999;margin-top:8px;">タップして録音</div>
-                <div style="margin-top:12px;">
-                    <input type="text" id="voiceAuthorInput" placeholder="名前を入れてね" style="
-                padding: 12px 16px;
+            <div class="card">
+                <div class="card-header-actions">
+                    <h2>🎤 ボイスメッセージ <span id="voiceNewBadge"
+                            style="display:none;font-size:11px;color:#ff4d6d;font-weight:bold;background:#ffe3e6;padding:2px 8px;border-radius:20px;">✨
+                            NEW!</span></h2>
+                </div>
+                <div id="voiceListContainer" class="diary-container">
+                    <div class="loading-pulse">読み込み中... 🎤</div>
+                </div>
+                <div style="margin-top:12px;text-align:center;">
+                    <button id="recordBtn" onclick="toggleRecording()" style="
+                background: linear-gradient(135deg, #ff9a9e, #fecfef);
+                color: white;
                 border: none;
-                border-radius: 16px;
-                font-size: 16px;
-                width: 80%;
-                box-sizing: border-box;
-                margin-bottom: 14px;
-                display: block;
-                margin-left: auto;
-                margin-right: auto;
-                outline: none;
-                background: white;
-                box-shadow: 0 4px 12px rgba(255, 154, 158, 0.15);
-            ">
+                border-radius: 50%;
+                width: 64px;
+                height: 64px;
+                font-size: 28px;
+                cursor: pointer;
+                box-shadow: 0 6px 16px rgba(255,154,158,0.4);
+                transition: all 0.2s ease;
+            ">🎤</button>
+                    <div id="recordStatus" style="font-size:12px;color:#999;margin-top:8px;">タップして録音</div>
+                    <div style="margin-top:12px;">
+                        <input type="text" id="voiceAuthorInput" placeholder="名前を入れてね" style="
+                    padding: 12px 16px;
+                    border: none;
+                    border-radius: 16px;
+                    font-size: 16px;
+                    width: 80%;
+                    box-sizing: border-box;
+                    margin-bottom: 14px;
+                    display: block;
+                    margin-left: auto;
+                    margin-right: auto;
+                    outline: none;
+                    background: white;
+                    box-shadow: 0 4px 12px rgba(255, 154, 158, 0.15);
+                ">
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <div class="card" style="text-align: center;">
-            <h2 style="margin-bottom: 15px;">MAP</h2>
-            <iframe id="map" src="https://maps.google.co.jp/maps?q=東京&output=embed"
-                style="width: 100%; max-width: 500px; height: 250px; border: none; border-radius: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); display: block; margin: 0 auto;"></iframe>
-        </div>
-
-        <div class="card">
-            <div class="card-header-actions">
-                <h2>📅 カレンダー</h2>
-                <button class="btn-round" onclick="openEventModal()">＋</button>
+            <div class="card" style="text-align: center;">
+                <h2 style="margin-bottom: 15px;">MAP</h2>
+                <iframe id="map" src="https://maps.google.co.jp/maps?q=東京&output=embed"
+                    style="width: 100%; max-width: 500px; height: 250px; border: none; border-radius: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); display: block; margin: 0 auto;"></iframe>
             </div>
-            <div id="calendarContainer"></div>
-            <p style="text-align: center; font-size: 11px; color: #888; margin-top: 10px;">
-                日付をタップして予定を確認・追加できるよ！
-            </p>
+            <div class="card">
+                <div class="card-header-actions">
+                    <h2>📅 カレンダー</h2>
+                    <button class="btn-round" onclick="openEventModal()">＋</button>
+                </div>
+                <div id="calendarContainer"></div>
+                <p style="text-align: center; font-size: 11px; color: #888; margin-top: 10px;">
+                    日付をタップして予定を確認・追加できるよ！
+                </p>
+            </div>
         </div>
     </div>
 
+    <div id="gameScreen" style="display:none;padding:20px 15px;max-width:600px;margin:auto;">
+        <button onclick="showHome()" style="
+            background:rgba(255,255,255,0.8);
+            border:none;border-radius:50%;
+            width:44px;height:44px;font-size:20px;
+            cursor:pointer;margin-bottom:12px;
+            box-shadow:0 4px 12px rgba(0,0,0,0.1);
+        ">🏠</button>
+        <div class="card">
+            <div class="card-header-actions">
+                <h2>🎨 お絵かき伝言ゲーム</h2>
+            </div>
+            
+            <!-- ゲーム開始前 -->
+            <div id="gameStartScreen">
+                <p style="text-align:center;font-size:13px;color:#666;margin:10px 0;">
+                    お題を見てもう片方に伝えよう！🖌️
+                </p>
+                <button onclick="startDrawGame()" style="
+                    width:100%;padding:12px;
+                    background:linear-gradient(135deg,#ff9a9e,#fecfef);
+                    color:white;border:none;border-radius:14px;
+                    font-size:14px;font-weight:bold;cursor:pointer;
+                ">🎨 お絵かきする側で始める</button>
+                <button onclick="joinDrawGame()" style="
+                    width:100%;padding:12px;margin-top:8px;
+                    background:white;
+                    color:#d81b60;border:2px solid #ff9a9e;border-radius:14px;
+                    font-size:14px;font-weight:bold;cursor:pointer;
+                ">🔍 当てる側で参加する</button>
+            </div>
+
+            <!-- ゲーム中（描く側） -->
+            <div id="drawerScreen" style="display:none;">
+                <div style="text-align:center;background:linear-gradient(135deg,#fff5f7,#ffe3e6);border-radius:14px;padding:10px;margin-bottom:10px;">
+                    <div style="font-size:11px;color:#888;">お題</div>
+                    <div id="drawWord" style="font-size:24px;font-weight:bold;color:#d81b60;margin-top:4px;">-</div>
+                </div>
+                <canvas id="drawCanvas" width="300" height="300" style="
+                    width:100%;height:300px;
+                    background:white;border-radius:14px;
+                    border:2px solid #ffe3e6;touch-action:none;
+                "></canvas>
+                <div style="display:flex;gap:6px;margin-top:8px;">
+                    <button onclick="clearCanvas()" style="
+                        flex:1;padding:8px;background:#ffe3e6;color:#d81b60;
+                        border:none;border-radius:10px;font-size:12px;font-weight:bold;
+                    ">🗑️ クリア</button>
+                    <button onclick="endDrawGame()" style="
+                        flex:1;padding:8px;background:#eee;color:#666;
+                        border:none;border-radius:10px;font-size:12px;font-weight:bold;
+                    ">終了</button>
+                </div>
+                <div id="guessDisplay" style="
+                    margin-top:10px;background:#fff5f7;
+                    border-radius:10px;padding:10px;font-size:12px;
+                    min-height:40px;
+                ">
+                    <div style="color:#999;">相手の回答がここに表示されるよ</div>
+                </div>
+            </div>
+
+            <!-- ゲーム中（当てる側） -->
+            <div id="guesserScreen" style="display:none;">
+                <p style="text-align:center;font-size:12px;color:#666;margin:5px 0;">
+                    👀 相手が描いてるよ！
+                </p>
+                <canvas id="watchCanvas" width="300" height="300" style="
+                    width:100%;height:300px;
+                    background:white;border-radius:14px;
+                    border:2px solid #ffe3e6;
+                "></canvas>
+                <div style="display:flex;gap:6px;margin-top:10px;">
+                    <input type="text" id="guessInput" placeholder="答えを入力..." style="
+                        flex:1;padding:10px 14px;border:1px solid #ddd;
+                        border-radius:12px;font-size:16px;outline:none;
+                    ">
+                    <button onclick="sendGuess()" style="
+                        padding:10px 16px;background:linear-gradient(135deg,#ff9a9e,#fecfef);
+                        color:white;border:none;border-radius:12px;
+                        font-size:13px;font-weight:bold;cursor:pointer;
+                    ">送信</button>
+                </div>
+                <button onclick="endDrawGame()" style="
+                    width:100%;margin-top:8px;padding:8px;
+                    background:#eee;color:#666;border:none;border-radius:10px;
+                    font-size:12px;font-weight:bold;
+                ">終了</button>
+            </div>
+        </div>
+    </div>
     <div id="shopModal" class="modal-overlay">
         <div class="modal-content">
             <h3>お店を追加 🍽</h3>
@@ -3090,6 +3197,291 @@
         window.onload = () => {
             checkLogin();
         };
+
+        function showGame() {
+            document.getElementById('homeScreen').style.display = 'none';
+            document.getElementById('gameScreen').style.display = 'block';
+            
+            // 記念日とハートボタンも非表示
+            document.querySelector('.countdown-container').style.display = 'none';
+            document.querySelector('.love-float-btn').style.display = 'none';
+            
+            window.scrollTo(0, 0);
+        }
+
+        function showHome() {
+            document.getElementById('gameScreen').style.display = 'none';
+            document.getElementById('homeScreen').style.display = 'block';
+            
+            // 記念日とハートボタンを再表示
+            document.querySelector('.countdown-container').style.display = 'block';
+            document.querySelector('.love-float-btn').style.display = 'flex';
+            
+            window.scrollTo(0, 0);
+        }
+
+        // --- お絵かきゲーム ---
+        const DRAW_WORDS = [
+            'りんご', 'バナナ', 'ねこ', 'いぬ', 'ぞう', 'ペンギン',
+            'スマホ', 'ピザ', 'すし', 'ラーメン', 'ケーキ', 'アイス',
+            '車', '電車', '飛行機', '家', 'ビル', '東京タワー',
+            '太陽', '月', '雲', '虹', '花', '木',
+            'ハート', '星', '王様', 'お姫様', 'ロボット', 'ドラゴン',
+            '富士山', '海', '川', '山', 'プール', 'ベッド',
+            'メガネ', '帽子', '靴', 'カバン', '時計', 'ピアノ',
+            'ギター', 'カメラ', 'テレビ', 'パソコン', '本', '鉛筆'
+        ];
+
+        let drawGameChannel = null;
+        let drawCtx = null;
+        let watchCtx = null;
+        let isDrawing = false;
+        let myRole = null; // 'drawer' or 'guesser'
+        let currentWord = '';
+
+        function startDrawGame() {
+            myRole = 'drawer';
+            currentWord = DRAW_WORDS[Math.floor(Math.random() * DRAW_WORDS.length)];
+            
+            document.getElementById('gameStartScreen').style.display = 'none';
+            document.getElementById('drawerScreen').style.display = 'block';
+            document.getElementById('drawWord').innerText = currentWord;
+            document.getElementById('guessDisplay').innerHTML = '<div style="color:#999;">相手の回答がここに表示されるよ</div>';
+            
+            setupDrawCanvas();
+            connectGameChannel();
+            
+            // 相手にゲーム開始を伝える
+            setTimeout(() => {
+                if (drawGameChannel) {
+                    drawGameChannel.send({
+                        type: 'broadcast',
+                        event: 'game_start',
+                        payload: { word: currentWord }
+                    });
+                }
+            }, 500);
+        }
+
+        function joinDrawGame() {
+            myRole = 'guesser';
+            
+            document.getElementById('gameStartScreen').style.display = 'none';
+            document.getElementById('guesserScreen').style.display = 'block';
+            
+            setupWatchCanvas();
+            connectGameChannel();
+        }
+
+        function endDrawGame() {
+            if (drawGameChannel) {
+                db.removeChannel(drawGameChannel);
+                drawGameChannel = null;
+            }
+            document.getElementById('gameStartScreen').style.display = 'block';
+            document.getElementById('drawerScreen').style.display = 'none';
+            document.getElementById('guesserScreen').style.display = 'none';
+            myRole = null;
+            currentWord = '';
+        }
+
+        function connectGameChannel() {
+            drawGameChannel = db.channel('draw-game', {
+                config: { broadcast: { self: false } }
+            });
+            
+            drawGameChannel
+                .on('broadcast', { event: 'draw' }, (msg) => {
+                    if (myRole === 'guesser' && watchCtx) {
+                        const { x0, y0, x1, y1 } = msg.payload;
+                        watchCtx.strokeStyle = '#333';
+                        watchCtx.lineWidth = 3;
+                        watchCtx.lineCap = 'round';
+                        watchCtx.beginPath();
+                        watchCtx.moveTo(x0, y0);
+                        watchCtx.lineTo(x1, y1);
+                        watchCtx.stroke();
+                    }
+                })
+                .on('broadcast', { event: 'clear' }, () => {
+                    if (myRole === 'guesser' && watchCtx) {
+                        watchCtx.clearRect(0, 0, 300, 300);
+                    }
+                })
+                .on('broadcast', { event: 'guess' }, (msg) => {
+                    if (myRole === 'drawer') {
+                        const guess = msg.payload.text;
+                        const isCorrect = guess === currentWord;
+                        
+                        const display = document.getElementById('guessDisplay');
+                        const time = new Date().toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' });
+                        const newGuess = document.createElement('div');
+                        newGuess.style.cssText = `padding:4px;margin-top:4px;${isCorrect ? 'background:#ffe3e6;color:#d81b60;font-weight:bold;border-radius:6px;' : 'color:#666;'}`;
+                        newGuess.innerText = `${time} 💬 ${guess}${isCorrect ? ' 🎉 正解！' : ''}`;
+                        display.appendChild(newGuess);
+                        display.scrollTop = display.scrollHeight;
+                        
+                        if (isCorrect) {
+                            drawGameChannel.send({
+                                type: 'broadcast',
+                                event: 'correct',
+                                payload: { word: currentWord }
+                            });
+                            showGameCelebration(currentWord);
+                        }
+                    }
+                })
+                .on('broadcast', { event: 'correct' }, (msg) => {
+                    if (myRole === 'guesser') {
+                        showGameCelebration(msg.payload.word);
+                    }
+                })
+                .on('broadcast', { event: 'game_start' }, (msg) => {
+                    if (myRole === 'guesser') {
+                        alert('相手がお絵かきを始めたよ！🎨');
+                    }
+                })
+                .subscribe();
+        }
+
+        function setupDrawCanvas() {
+            const canvas = document.getElementById('drawCanvas');
+            drawCtx = canvas.getContext('2d');
+            drawCtx.clearRect(0, 0, 300, 300);
+            
+            let lastX = 0, lastY = 0;
+            
+            function getPos(e) {
+                const rect = canvas.getBoundingClientRect();
+                const scaleX = canvas.width / rect.width;
+                const scaleY = canvas.height / rect.height;
+                if (e.touches) {
+                    return {
+                        x: (e.touches[0].clientX - rect.left) * scaleX,
+                        y: (e.touches[0].clientY - rect.top) * scaleY
+                    };
+                }
+                return {
+                    x: (e.clientX - rect.left) * scaleX,
+                    y: (e.clientY - rect.top) * scaleY
+                };
+            }
+            
+            function start(e) {
+                e.preventDefault();
+                isDrawing = true;
+                const pos = getPos(e);
+                lastX = pos.x;
+                lastY = pos.y;
+            }
+            
+            function draw(e) {
+                e.preventDefault();
+                if (!isDrawing) return;
+                const pos = getPos(e);
+                
+                drawCtx.strokeStyle = '#333';
+                drawCtx.lineWidth = 3;
+                drawCtx.lineCap = 'round';
+                drawCtx.beginPath();
+                drawCtx.moveTo(lastX, lastY);
+                drawCtx.lineTo(pos.x, pos.y);
+                drawCtx.stroke();
+                
+                // 相手に送信
+                if (drawGameChannel) {
+                    drawGameChannel.send({
+                        type: 'broadcast',
+                        event: 'draw',
+                        payload: { x0: lastX, y0: lastY, x1: pos.x, y1: pos.y }
+                    });
+                }
+                
+                lastX = pos.x;
+                lastY = pos.y;
+            }
+            
+            function end() {
+                isDrawing = false;
+            }
+            
+            canvas.onmousedown = start;
+            canvas.onmousemove = draw;
+            canvas.onmouseup = end;
+            canvas.onmouseleave = end;
+            canvas.ontouchstart = start;
+            canvas.ontouchmove = draw;
+            canvas.ontouchend = end;
+        }
+
+        function setupWatchCanvas() {
+            const canvas = document.getElementById('watchCanvas');
+            watchCtx = canvas.getContext('2d');
+            watchCtx.clearRect(0, 0, 300, 300);
+        }
+
+        function clearCanvas() {
+            if (drawCtx) {
+                drawCtx.clearRect(0, 0, 300, 300);
+                if (drawGameChannel) {
+                    drawGameChannel.send({
+                        type: 'broadcast',
+                        event: 'clear',
+                        payload: {}
+                    });
+                }
+            }
+        }
+
+        function sendGuess() {
+            const input = document.getElementById('guessInput');
+            const text = input.value.trim();
+            if (!text) return;
+            
+            if (drawGameChannel) {
+                drawGameChannel.send({
+                    type: 'broadcast',
+                    event: 'guess',
+                    payload: { text }
+                });
+            }
+            input.value = '';
+        }
+
+        function showGameCelebration(word) {
+            const overlay = document.createElement('div');
+            overlay.style.cssText = `
+                position: fixed;
+                top: 0; left: 0;
+                width: 100%; height: 100%;
+                background: rgba(255,107,157,0.95);
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                z-index: 99999;
+                color: white;
+                text-align: center;
+                animation: fadeIn 0.5s ease;
+            `;
+            overlay.innerHTML = `
+                <div style="font-size:80px;animation:bounce 1s infinite;">🎉</div>
+                <h1 style="font-size:36px;margin:20px 0;">正解！</h1>
+                <p style="font-size:20px;font-weight:bold;">答え：${word}</p>
+                <button onclick="this.parentElement.remove()" style="
+                    margin-top:20px;background:rgba(255,255,255,0.3);
+                    border:2px solid white;color:white;
+                    border-radius:30px;padding:10px 24px;
+                    font-size:14px;font-weight:bold;cursor:pointer;
+                ">閉じる</button>
+            `;
+            document.body.appendChild(overlay);
+            
+            setTimeout(() => {
+                if (overlay.parentElement) overlay.remove();
+            }, 5000);
+        }
+
     </script>
 
     <div id="anniversaryModal" class="modal-overlay">
