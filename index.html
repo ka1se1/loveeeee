@@ -998,6 +998,1588 @@
         #annivTypeInput {
             font-size: 16px !important;
         }
+
+        /* ========================================================
+           📅 カレンダー v2  (TimeTree風アップグレード)
+           ======================================================== */
+        .cal-card.cal-fs {
+            position: fixed;
+            inset: 0;
+            z-index: 1200;
+            margin: 0;
+            width: 100%;
+            max-width: none;
+            border-radius: 0;
+            padding: 14px 12px calc(90px + env(safe-area-inset-bottom));
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            background: linear-gradient(180deg, #fff7f8, #fffdfc 40%);
+            backdrop-filter: none;
+            border: none;
+        }
+
+        .cal-card.cal-fs .card-header-actions {
+            position: sticky;
+            top: -14px;
+            z-index: 6;
+            margin: -14px -12px 10px;
+            padding: 14px 12px 10px;
+            background: linear-gradient(180deg, #fff7f8 70%, rgba(255, 247, 248, 0));
+        }
+
+        body.cal-locked {
+            overflow: hidden;
+        }
+
+        .cal-head-tools {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+
+        .cal-icon-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: none;
+            background: #fff5f7;
+            color: #d81b60;
+            font-size: 14px;
+            line-height: 1;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(255, 154, 158, .25);
+            transition: transform .15s ease, background .15s ease;
+        }
+
+        .cal-icon-btn:active {
+            transform: scale(.9);
+        }
+
+        .cal-icon-btn.on {
+            background: linear-gradient(135deg, #ff9a9e, #fecfef);
+            color: #fff;
+        }
+
+        /* --- ツールバー --- */
+        .cal-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
+        .cal-nav {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+        }
+
+        .cal-nav button {
+            width: 28px;
+            height: 28px;
+            border: none;
+            border-radius: 10px;
+            background: #fff5f7;
+            color: #d81b60;
+            font-size: 15px;
+            cursor: pointer;
+        }
+
+        .cal-nav button:active {
+            background: #ffe3e6;
+        }
+
+        .cal-title {
+            font-weight: 800;
+            font-size: 16px;
+            color: #4a3b40;
+            letter-spacing: .5px;
+            min-width: 96px;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        .cal-title small {
+            display: block;
+            font-size: 9px;
+            font-weight: 600;
+            color: #b98b96;
+            letter-spacing: 1px;
+        }
+
+        .cal-today-btn {
+            border: none;
+            background: linear-gradient(135deg, #ff9a9e, #fecfef);
+            color: #fff;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 6px 12px;
+            border-radius: 999px;
+            cursor: pointer;
+            box-shadow: 0 3px 8px rgba(255, 154, 158, .35);
+        }
+
+        /* --- ビュー切替（セグメント） --- */
+        .cal-seg {
+            display: flex;
+            background: #fdeef1;
+            border-radius: 999px;
+            padding: 3px;
+            gap: 2px;
+        }
+
+        .cal-seg button {
+            border: none;
+            background: transparent;
+            color: #b07f8b;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 5px 10px;
+            border-radius: 999px;
+            cursor: pointer;
+            transition: all .18s ease;
+        }
+
+        .cal-seg button.on {
+            background: #fff;
+            color: #d81b60;
+            box-shadow: 0 2px 6px rgba(216, 27, 96, .15);
+        }
+
+        /* --- 検索 / フィルタ --- */
+        .cal-searchbar {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: #fff;
+            border-radius: 12px;
+            padding: 8px 12px;
+            margin-bottom: 8px;
+            box-shadow: 0 2px 10px rgba(255, 154, 158, .18);
+        }
+
+        .cal-searchbar input {
+            flex: 1;
+            border: none;
+            outline: none;
+            font-size: 16px;
+            background: transparent;
+        }
+
+        .cal-chips {
+            display: flex;
+            gap: 6px;
+            overflow-x: auto;
+            padding-bottom: 6px;
+            margin-bottom: 4px;
+            scrollbar-width: none;
+        }
+
+        .cal-chips::-webkit-scrollbar {
+            display: none;
+        }
+
+        .cal-chip {
+            flex: 0 0 auto;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            border: 1px solid #f2dfe4;
+            background: #fff;
+            color: #8a707a;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 5px 11px;
+            border-radius: 999px;
+            cursor: pointer;
+        }
+
+        .cal-chip .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .cal-chip.on {
+            background: #4a3b40;
+            border-color: #4a3b40;
+            color: #fff;
+        }
+
+        /* --- 次の予定バナー --- */
+        .cal-next {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: linear-gradient(135deg, #fff5f7, #ffeef4);
+            border: 1px solid #ffe0e8;
+            border-radius: 16px;
+            padding: 9px 12px;
+            margin-bottom: 10px;
+            cursor: pointer;
+        }
+
+        .cal-next .cd {
+            flex: 0 0 auto;
+            text-align: center;
+            background: #fff;
+            border-radius: 12px;
+            padding: 5px 9px;
+            box-shadow: 0 2px 6px rgba(255, 154, 158, .25);
+        }
+
+        .cal-next .cd b {
+            display: block;
+            font-size: 18px;
+            color: #d81b60;
+            line-height: 1.1;
+        }
+
+        .cal-next .cd span {
+            font-size: 9px;
+            color: #b98b96;
+        }
+
+        .cal-next .tx {
+            min-width: 0;
+            flex: 1;
+        }
+
+        .cal-next .tx b {
+            display: block;
+            font-size: 13px;
+            color: #4a3b40;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .cal-next .tx span {
+            font-size: 11px;
+            color: #a58b93;
+        }
+
+        /* --- 月ビュー --- */
+        .cal-dow {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            margin-bottom: 2px;
+        }
+
+        .cal-dow div {
+            text-align: center;
+            font-size: 10px;
+            font-weight: 700;
+            color: #aa9;
+            letter-spacing: .5px;
+        }
+
+        .cal-dow div.sun {
+            color: #e57373;
+        }
+
+        .cal-dow div.sat {
+            color: #6495ed;
+        }
+
+        .cal-month {
+            border-top: 1px solid #f6e6ea;
+            touch-action: pan-y;
+        }
+
+        .cal-week {
+            border-bottom: 1px solid #f6e6ea;
+            padding-bottom: 3px;
+        }
+
+        .cal-week-nums {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+        }
+
+        .cal-daycell {
+            text-align: center;
+            padding: 4px 0 1px;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .cal-daynum {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 22px;
+            height: 22px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #4a3b40;
+        }
+
+        .cal-daycell.sun .cal-daynum,
+        .cal-daycell.hol .cal-daynum {
+            color: #e57373;
+        }
+
+        .cal-daycell.sat .cal-daynum {
+            color: #6495ed;
+        }
+
+        .cal-daycell.out {
+            opacity: .3;
+        }
+
+        .cal-daycell.today .cal-daynum {
+            background: linear-gradient(135deg, #ff9a9e, #fb8fa4);
+            color: #fff;
+            box-shadow: 0 2px 6px rgba(251, 143, 164, .5);
+        }
+
+        .cal-daycell.sel {
+            background: rgba(255, 154, 158, .13);
+            border-radius: 10px;
+        }
+
+        .cal-daycell.sel .cal-daynum {
+            outline: 2px solid #ff9a9e;
+            outline-offset: 1px;
+        }
+
+        .cal-holname {
+            font-size: 8px;
+            color: #e57373;
+            line-height: 1.1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            padding: 0 2px;
+        }
+
+        .cal-lanes {
+            position: relative;
+            margin-top: 1px;
+        }
+
+        .cal-chipev {
+            position: absolute;
+            height: 15px;
+            line-height: 15px;
+            font-size: 9px;
+            font-weight: 700;
+            color: #fff;
+            padding: 0 4px;
+            border-radius: 5px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            cursor: pointer;
+            box-sizing: border-box;
+        }
+
+        .cal-chipev.timed {
+            background: transparent !important;
+            color: #5a4850;
+            padding-left: 2px;
+        }
+
+        .cal-chipev.timed .tdot {
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            margin-right: 3px;
+            vertical-align: middle;
+        }
+
+        .cal-chipev.done {
+            opacity: .45;
+            text-decoration: line-through;
+        }
+
+        .cal-more {
+            position: absolute;
+            height: 13px;
+            line-height: 13px;
+            font-size: 9px;
+            font-weight: 700;
+            color: #b07f8b;
+            cursor: pointer;
+            padding-left: 4px;
+        }
+
+        /* --- 選択日パネル --- */
+        .cal-daypanel {
+            margin-top: 12px;
+            border-top: 1px dashed #ffdde4;
+            padding-top: 12px;
+        }
+
+        .cal-daypanel-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .cal-daypanel-head b {
+            font-size: 13px;
+            color: #d81b60;
+        }
+
+        .cal-daypanel-head span {
+            font-size: 10px;
+            color: #b98b96;
+            font-weight: 600;
+        }
+
+        .cal-ev {
+            display: flex;
+            gap: 9px;
+            align-items: stretch;
+            background: #fff;
+            border-radius: 14px;
+            padding: 10px 12px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(180, 130, 145, .12);
+        }
+
+        .cal-ev .bar {
+            flex: 0 0 4px;
+            border-radius: 4px;
+        }
+
+        .cal-ev .time {
+            flex: 0 0 44px;
+            font-size: 10px;
+            font-weight: 700;
+            color: #a58b93;
+            line-height: 1.35;
+            padding-top: 1px;
+        }
+
+        .cal-ev .body {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .cal-ev .body b {
+            display: block;
+            font-size: 13px;
+            color: #4a3b40;
+            word-break: break-word;
+        }
+
+        .cal-ev .body .meta {
+            font-size: 10.5px;
+            color: #a58b93;
+            margin-top: 3px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .cal-ev.done .body b {
+            text-decoration: line-through;
+            opacity: .55;
+        }
+
+        .cal-empty {
+            text-align: center;
+            font-size: 12px;
+            color: #c3aeb4;
+            padding: 18px 0;
+        }
+
+        /* --- 週ビュー --- */
+        .cal-wk-head {
+            display: grid;
+            grid-template-columns: 38px repeat(7, 1fr);
+            border-bottom: 1px solid #f6e6ea;
+        }
+
+        .cal-wk-head .h {
+            text-align: center;
+            padding: 4px 0 6px;
+            cursor: pointer;
+        }
+
+        .cal-wk-head .h small {
+            display: block;
+            font-size: 9px;
+            color: #aa9;
+            font-weight: 700;
+        }
+
+        .cal-wk-head .h b {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            font-size: 12px;
+            color: #4a3b40;
+        }
+
+        .cal-wk-head .h.today b {
+            background: linear-gradient(135deg, #ff9a9e, #fb8fa4);
+            color: #fff;
+        }
+
+        .cal-wk-head .h.sun b,
+        .cal-wk-head .h.hol b {
+            color: #e57373;
+        }
+
+        .cal-wk-head .h.sat b {
+            color: #6495ed;
+        }
+
+        .cal-wk-allday {
+            display: grid;
+            grid-template-columns: 38px 1fr;
+            border-bottom: 1px solid #f6e6ea;
+        }
+
+        .cal-wk-allday .lbl {
+            font-size: 8px;
+            color: #bbaaae;
+            text-align: right;
+            padding: 3px 4px 0 0;
+        }
+
+        .cal-wk-scroll {
+            display: grid;
+            grid-template-columns: 38px 1fr;
+            max-height: 58vh;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .cal-card.cal-fs .cal-wk-scroll {
+            max-height: 66vh;
+        }
+
+        .cal-wk-hours .hr {
+            height: 44px;
+            font-size: 9px;
+            color: #bbaaae;
+            text-align: right;
+            padding-right: 4px;
+            transform: translateY(-5px);
+        }
+
+        .cal-wk-cols {
+            position: relative;
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            background-image: repeating-linear-gradient(to bottom, #f6e6ea 0, #f6e6ea 1px, transparent 1px, transparent 44px);
+        }
+
+        .cal-wk-col {
+            position: relative;
+            border-left: 1px solid #faf0f2;
+            cursor: pointer;
+        }
+
+        .cal-wk-ev {
+            position: absolute;
+            border-radius: 6px;
+            padding: 2px 4px;
+            font-size: 9px;
+            font-weight: 700;
+            color: #fff;
+            overflow: hidden;
+            cursor: pointer;
+            box-sizing: border-box;
+            line-height: 1.2;
+        }
+
+        .cal-now-line {
+            position: absolute;
+            left: 0;
+            right: 0;
+            height: 0;
+            border-top: 2px solid #ff4d6d;
+            z-index: 4;
+            pointer-events: none;
+        }
+
+        .cal-now-line::before {
+            content: '';
+            position: absolute;
+            left: -3px;
+            top: -4px;
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #ff4d6d;
+        }
+
+        /* --- リストビュー --- */
+        .cal-list-day {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .cal-list-date {
+            flex: 0 0 40px;
+            text-align: center;
+        }
+
+        .cal-list-date b {
+            display: block;
+            font-size: 18px;
+            color: #4a3b40;
+            line-height: 1.3;
+        }
+
+        .cal-list-date small {
+            font-size: 9px;
+            color: #aa9;
+            font-weight: 700;
+        }
+
+        .cal-list-date.today b {
+            color: #fff;
+            background: linear-gradient(135deg, #ff9a9e, #fb8fa4);
+            border-radius: 999px;
+        }
+
+        .cal-list-date.sun b,
+        .cal-list-date.hol b {
+            color: #e57373;
+        }
+
+        .cal-list-date.sat b {
+            color: #6495ed;
+        }
+
+        .cal-list-items {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .cal-mon-sep {
+            font-size: 11px;
+            font-weight: 800;
+            color: #d81b60;
+            letter-spacing: 1px;
+            margin: 14px 0 10px;
+            padding-bottom: 4px;
+            border-bottom: 1px solid #ffe0e8;
+        }
+
+        /* --- ボトムシート --- */
+        .cal-sheet {
+            position: fixed;
+            inset: 0;
+            z-index: 1400;
+            display: none;
+        }
+
+        .cal-sheet.active {
+            display: block;
+        }
+
+        .cal-sheet-bg {
+            position: absolute;
+            inset: 0;
+            background: rgba(60, 30, 40, .45);
+            animation: fadeIn .2s ease;
+        }
+
+        .cal-sheet-panel {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            max-height: 88vh;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            background: #fff;
+            border-radius: 26px 26px 0 0;
+            padding: 10px 20px calc(24px + env(safe-area-inset-bottom));
+            animation: sheetUp .28s cubic-bezier(.2, .9, .3, 1);
+            box-shadow: 0 -10px 40px rgba(0, 0, 0, .2);
+        }
+
+        @keyframes sheetUp {
+            from {
+                transform: translateY(100%);
+            }
+
+            to {
+                transform: translateY(0);
+            }
+        }
+
+        .cal-sheet-grip {
+            width: 38px;
+            height: 4px;
+            border-radius: 4px;
+            background: #eddde2;
+            margin: 0 auto 14px;
+        }
+
+        .cal-detail-title {
+            font-size: 19px;
+            font-weight: 800;
+            color: #3d2f34;
+            line-height: 1.35;
+            word-break: break-word;
+        }
+
+        .cal-detail-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 10px;
+            font-weight: 700;
+            color: #fff;
+            padding: 3px 10px;
+            border-radius: 999px;
+            margin-bottom: 8px;
+        }
+
+        .cal-row {
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+            font-size: 13px;
+            color: #5a4850;
+            padding: 9px 0;
+            border-bottom: 1px solid #f7eef1;
+            word-break: break-word;
+        }
+
+        .cal-row .ic {
+            flex: 0 0 18px;
+            text-align: center;
+            opacity: .8;
+        }
+
+        .cal-row a {
+            color: #d81b60;
+        }
+
+        .cal-cd-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #ff9a9e, #fecfef);
+            color: #fff;
+            font-size: 11px;
+            font-weight: 800;
+            padding: 4px 12px;
+            border-radius: 999px;
+            margin-left: 8px;
+            vertical-align: middle;
+        }
+
+        .cal-sheet-actions {
+            display: flex;
+            gap: 8px;
+            margin: 14px 0 4px;
+        }
+
+        .cal-sheet-actions button {
+            flex: 1;
+            border: none;
+            border-radius: 14px;
+            padding: 12px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .cal-btn-main {
+            background: linear-gradient(135deg, #ff9a9e, #fecfef);
+            color: #fff;
+        }
+
+        .cal-btn-sub {
+            background: #fff5f7;
+            color: #d81b60;
+        }
+
+        .cal-btn-danger {
+            background: #ffeef0;
+            color: #e5455f;
+        }
+
+        /* --- コメント --- */
+        .cal-cmt {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
+        .cal-cmt .av {
+            flex: 0 0 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #ff9a9e, #fecfef);
+            color: #fff;
+            font-size: 12px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .cal-cmt .bub {
+            background: #fff5f7;
+            border-radius: 4px 14px 14px 14px;
+            padding: 8px 12px;
+            font-size: 12.5px;
+            color: #4a3b40;
+            word-break: break-word;
+            min-width: 0;
+        }
+
+        .cal-cmt .who {
+            font-size: 9.5px;
+            color: #b98b96;
+            font-weight: 700;
+            margin-bottom: 2px;
+        }
+
+        .cal-cmt-input {
+            display: flex;
+            gap: 6px;
+            margin-top: 6px;
+        }
+
+        .cal-cmt-input input {
+            flex: 1;
+            border: 1px solid #f2dfe4;
+            border-radius: 999px;
+            padding: 10px 14px;
+            font-size: 16px;
+            outline: none;
+        }
+
+        .cal-cmt-input button {
+            border: none;
+            border-radius: 999px;
+            padding: 0 16px;
+            background: linear-gradient(135deg, #ff9a9e, #fecfef);
+            color: #fff;
+            font-weight: 700;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        /* --- 予定フォーム --- */
+        .cal-form-labels {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 9px;
+        }
+
+        .cal-form-labels .sw {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 3px solid transparent;
+            transition: transform .15s ease;
+            box-sizing: border-box;
+        }
+
+        .cal-form-labels .sw.on {
+            border-color: #4a3b40;
+            transform: scale(1.12);
+        }
+
+        .cal-switch {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 13px;
+            color: #5a4850;
+            margin-bottom: 14px;
+        }
+
+        .cal-switch input {
+            width: 44px;
+            height: 26px;
+            appearance: none;
+            -webkit-appearance: none;
+            background: #eee;
+            border-radius: 999px;
+            position: relative;
+            outline: none;
+            cursor: pointer;
+            transition: background .2s ease;
+            flex: 0 0 44px;
+            margin: 0;
+        }
+
+        .cal-switch input::after {
+            content: '';
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #fff;
+            transition: transform .2s ease;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, .2);
+        }
+
+        .cal-switch input:checked {
+            background: linear-gradient(135deg, #ff9a9e, #fb8fa4);
+        }
+
+        .cal-switch input:checked::after {
+            transform: translateX(18px);
+        }
+
+        .cal-time-row {
+            display: flex;
+            gap: 8px;
+        }
+
+        .cal-time-row>div {
+            flex: 1;
+            min-width: 0;
+        }
+
+        #eventModal select,
+        #eventModal input[type="time"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            box-sizing: border-box;
+            font-size: 16px;
+            background: #fff;
+            appearance: none;
+            -webkit-appearance: none;
+        }
+
+        /* 全画面カレンダー(1200)・詳細シート(1400)より上に出す */
+        #eventModal {
+            z-index: 1600;
+        }
+
+        #eventModal .modal-content {
+            max-height: 88vh;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .cal-quick {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-bottom: 14px;
+        }
+
+        .cal-quick button {
+            border: 1px solid #f2dfe4;
+            background: #fff;
+            color: #8a707a;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 6px 10px;
+            border-radius: 999px;
+            cursor: pointer;
+        }
+
+        .cal-fab {
+            position: fixed;
+            right: 18px;
+            bottom: calc(22px + env(safe-area-inset-bottom));
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(135deg, #ff9a9e, #fb8fa4);
+            color: #fff;
+            font-size: 28px;
+            line-height: 1;
+            cursor: pointer;
+            box-shadow: 0 8px 22px rgba(251, 143, 164, .5);
+            z-index: 1250;
+            display: none;
+        }
+
+        .cal-fab.show {
+            display: block;
+        }
+
+        /* ---- ラベル編集への導線 ---- */
+        .cal-chip-edit {
+            border-style: dashed;
+            color: #b07f8b;
+        }
+
+        .cal-form-labels .sw-edit {
+            background: #fff5f7;
+            border: 2px dashed #f0cdd6;
+            color: #d81b60;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* ---- 日別シート ---- */
+        .cal-daysheet-head {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 14px;
+        }
+
+        .cal-daysheet-head .nav {
+            flex: 0 0 34px;
+            height: 34px;
+            border: none;
+            border-radius: 12px;
+            background: #fff5f7;
+            color: #d81b60;
+            font-size: 17px;
+            cursor: pointer;
+        }
+
+        .cal-daysheet-head .nav:active {
+            background: #ffe3e6;
+        }
+
+        .cal-daysheet-head .ttl {
+            flex: 1;
+            text-align: center;
+            min-width: 0;
+        }
+
+        .cal-daysheet-head .ttl b {
+            display: block;
+            font-size: 17px;
+            font-weight: 800;
+            color: #3d2f34;
+        }
+
+        .cal-daysheet-head .ttl b.sun {
+            color: #e57373;
+        }
+
+        .cal-daysheet-head .ttl b.sat {
+            color: #6495ed;
+        }
+
+        .cal-daysheet-head .ttl small {
+            font-size: 10.5px;
+            color: #b98b96;
+            font-weight: 700;
+        }
+
+        .cal-daysheet-note {
+            font-size: 10.5px;
+            color: #b98b96;
+            background: #fff5f7;
+            border-radius: 10px;
+            padding: 7px 10px;
+            margin-bottom: 10px;
+        }
+
+        .cal-daysheet-add {
+            width: 100%;
+            border: 1px dashed #ffc9d4;
+            background: #fff;
+            color: #d81b60;
+            font-weight: 700;
+            font-size: 13px;
+            padding: 13px;
+            border-radius: 14px;
+            cursor: pointer;
+            margin-top: 4px;
+        }
+
+        .cal-sheet-back {
+            font-size: 12px;
+            font-weight: 700;
+            color: #d81b60;
+            margin-bottom: 10px;
+            cursor: pointer;
+        }
+
+        /* ---- ラベル編集モーダル ---- */
+        #labelModal {
+            z-index: 1700;
+        }
+
+        #labelModal .modal-content {
+            max-height: 88vh;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .cal-lbl-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            padding: 7px 0;
+            border-bottom: 1px solid #f7eef1;
+        }
+
+        .cal-lbl-color {
+            flex: 0 0 30px;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: 2px solid #fff;
+            box-shadow: 0 0 0 1px #eddde2;
+            cursor: pointer;
+            color: #fff;
+            font-size: 14px;
+            line-height: 1;
+            padding: 0;
+        }
+
+        .cal-lbl-name {
+            flex: 1;
+            min-width: 0;
+            border: 1px solid #f2dfe4;
+            border-radius: 10px;
+            padding: 9px 11px;
+            font-size: 16px;
+            outline: none;
+            background: #fff;
+            box-sizing: border-box;
+        }
+
+        .cal-lbl-name:focus {
+            border-color: #ff9a9e;
+        }
+
+        .cal-lbl-count {
+            flex: 0 0 auto;
+            font-size: 10px;
+            color: #c3aeb4;
+            font-weight: 700;
+            min-width: 26px;
+            text-align: right;
+        }
+
+        .cal-lbl-del {
+            flex: 0 0 30px;
+            width: 30px;
+            height: 30px;
+            border: none;
+            border-radius: 10px;
+            background: #fff5f7;
+            font-size: 12px;
+            cursor: pointer;
+            padding: 0;
+        }
+
+        .cal-lbl-del:disabled {
+            opacity: .3;
+            cursor: default;
+        }
+
+        .cal-lbl-palette {
+            flex: 1 0 100%;
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 8px;
+            background: #fff8fa;
+            border-radius: 12px;
+            padding: 10px;
+            margin-top: 6px;
+        }
+
+        .cal-lbl-palette .sw {
+            width: 100%;
+            aspect-ratio: 1;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 3px solid transparent;
+            box-sizing: border-box;
+        }
+
+        .cal-lbl-palette .sw.on {
+            border-color: #4a3b40;
+        }
+
+        #labelAddBtn {
+            width: 100%;
+            border: 1px dashed #ffc9d4;
+            background: #fff;
+            color: #d81b60;
+            font-weight: 700;
+            font-size: 12px;
+            padding: 11px;
+            border-radius: 14px;
+            cursor: pointer;
+            margin: 12px 0;
+        }
+
+        .cal-lbl-hint {
+            font-size: 10.5px;
+            color: #b98b96;
+            line-height: 1.6;
+            margin-bottom: 12px;
+        }
+
+        /* ---- メンバー（誰の予定か） ---- */
+        .cal-av {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            font-size: 9px;
+            line-height: 1;
+            vertical-align: middle;
+            box-shadow: 0 0 0 1.5px #fff;
+        }
+
+        .cal-avs {
+            display: inline-flex;
+            gap: 3px;
+            margin-left: 6px;
+            vertical-align: middle;
+        }
+
+        .cal-chips-member .cal-chip {
+            padding-left: 6px;
+        }
+
+        .cal-chips-member .cal-chip.on .cal-av {
+            box-shadow: 0 0 0 1.5px #4a3b40;
+        }
+
+        .cal-who {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .cal-who-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 11.5px;
+            font-weight: 700;
+            padding: 4px 10px 4px 5px;
+            border-radius: 999px;
+        }
+
+        /* 予定フォームのメンバー選択 */
+        .cal-mpicks {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .cal-mpick {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            font-weight: 700;
+            color: #6b5a60;
+            background: #fff;
+            border: 2px solid #f0dfe4;
+            border-radius: 999px;
+            padding: 6px 12px 6px 6px;
+            cursor: pointer;
+            transition: all .15s ease;
+        }
+
+        .cal-mpick.on {
+            color: #fff;
+        }
+
+        .cal-mpick.edit {
+            color: #b07f8b;
+            border-style: dashed;
+            padding: 6px 12px;
+        }
+
+        .cal-me-btn {
+            flex: 0 0 auto;
+            border: 1px solid #f0dfe4;
+            background: #fff;
+            color: #b07f8b;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 6px 9px;
+            border-radius: 999px;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .cal-me-btn.on {
+            background: #4a3b40;
+            border-color: #4a3b40;
+            color: #fff;
+        }
+
+        .cal-emoji-palette {
+            flex: 1 0 100%;
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            gap: 6px;
+            background: #fff8fa;
+            border-radius: 12px;
+            padding: 10px;
+            margin-top: 6px;
+        }
+
+        .cal-emoji-palette .em {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            border-radius: 10px;
+            cursor: pointer;
+            background: #fff;
+            border: 2px solid transparent;
+        }
+
+        .cal-emoji-palette .em.on {
+            border-color: #4a3b40;
+        }
+
+        /* ---- くり返しの詳細 ---- */
+        .cal-repeat-detail {
+            background: #fff8fa;
+            border-radius: 14px;
+            padding: 12px;
+            margin: -6px 0 16px;
+        }
+
+        .cal-dows {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+        }
+
+        .cal-dowpick {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 34px;
+            border-radius: 10px;
+            background: #fff;
+            border: 1.5px solid #f0dfe4;
+            font-size: 12px;
+            font-weight: 700;
+            color: #7a666d;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .cal-dowpick.sun {
+            color: #e57373;
+        }
+
+        .cal-dowpick.sat {
+            color: #6495ed;
+        }
+
+        .cal-dowpick.on {
+            background: linear-gradient(135deg, #ff9a9e, #fb8fa4);
+            border-color: #fb8fa4;
+            color: #fff;
+        }
+
+        .cal-monthly-hint {
+            font-size: 10.5px;
+            color: #b98b96;
+            margin-top: 6px;
+            line-height: 1.6;
+        }
+
+        /* ---- 予定の写真 ---- */
+        .cal-sec-head {
+            margin-top: 18px;
+            font-size: 12px;
+            font-weight: 800;
+            color: #d81b60;
+        }
+
+        .cal-ev-gallery {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+            margin-top: 10px;
+        }
+
+        .cal-ev-gallery img {
+            width: 100%;
+            aspect-ratio: 1;
+            object-fit: cover;
+            border-radius: 12px;
+            cursor: pointer;
+            background: #f7eef1;
+        }
+
+        .cal-photo-empty {
+            font-size: 11.5px;
+            color: #c3aeb4;
+            margin-top: 8px;
+        }
+
+        .cal-photo-tools {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+
+        .cal-photo-add {
+            flex: 1;
+            min-width: 140px;
+            text-align: center;
+            border: 1px dashed #ffc9d4;
+            background: #fff;
+            color: #d81b60;
+            font-weight: 700;
+            font-size: 12.5px;
+            padding: 11px;
+            border-radius: 14px;
+            cursor: pointer;
+        }
+
+        .cal-photo-share {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            color: #8a707a;
+            cursor: pointer;
+        }
+
+        .cal-photo-share input {
+            width: 16px;
+            height: 16px;
+            accent-color: #fb8fa4;
+        }
+
+        /* 一覧に出す写真の帯 */
+        .cal-ev-photos {
+            display: flex;
+            gap: 4px;
+            margin-top: 6px;
+        }
+
+        .cal-ev-photos img {
+            width: 40px;
+            height: 40px;
+            object-fit: cover;
+            border-radius: 8px;
+            background: #f7eef1;
+        }
+
+        /* 予定写真のビューア */
+        .cal-photo-viewer {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, .92);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1800;
+        }
+
+        .cal-photo-viewer img {
+            max-width: 92%;
+            max-height: 82%;
+            border-radius: 14px;
+        }
+
+        .cal-pv-top {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: calc(14px + env(safe-area-inset-top)) 16px 14px;
+            color: #fff;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .cal-pv-top button {
+            background: rgba(255, 255, 255, .95);
+            border: none;
+            padding: 9px 12px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 700;
+            margin-left: 8px;
+            cursor: pointer;
+        }
+
+        .cal-pv-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 42px;
+            height: 42px;
+            border: none;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, .85);
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .cal-pv-nav.left {
+            left: 14px;
+        }
+
+        .cal-pv-nav.right {
+            right: 14px;
+        }
+
+        /* ---- ギャラリーのボタン ---- */
+        .gallery-main-btn {
+            padding: 10px 24px;
+            background: linear-gradient(135deg, #ff9a9e, #fecfef);
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .gallery-sub-btn {
+            display: block;
+            margin: 8px auto 0;
+            padding: 9px 20px;
+            background: #fff5f7;
+            color: #d81b60;
+            border: 1px solid #ffdde4;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        /* 読み込み中も高さが崩れないようにする */
+        .gallery-grid img {
+            background: #f7eef1;
+        }
+
+        .slides img {
+            background: #f7eef1;
+        }
     </style>
 </head>
 
@@ -1079,6 +2661,20 @@
                 <div id="weatherContainer" style="text-align:center;padding:10px;">
                     <div class="loading-pulse">天気を読み込み中... 🌤️</div>
                 </div>
+            </div>
+
+            <div class="card cal-card" id="calendarCard">
+                <div class="card-header-actions">
+                    <h2>📅 カレンダー <span id="calNewBadge"
+                            style="display:none;font-size:11px;color:#ff4d6d;font-weight:bold;background:#ffe3e6;padding:2px 8px;border-radius:20px;">✨
+                            NEW!</span></h2>
+                    <div class="cal-head-tools">
+                        <button class="cal-icon-btn" onclick="toggleCalSearch()" title="検索">🔍</button>
+                        <button class="cal-icon-btn" id="calFsBtn" onclick="toggleCalFullscreen()" title="全画面">⛶</button>
+                        <button class="btn-round" onclick="openEventModal()">＋</button>
+                    </div>
+                </div>
+                <div id="calendarContainer"></div>
             </div>
 
             <div class="card">
@@ -1173,16 +2769,6 @@
                 <h2 style="margin-bottom: 15px;">MAP</h2>
                 <iframe id="map" src="https://maps.google.co.jp/maps?q=東京&output=embed"
                     style="width: 100%; max-width: 500px; height: 250px; border: none; border-radius: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); display: block; margin: 0 auto;"></iframe>
-            </div>
-            <div class="card">
-                <div class="card-header-actions">
-                    <h2>📅 カレンダー</h2>
-                    <button class="btn-round" onclick="openEventModal()">＋</button>
-                </div>
-                <div id="calendarContainer"></div>
-                <p style="text-align: center; font-size: 11px; color: #888; margin-top: 10px;">
-                    日付をタップして予定を確認・追加できるよ！
-                </p>
             </div>
         </div>
     </div>
@@ -1497,6 +3083,20 @@
                 loveCount = data.love_count || 0;
                 events = data.events || [];
                 anniversaries = data.anniversaries || [];
+                // ラベル（labels 列が無ければ端末の控えを使う）
+                if (data.labels && data.labels.length) {
+                    calSetLabels(data.labels);
+                    calSaveLocalLabels();
+                } else {
+                    calLoadLocalLabels();
+                }
+                // メンバー（members 列が無ければ端末の控えを使う）
+                if (data.members && data.members.length) {
+                    calSetMembers(data.members);
+                    calSaveLocalMembers();
+                } else {
+                    calLoadLocalMembers();
+                }
 
                 renderShops();
                 renderGallery();
@@ -1514,22 +3114,42 @@
 
 
 
+        // labels 列がまだ無いテーブルでも壊れないようにする
+        let calLabelsColumnOK = true;
+        let calMembersColumnOK = true;
+
         async function updateCloudData() {
-            const {
-                error
-            } = await db
-                .from('memories')
-                .upsert({
-                    id: "main",
-                    shops,
-                    photos,
-                    diaries,
-                    events, // ← 追加
-                    voices,
-                    anniversaries,
-                    love_count: loveCount,
-                    updated_at: new Date().toISOString()
-                });
+            const payload = {
+                id: "main",
+                shops,
+                photos,
+                diaries,
+                events,
+                voices,
+                anniversaries,
+                love_count: loveCount,
+                updated_at: new Date().toISOString()
+            };
+            if (calLabelsColumnOK) payload.labels = calLabels;
+            if (calMembersColumnOK) payload.members = calMembers;
+
+            let { error } = await db.from('memories').upsert(payload);
+
+            // labels 列が無い場合は、それだけ除いて保存し直す
+            if (error && /labels/i.test(error.message || '') && calLabelsColumnOK) {
+                console.warn('memories.labels 列が無いので、ラベルはこの端末にだけ保存します');
+                calLabelsColumnOK = false;
+                calSaveLocalLabels();
+                delete payload.labels;
+                ({ error } = await db.from('memories').upsert(payload));
+            }
+            if (error && /members/i.test(error.message || '') && calMembersColumnOK) {
+                console.warn('memories.members 列が無いので、メンバーはこの端末にだけ保存します');
+                calMembersColumnOK = false;
+                calSaveLocalMembers();
+                delete payload.members;
+                ({ error } = await db.from('memories').upsert(payload));
+            }
 
             if (error) {
                 console.error(error);
@@ -1546,83 +3166,161 @@
         const ANNIVERSARY_DATE = "2026/01/21"; // 例: 付き合い始めた日
 
         // --- 写真アップロード (ImgBB) ・一括対応 ---
+        /* ============================================================
+           📷 写真ユーティリティ（縮小・サムネイル・遅延読み込み）
+
+           写真は次の2つの形を受け付ける：
+             旧: "https://.../IMG_1234.jpg"              (原寸のURLだけ)
+             新: { full, thumb, orig, w, h, at, by }
+           orig は移行前の原寸ファイル。消さずに残してある。
+           ============================================================ */
+        const PHOTO_FULL_PX = 1600;   // 拡大表示用
+        const PHOTO_THUMB_PX = 420;   // 一覧用
+        const GALLERY_PAGE = 24;      // 「全部見る」で一度に出す枚数
+
+        function photoFull(p) { return typeof p === 'string' ? p : (p && p.full) || ''; }
+        function photoThumb(p) {
+            if (typeof p === 'string') return p;
+            if (!p) return '';
+            return p.thumb || p.full || '';
+        }
+        function photoOrig(p) { return typeof p === 'string' ? p : (p && (p.orig || p.full)) || ''; }
+        function photoNeedsShrink(p) { return typeof p === 'string' || !(p && p.thumb); }
+
+        function safeFileName(name) {
+            return String(name || 'photo').replace(/\.[^.]+$/, '')
+                .replace(/[^a-zA-Z0-9._-]/g, '_').slice(0, 40) || 'photo';
+        }
+
+        // EXIF の回転を反映して読み込む
+        async function imgLoad(blob) {
+            if (window.createImageBitmap) {
+                try { return await createImageBitmap(blob, { imageOrientation: 'from-image' }); }
+                catch (e) { /* 未対応なら下のやり方で */ }
+            }
+            return await new Promise((res, rej) => {
+                const url = URL.createObjectURL(blob);
+                const im = new Image();
+                im.onload = () => { URL.revokeObjectURL(url); res(im); };
+                im.onerror = e => { URL.revokeObjectURL(url); rej(e); };
+                im.src = url;
+            });
+        }
+
+        // 長辺 maxSide まで縮小する。WebPが作れない端末ではJPEGにする
+        async function shrinkImage(blob, maxSide, quality) {
+            const src = await imgLoad(blob);
+            const w0 = src.width, h0 = src.height;
+            const scale = Math.min(1, maxSide / Math.max(w0, h0));
+            const w = Math.max(1, Math.round(w0 * scale));
+            const h = Math.max(1, Math.round(h0 * scale));
+            const cv = document.createElement('canvas');
+            cv.width = w; cv.height = h;
+            const cx = cv.getContext('2d');
+            cx.imageSmoothingEnabled = true;
+            cx.imageSmoothingQuality = 'high';
+            cx.drawImage(src, 0, 0, w, h);
+            if (src.close) src.close();
+            let out = await new Promise(r => cv.toBlob(r, 'image/webp', quality));
+            if (!out || out.type !== 'image/webp') {
+                out = await new Promise(r => cv.toBlob(r, 'image/jpeg', quality));
+            }
+            return { blob: out, w: w, h: h };
+        }
+
+        const PHOTO_BUCKET = 'photos';
+        function photoPublicUrl(path) {
+            return db.storage.from(PHOTO_BUCKET).getPublicUrl(path).data.publicUrl;
+        }
+        async function photoPut(path, blob) {
+            const { error } = await db.storage.from(PHOTO_BUCKET).upload(path, blob, {
+                cacheControl: '31536000',   // 一度読んだらブラウザに残す
+                upsert: true,
+                contentType: blob.type
+            });
+            if (error) throw error;
+            return photoPublicUrl(path);
+        }
+
+        // 1枚ぶんの縮小＋サムネイルを作ってアップロードする
+        async function uploadOnePhoto(blob, name) {
+            const base = Date.now().toString(36) + Math.random().toString(36).slice(2, 7) +
+                '_' + safeFileName(name);
+            const ext = b => b.type === 'image/webp' ? 'webp' : 'jpg';
+            const full = await shrinkImage(blob, PHOTO_FULL_PX, 0.82);
+            const thumb = await shrinkImage(blob, PHOTO_THUMB_PX, 0.70);
+            const fullUrl = await photoPut(base + '.' + ext(full.blob), full.blob);
+            let thumbUrl = fullUrl;
+            try { thumbUrl = await photoPut(base + '_t.' + ext(thumb.blob), thumb.blob); }
+            catch (e) { console.warn('サムネイルの保存に失敗（原寸で代用します）', e); }
+            return {
+                full: fullUrl, thumb: thumbUrl,
+                w: full.w, h: full.h,
+                at: new Date().toISOString(), by: calMe()
+            };
+        }
+
+        // Storage 上のファイルだけ消す（orig は移行前の原本なので残す）
+        async function deletePhotoFiles(p) {
+            if (typeof p === 'string') return;
+            const marker = '/storage/v1/object/public/' + PHOTO_BUCKET + '/';
+            const names = [p.full, p.thumb].filter(u => u && u.indexOf(marker) !== -1)
+                .map(u => decodeURIComponent(u.split(marker)[1]));
+            if (!names.length) return;
+            try { await db.storage.from(PHOTO_BUCKET).remove([...new Set(names)]); }
+            catch (e) { console.warn('ファイルの削除に失敗', e); }
+        }
+
+        /* ---------- ギャラリーへのアップロード ---------- */
         function triggerPhotoUpload() {
             document.getElementById('photoUpload').click();
         }
 
         async function handlePhotoUpload(input) {
             if (!input.files || input.files.length === 0) return;
-
-            const totalFiles = input.files.length;
-            const newPhotoUrls = [];
+            const files = Array.from(input.files);
             const uploadBtn = document.getElementById('uploadBtn');
             const uploadLoading = document.getElementById('uploadLoading');
-
             uploadBtn.disabled = true;
             uploadLoading.style.display = 'flex';
 
-            let successCount = 0;
-
-            for (let i = 0; i < totalFiles; i++) {
-                uploadLoading.innerHTML = `アップロード中... 🚀 (${i + 1}/${totalFiles}枚目)`;
-
-                const file = input.files[i];
-                const fileName = `${Date.now()}_${file.name}`;
-
-                try {
-                    // Supabase Storageにアップロード
-                    const {
-                        data,
-                        error
-                    } = await db.storage
-                        .from('photos')
-                        .upload(fileName, file, {
-                            cacheControl: '3600',
-                            upsert: false
-                        });
-
-                    if (error) throw error;
-
-                    // 公開URLを取得
-                    const {
-                        data: urlData
-                    } = db.storage
-                        .from('photos')
-                        .getPublicUrl(fileName);
-
-                    newPhotoUrls.push(urlData.publicUrl);
-                    successCount++;
-
-                } catch (e) {
-                    console.error(`${i + 1}枚目のアップロードに失敗しました🥲`, e);
-                }
+            const added = [];
+            for (let i = 0; i < files.length; i++) {
+                uploadLoading.innerHTML = '軽くしてアップロード中... 🚀 (' + (i + 1) + '/' + files.length + '枚目)';
+                try { added.push(await uploadOnePhoto(files[i], files[i].name)); }
+                catch (e) { console.error((i + 1) + '枚目のアップロードに失敗しました🥲', e); }
             }
-
-            if (newPhotoUrls.length > 0) {
-                photos.push(...newPhotoUrls);
+            if (added.length) {
+                photos.push(...added);
                 await updateCloudData();
                 renderGallery();
             }
-
             uploadLoading.style.display = 'none';
             uploadBtn.disabled = false;
-            input.value = "";
-            alert(`${successCount}/${totalFiles}枚アップロードしました！✨`);
+            input.value = '';
+            showToast(added.length + '/' + files.length + '枚アップロードしました！✨');
         }
-        const slides = document.getElementById('slides');
-        let startX = 0;
-        let currentTranslate = 0;
-        let isDragging = false;
-        prevTranslate = currentTranslate;
+
+        /* ---------- ギャラリー表示 ---------- */
+        let galleryShown = 0;
+
+        function photoImgEl(p, index, eager) {
+            const img = document.createElement('img');
+            if (!eager) { img.loading = 'lazy'; }
+            img.decoding = 'async';
+            img.alt = '';
+            img.src = photoThumb(p);
+            img.onclick = () => openViewer(p, index);
+            return img;
+        }
 
         function renderGallery() {
             const slides = document.getElementById('slides');
             const grid = document.getElementById('galleryGrid');
-
             slides.innerHTML = '';
             grid.innerHTML = '';
+            galleryShown = 0;
 
-            // 既存のボタンラッパーを削除
             const oldWrapper = document.getElementById('galleryBtnWrapper');
             if (oldWrapper) oldWrapper.remove();
 
@@ -1631,66 +3329,164 @@
                 return;
             }
 
-            // スライダーは最新6枚
-            const displayPhotos = [...photos].reverse();
-            const sliderPhotos = displayPhotos.slice(0, 6);
-            sliderPhotos.forEach((url, index) => {
-                const actualIndex = photos.length - 1 - index;
+            // スライダーは最新6枚。1枚目以外は画面に入ってから読み込む
+            for (let i = 0; i < Math.min(6, photos.length); i++) {
+                const index = photos.length - 1 - i;
+                const p = photos[index];
                 const img = document.createElement('img');
-                img.src = url;
-                img.onclick = () => openViewer(url, actualIndex);
+                if (i > 0) img.loading = 'lazy';
+                img.decoding = 'async';
+                img.src = photoFull(p);
+                img.onclick = () => openViewer(p, index);
                 slides.appendChild(img);
-            });
+            }
 
-            // 全部見るボタンをグリッドの外に配置
             const btnWrapper = document.createElement('div');
             btnWrapper.id = 'galleryBtnWrapper';
-            btnWrapper.style.cssText = `text-align: center; margin-top: 12px;`;
+            btnWrapper.style.cssText = 'text-align:center;margin-top:12px;';
 
             const btn = document.createElement('button');
-            btn.innerText = `📂 全部見る（${photos.length}枚）`;
-            btn.style.cssText = `
-                padding: 10px 24px;
-                background: linear-gradient(135deg, #ff9a9e, #fecfef);
-                color: white;
-                border: none;
-                border-radius: 12px;
-                font-size: 13px;
-                font-weight: bold;
-                cursor: pointer;
-            `;
-            btn.onclick = () => {
-                grid.innerHTML = '';
-                [...photos].reverse().forEach((url) => {
-                    const actualIndex = photos.indexOf(url);
-                    const img = document.createElement('img');
-                    img.src = url;
-                    img.onclick = () => openViewer(url, actualIndex);
-                    grid.appendChild(img);
-                });
-
-                const closeBtn = document.createElement('button');
-                closeBtn.innerText = '閉じる ▲';
-                closeBtn.style.cssText = `
-                    width: 100%;
-                    padding: 10px;
-                    margin-top: 8px;
-                    background: #eee;
-                    color: #666;
-                    border: none;
-                    border-radius: 12px;
-                    font-size: 13px;
-                    font-weight: bold;
-                    cursor: pointer;
-                    grid-column: 1 / -1;
-                `;
-                closeBtn.onclick = () => renderGallery();
-                grid.appendChild(closeBtn);
-                btnWrapper.style.display = 'none';
-            };
-
+            btn.className = 'gallery-main-btn';
+            btn.innerText = '📂 全部見る（' + photos.length + '枚）';
+            btn.onclick = () => galleryShowMore(true);
             btnWrapper.appendChild(btn);
+
+            // 縮小がまだの写真があれば案内を出す
+            const heavy = photos.filter(photoNeedsShrink).length;
+            if (heavy > 0) {
+                const fix = document.createElement('button');
+                fix.id = 'photoOptimizeBtn';
+                fix.className = 'gallery-sub-btn';
+                fix.innerText = '⚡ 写真を軽くする（' + heavy + '枚）';
+                fix.onclick = () => optimizeExistingPhotos();
+                btnWrapper.appendChild(fix);
+            }
             grid.after(btnWrapper);
+        }
+
+        // 「全部見る」を24枚ずつ足していく
+        function galleryShowMore(first) {
+            const grid = document.getElementById('galleryGrid');
+            const wrapper = document.getElementById('galleryBtnWrapper');
+            if (first) { grid.innerHTML = ''; galleryShown = 0; if (wrapper) wrapper.style.display = 'none'; }
+
+            const oldFoot = document.getElementById('galleryFoot');
+            if (oldFoot) oldFoot.remove();
+
+            const end = Math.min(photos.length, galleryShown + GALLERY_PAGE);
+            for (let i = galleryShown; i < end; i++) {
+                const index = photos.length - 1 - i;   // 新しい順
+                grid.appendChild(photoImgEl(photos[index], index));
+            }
+            galleryShown = end;
+
+            const foot = document.createElement('div');
+            foot.id = 'galleryFoot';
+            foot.style.cssText = 'grid-column:1/-1;display:flex;gap:8px;margin-top:8px;';
+            if (galleryShown < photos.length) {
+                const more = document.createElement('button');
+                more.className = 'gallery-main-btn';
+                more.style.flex = '1';
+                more.innerText = 'もっと見る（あと' + (photos.length - galleryShown) + '枚）';
+                more.onclick = () => galleryShowMore(false);
+                foot.appendChild(more);
+            }
+            const close = document.createElement('button');
+            close.className = 'gallery-sub-btn';
+            close.style.cssText = 'flex:1;margin-top:0;';
+            close.innerText = '閉じる ▲';
+            close.onclick = () => renderGallery();
+            foot.appendChild(close);
+            grid.appendChild(foot);
+        }
+
+        /* ---------- 既存の写真を軽くする（一度だけ動かす） ---------- */
+        let photoOptimizeRunning = false;
+        async function optimizeExistingPhotos() {
+            if (photoOptimizeRunning) return;
+            // 途中で相手の更新が入っても大丈夫なよう、番号でなくURLで覚えておく
+            const targets = photos.filter(photoNeedsShrink).map(photoOrig);
+            if (!targets.length) { showToast('もう全部軽くなってるよ✨'); return; }
+            if (!confirm(targets.length + '枚の写真を軽くします。\n' +
+                '元の写真はそのまま残るので消えません。\n' +
+                'Wi-Fiで、画面を開いたまま待ってね。\n\nはじめる？')) return;
+
+            photoOptimizeRunning = true;
+            const btn = document.getElementById('photoOptimizeBtn');
+            let done = 0, failed = 0;
+            try {
+                for (let k = 0; k < targets.length; k++) {
+                    const url = targets[k];
+                    if (btn) btn.innerText = '⚡ 軽くしています... ' + (k + 1) + '/' + targets.length;
+                    try {
+                        const res = await fetch(url, { mode: 'cors', cache: 'force-cache' });
+                        if (!res.ok) throw new Error('HTTP ' + res.status);
+                        const blob = await res.blob();
+                        const made = await uploadOnePhoto(blob, url.split('/').pop());
+                        made.orig = url;   // 元の写真は消さずに残す
+                        // 待っている間に並びが変わっているかもしれないので、探し直して入れ替える
+                        const at = photos.findIndex(q => photoOrig(q) === url);
+                        if (at !== -1) photos[at] = made; else photos.push(made);
+                        done++;
+                    } catch (e) {
+                        console.warn('この写真は軽くできませんでした:', url, e);
+                        failed++;
+                    }
+                    if (done && done % 5 === 0) await updateCloudData();  // 途中で止まっても進捗が残る
+                }
+                await updateCloudData();
+            } finally {
+                photoOptimizeRunning = false;
+                renderGallery();
+            }
+            showToast(done + '枚を軽くしました！' + (failed ? '（' + failed + '枚は失敗）' : '✨'));
+        }
+
+        /* ---------- 拡大ビューア ---------- */
+        let currentViewerIndex = null;
+
+        function openViewer(p, index) {
+            const viewer = document.getElementById('photoViewer');
+            const img = document.getElementById('viewerImg');
+            currentViewerIndex = index;
+            img.src = photoFull(typeof p === 'number' ? photos[p] : p);
+            viewer.style.display = 'flex';
+        }
+
+        function closeViewer() {
+            document.getElementById('photoViewer').style.display = 'none';
+        }
+
+        function viewerShow() {
+            document.getElementById('viewerImg').src = photoFull(photos[currentViewerIndex]);
+        }
+
+        function viewerPrev() {
+            if (currentViewerIndex === null) return;
+            currentViewerIndex = (currentViewerIndex - 1 + photos.length) % photos.length;
+            viewerShow();
+        }
+
+        function viewerNext() {
+            if (currentViewerIndex === null) return;
+            currentViewerIndex = (currentViewerIndex + 1) % photos.length;
+            viewerShow();
+        }
+
+        async function deleteFromViewer() {
+            if (currentViewerIndex === null) return;
+            if (!confirm("この写真を削除する？")) return;
+            const p = photos[currentViewerIndex];
+            const key = photoFull(p);
+            await deletePhotoFiles(p);
+            // 待っている間に並びが変わっていても、違う写真を消さないようにする
+            const at = photos.findIndex(q => photoFull(q) === key);
+            if (at !== -1) photos.splice(at, 1);
+            await updateCloudData();
+            closeViewer();
+            renderGallery();
+            currentViewerIndex = null;
+            showToast("写真を削除しました🗑️");
         }
 
         function renderShops() {
@@ -1871,54 +3667,8 @@
             renderGallery();
         }
 
-        async function deleteFromViewer() {
-            if (currentViewerIndex === null) return;
-            if (!confirm("この写真を削除する？")) return;
-
-            const url = photos[currentViewerIndex];
-
-            // SupabaseStorageからも削除
-            const fileName = url.split('/').pop();
-            await db.storage.from('photos').remove([fileName]);
-
-            photos.splice(currentViewerIndex, 1);
-            await updateCloudData();
-
-            closeViewer();
-            renderGallery();
-            currentViewerIndex = null;
-            showToast("写真を削除しました🗑️");
-        }
-
         function openInsta(url) {
             window.open(url, '_blank');
-        }
-
-        let currentViewerIndex = null;
-
-        function openViewer(url, index) {
-            const viewer = document.getElementById('photoViewer');
-            const img = document.getElementById('viewerImg');
-
-            currentViewerIndex = index;
-            img.src = url;
-            viewer.style.display = 'flex';
-        }
-
-        function closeViewer() {
-            document.getElementById('photoViewer').style.display = 'none';
-        }
-
-        function viewerPrev() {
-            if (currentViewerIndex === null) return;
-            currentViewerIndex = (currentViewerIndex - 1 + photos.length) % photos.length;
-            document.getElementById('viewerImg').src = photos[currentViewerIndex];
-        }
-
-        function viewerNext() {
-            if (currentViewerIndex === null) return;
-            currentViewerIndex = (currentViewerIndex + 1) % photos.length;
-            document.getElementById('viewerImg').src = photos[currentViewerIndex];
         }
 
         function showToast(msg) {
@@ -2118,203 +3868,1638 @@
             }
         }
 
-        // --- カレンダー ---
+        // ============================================================
+        // 📅 カレンダー v2 (TimeTree風)
+        // ============================================================
         let events = [];
-        let currentCalYear = new Date().getFullYear();
-        let currentCalMonth = new Date().getMonth();
-        let selectedDate = null;
 
+        // ラベルは名前も色も編集できる（キーは予定と結び付いているので変えない）
+        const CAL_DEFAULT_LABELS = [
+            { key: 'rose', name: 'ふたり', color: '#ff6b8a' },
+            { key: 'coral', name: 'デート', color: '#ff9248' },
+            { key: 'amber', name: '大事', color: '#f6b93b' },
+            { key: 'mint', name: '学校', color: '#26c281' },
+            { key: 'sky', name: '旅行', color: '#3aa3f5' },
+            { key: 'indigo', name: '仕事', color: '#7c83fd' },
+            { key: 'violet', name: '趣味', color: '#c471ed' },
+            { key: 'slate', name: 'その他', color: '#8d99ae' }
+        ];
+        const CAL_LABEL_MAX = 14;
+        const CAL_PALETTE = ['#ff6b8a', '#ff4d6d', '#ff9248', '#f6b93b', '#ffd43b', '#a3cb38',
+            '#26c281', '#00b8a9', '#3aa3f5', '#4d7cfe', '#7c83fd', '#c471ed',
+            '#e056a0', '#b08968', '#8d99ae', '#5a6472'];
+        let calLabels = CAL_DEFAULT_LABELS.map(l => ({ key: l.key, name: l.name, color: l.color }));
+
+        function calLabel(key) {
+            return calLabels.find(l => l.key === key) || calLabels[0] ||
+                { key: 'rose', name: 'ラベル', color: '#ff6b8a' };
+        }
+        function calSetLabels(list) {
+            if (Array.isArray(list) && list.length) {
+                calLabels = list.filter(l => l && l.key).map(l => ({
+                    key: String(l.key),
+                    name: String(l.name || 'ラベル').slice(0, 12),
+                    color: /^#[0-9a-fA-F]{6}$/.test(l.color || '') ? l.color : '#ff6b8a'
+                }));
+            }
+            if (!calLabels.length) calLabels = CAL_DEFAULT_LABELS.map(l => Object.assign({}, l));
+        }
+        // labels 列がまだ無い環境でも動くように、端末側にも控えを置く
+        function calLoadLocalLabels() {
+            try {
+                const raw = localStorage.getItem('cal_labels');
+                if (raw) calSetLabels(JSON.parse(raw));
+            } catch (e) { }
+        }
+        function calSaveLocalLabels() {
+            try { localStorage.setItem('cal_labels', JSON.stringify(calLabels)); } catch (e) { }
+        }
+        /* ---------- メンバー（誰の予定か） ---------- */
+        const CAL_MEMBER_EMOJI = ['💗', '💙', '🐻', '🐰', '🐣', '🌟', '🍀', '🐼', '🦊', '🐧'];
+        const CAL_MEMBER_MAX = 8;
+        let calMembers = [];
+
+        function calMember(id) { return calMembers.find(m => m.id === id) || null; }
+        function calEnsureMembers() {
+            if (!Array.isArray(calMembers) || !calMembers.length) {
+                calMembers = [
+                    { id: 'mine', name: calMe(), color: '#ff6b8a', emoji: '💗' },
+                    { id: 'yours', name: 'パートナー', color: '#4dabf7', emoji: '💙' }
+                ];
+            }
+        }
+        function calSetMembers(list) {
+            if (Array.isArray(list) && list.length) {
+                calMembers = list.filter(m => m && m.id).map(m => ({
+                    id: String(m.id),
+                    name: String(m.name || 'メンバー').slice(0, 12),
+                    color: /^#[0-9a-fA-F]{6}$/.test(m.color || '') ? m.color : '#ff6b8a',
+                    emoji: String(m.emoji || '💗').slice(0, 4)
+                }));
+            }
+            calEnsureMembers();
+        }
+        function calLoadLocalMembers() {
+            try {
+                const raw = localStorage.getItem('cal_members');
+                if (raw) calSetMembers(JSON.parse(raw));
+            } catch (e) { }
+            calEnsureMembers();
+        }
+        function calSaveLocalMembers() {
+            try { localStorage.setItem('cal_members', JSON.stringify(calMembers)); } catch (e) { }
+        }
+        // 「自分」がどのメンバーかは端末ごとに覚える
+        function calMyMemberId() {
+            calEnsureMembers();
+            try {
+                const saved = localStorage.getItem('my_member_id');
+                if (saved && calMember(saved)) return saved;
+            } catch (e) { }
+            const byName = calMembers.find(m => m.name === calMe());
+            return byName ? byName.id : calMembers[0].id;
+        }
+        function calSetMyMember(id) {
+            try { localStorage.setItem('my_member_id', id); } catch (e) { }
+        }
+        // 予定に割り当てられたメンバーのアイコン
+        function calMemberAvatars(ev, cls) {
+            return (ev.members || []).map(id => {
+                const m = calMember(id);
+                if (!m) return '';
+                return '<span class="cal-av ' + (cls || '') + '" style="background:' + m.color + '" title="' +
+                    esc(m.name) + '">' + esc(m.emoji) + '</span>';
+            }).join('');
+        }
+        function calMemberNames(ev) {
+            return (ev.members || []).map(id => { const m = calMember(id); return m ? m.name : null; })
+                .filter(Boolean).join('・');
+        }
+
+        const CAL_REPEATS = {
+            none: 'くり返さない', daily: '毎日', weekly: '毎週',
+            biweekly: '隔週', monthly: '毎月', yearly: '毎年'
+        };
+        const CAL_REMINDERS = {
+            0: 'なし', 10: '10分前', 30: '30分前', 60: '1時間前',
+            180: '3時間前', 1440: '1日前', 2880: '2日前', 10080: '1週間前'
+        };
+        const CAL_DOW = ['日', '月', '火', '水', '木', '金', '土'];
+
+        let calView = 'month';
+        let calCursor = new Date();
+        let selectedDate = null;
+        let calSearch = '';
+        let calSearchOpen = false;
+        let calLabelFilter = [];
+        let calMemberFilter = [];
+        let calFullscreen = false;
+        let editingEventId = null;
+        let editingEventIndex = null; // 旧コード互換
+        let calSheetEvId = null;
+        let calSheetOcc = null;
+        let calSheetMode = 'event'; // 'event' = 予定の詳細 / 'day' = その日の一覧
+        let calSheetDate = null;
+        let calSheetFrom = null;    // 日別シートから開いたときの戻り先
+        let calReminderTimers = [];
+
+        /* ---------- 小道具 ---------- */
+        const calPad = n => String(n).padStart(2, '0');
+        function calYmd(d) { return d.getFullYear() + '-' + calPad(d.getMonth() + 1) + '-' + calPad(d.getDate()); }
+        function calParse(s) { const p = String(s).split('-').map(Number); return new Date(p[0], (p[1] || 1) - 1, p[2] || 1); }
+        function calAdd(d, n) { const x = new Date(d.getTime()); x.setDate(x.getDate() + n); return x; }
+        function calDiff(a, b) { return Math.round((calParse(b) - calParse(a)) / 86400000); }
+        function calToday() { return calYmd(new Date()); }
+        function calMin(t) { const p = String(t || '0:00').split(':'); return (+p[0]) * 60 + (+p[1] || 0); }
+        function esc(s) {
+            return String(s == null ? '' : s).replace(/[&<>"']/g, c =>
+                ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+        }
+        function calMe() {
+            try {
+                if (typeof USER_NAME !== 'undefined' && USER_NAME) return USER_NAME;
+            } catch (e) { }
+            return localStorage.getItem('user_name') || 'わたし';
+        }
+        function calColor(ev) { return calLabel(ev.label).color; }
+
+        /* ---------- 日本の祝日 ---------- */
+        const calHolidayCache = {};
+        function calNthMonday(y, m, n) {
+            const first = new Date(y, m - 1, 1);
+            const off = (8 - first.getDay()) % 7;
+            return new Date(y, m - 1, 1 + off + (n - 1) * 7);
+        }
+        function calHolidays(year) {
+            if (calHolidayCache[year]) return calHolidayCache[year];
+            const h = {};
+            const set = (d, name) => { h[calYmd(d)] = name; };
+            set(new Date(year, 0, 1), '元日');
+            set(calNthMonday(year, 1, 2), '成人の日');
+            set(new Date(year, 1, 11), '建国記念の日');
+            set(new Date(year, 1, 23), '天皇誕生日');
+            const shun = Math.floor(20.8431 + 0.242194 * (year - 1980) - Math.floor((year - 1980) / 4));
+            set(new Date(year, 2, shun), '春分の日');
+            set(new Date(year, 3, 29), '昭和の日');
+            set(new Date(year, 4, 3), '憲法記念日');
+            set(new Date(year, 4, 4), 'みどりの日');
+            set(new Date(year, 4, 5), 'こどもの日');
+            set(calNthMonday(year, 7, 3), '海の日');
+            set(new Date(year, 7, 11), '山の日');
+            const keiro = calNthMonday(year, 9, 3);
+            set(keiro, '敬老の日');
+            const shuu = Math.floor(23.2488 + 0.242194 * (year - 1980) - Math.floor((year - 1980) / 4));
+            const shuubun = new Date(year, 8, shuu);
+            set(shuubun, '秋分の日');
+            if (calDiff(calYmd(keiro), calYmd(shuubun)) === 2) set(calAdd(keiro, 1), '国民の休日');
+            set(calNthMonday(year, 10, 2), 'スポーツの日');
+            set(new Date(year, 10, 3), '文化の日');
+            set(new Date(year, 10, 23), '勤労感謝の日');
+            // 振替休日
+            Object.keys(h).slice().forEach(k => {
+                const d = calParse(k);
+                if (d.getDay() === 0) {
+                    let n = calAdd(d, 1);
+                    while (h[calYmd(n)]) n = calAdd(n, 1);
+                    h[calYmd(n)] = '振替休日';
+                }
+            });
+            calHolidayCache[year] = h;
+            return h;
+        }
+        function calHolidayName(dateStr) {
+            const y = +dateStr.slice(0, 4);
+            return calHolidays(y)[dateStr] || null;
+        }
+
+        /* ---------- データ正規化 ---------- */
+        function calNormalize(ev) {
+            if (!ev.id) ev.id = 'e' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+            if (typeof ev.title !== 'string') ev.title = String(ev.title == null ? '' : ev.title);
+            if (typeof ev.note !== 'string') ev.note = String(ev.note == null ? '' : ev.note);
+            if (!ev.date) ev.date = calToday();
+            if (!ev.endDate || ev.endDate < ev.date) ev.endDate = ev.date;
+            if (ev.allDay === undefined) ev.allDay = !ev.start;
+            if (!calLabels.some(l => l.key === ev.label)) ev.label = calLabels[0].key;
+            if (!CAL_REPEATS[ev.repeat]) ev.repeat = 'none';
+            if (!Array.isArray(ev.repeatDows)) ev.repeatDows = [];
+            ev.repeatDows = ev.repeatDows.filter(d => d >= 0 && d <= 6);
+            if (ev.monthlyMode !== 'nth') ev.monthlyMode = 'date';
+            if (typeof ev.repeatUntil !== 'string') ev.repeatUntil = '';
+            // 知らないIDでも消さない（相手の端末が先にメンバーを増やしている場合があるため）
+            if (!Array.isArray(ev.members)) ev.members = [];
+            ev.members = ev.members.filter(id => typeof id === 'string');
+            if (!Array.isArray(ev.photos)) ev.photos = [];
+            if (!Array.isArray(ev.comments)) ev.comments = [];
+            if (!Array.isArray(ev.doneDates)) ev.doneDates = [];
+            if (!Array.isArray(ev.exdates)) ev.exdates = [];
+            if (typeof ev.reminder !== 'number') ev.reminder = 0;
+            if (typeof ev.location !== 'string') ev.location = ev.location || '';
+            return ev;
+        }
+        function calNormalizeAll() {
+            calEnsureMembers();
+            if (!Array.isArray(events)) events = [];
+            events = events.map(calNormalize);
+        }
+
+        /* ---------- 第N曜日の計算（毎月 第2土曜 など） ---------- */
+        // その月の第何週めか。最終週なら -1（第5◯曜 = 最終◯曜 として扱う）
+        function calNthIndex(d) {
+            const lastDate = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+            return (d.getDate() + 7 > lastDate) ? -1 : Math.ceil(d.getDate() / 7);
+        }
+        function calNthWeekday(y, m, dow, nth) {
+            if (nth > 0) {
+                const first = new Date(y, m, 1);
+                const off = (dow - first.getDay() + 7) % 7;
+                const d = new Date(y, m, 1 + off + (nth - 1) * 7);
+                return d.getMonth() === m ? d : null;
+            }
+            const last = new Date(y, m + 1, 0);
+            const off = (last.getDay() - dow + 7) % 7;
+            return new Date(y, m, last.getDate() - off);
+        }
+        function calRepeatText(ev) {
+            if (ev.repeat === 'none') return '';
+            if (ev.repeat === 'weekly' || ev.repeat === 'biweekly') {
+                const base = calParse(ev.date);
+                const dows = ev.repeatDows && ev.repeatDows.length ? ev.repeatDows : [base.getDay()];
+                return (ev.repeat === 'weekly' ? '毎週' : '隔週') + ' ' +
+                    dows.slice().sort((a, b) => a - b).map(d => CAL_DOW[d]).join('・');
+            }
+            if (ev.repeat === 'monthly' && ev.monthlyMode === 'nth') {
+                const base = calParse(ev.date);
+                const nth = calNthIndex(base);
+                return '毎月 ' + (nth < 0 ? '最終' : '第' + nth) + CAL_DOW[base.getDay()] + '曜';
+            }
+            return CAL_REPEATS[ev.repeat];
+        }
+
+        /* ---------- 予定の展開（くり返し対応） ---------- */
+        function calMatches(ev) {
+            if (calLabelFilter.length && calLabelFilter.indexOf(ev.label) === -1) return false;
+            // メンバー未指定の予定は誰の絞り込みでも表示する
+            if (calMemberFilter.length && (ev.members || []).length &&
+                !ev.members.some(id => calMemberFilter.indexOf(id) !== -1)) return false;
+            if (calSearch) {
+                const q = calSearch.toLowerCase();
+                const hay = (ev.title + ' ' + (ev.note || '') + ' ' + (ev.location || '') + ' ' +
+                    (ev.author || '') + ' ' + calMemberNames(ev)).toLowerCase();
+                if (hay.indexOf(q) === -1) return false;
+            }
+            return true;
+        }
+        function calPush(out, ev, startDate, span, from, to) {
+            const s = startDate, e = calAdd(startDate, span);
+            if (e < from || s > to) return;
+            const sy = calYmd(s);
+            if (ev.exdates.indexOf(sy) !== -1) return;
+            out.push({ ev: ev, sYmd: sy, eYmd: calYmd(e), s: s, e: e });
+        }
+        function calOccurrences(fromStr, toStr, ignoreFilter) {
+            calNormalizeAll();
+            const out = [];
+            const from = calParse(fromStr), to = calParse(toStr);
+            events.forEach(ev => {
+                if (!ignoreFilter && !calMatches(ev)) return;
+                const span = Math.max(0, calDiff(ev.date, ev.endDate));
+                const base = calParse(ev.date);
+                const until = ev.repeatUntil ? calParse(ev.repeatUntil) : null;
+                const limit = until && until < to ? until : to;
+                const guardStart = calAdd(from, -span);
+                let cur, g = 0;
+                switch (ev.repeat) {
+                    case 'none':
+                        calPush(out, ev, base, span, from, to);
+                        break;
+                    case 'daily':
+                        cur = base < guardStart ? new Date(guardStart.getTime()) : new Date(base.getTime());
+                        while (cur <= limit && g++ < 400) { if (cur >= base) calPush(out, ev, cur, span, from, to); cur = calAdd(cur, 1); }
+                        break;
+                    case 'weekly':
+                    case 'biweekly': {
+                        // 曜日を複数選べる（月・水・金 など）。未指定なら開始日の曜日
+                        const step = ev.repeat === 'weekly' ? 7 : 14;
+                        const dows = ev.repeatDows.length ? ev.repeatDows : [base.getDay()];
+                        let wk = calAdd(base, -base.getDay());          // 基準になる週の日曜
+                        const wkGuard = calAdd(guardStart, -6);
+                        if (wk < wkGuard) {
+                            const k = Math.floor((wkGuard - wk) / (step * 86400000));
+                            wk = calAdd(wk, k * step);
+                        }
+                        while (wk <= limit && g++ < 400) {
+                            for (let di = 0; di < dows.length; di++) {
+                                const d = calAdd(wk, dows[di]);
+                                if (d >= base && d <= limit) calPush(out, ev, d, span, from, to);
+                            }
+                            wk = calAdd(wk, step);
+                        }
+                        break;
+                    }
+                    case 'monthly': {
+                        if (ev.monthlyMode === 'nth') {
+                            // 「毎月 第2土曜」のくり返し
+                            const dow = base.getDay();
+                            const nth = calNthIndex(base);
+                            for (let i = -1; i < 40; i++) {
+                                const ref = new Date(from.getFullYear(), from.getMonth() + i, 1);
+                                const d = calNthWeekday(ref.getFullYear(), ref.getMonth(), dow, nth);
+                                if (!d || d < base || d > limit) continue;
+                                calPush(out, ev, d, span, from, to);
+                                if (d > to) break;
+                            }
+                        } else {
+                            const dm = base.getDate();
+                            let y = from.getFullYear(), m = from.getMonth() - 1;
+                            for (let i = 0; i < 40; i++) {
+                                const d = new Date(y, m + i, dm);
+                                if (d.getDate() !== dm) continue;
+                                if (d < base || d > limit) continue;
+                                calPush(out, ev, d, span, from, to);
+                                if (d > to) break;
+                            }
+                        }
+                        break;
+                    }
+                    case 'yearly':
+                        for (let y = from.getFullYear() - 1; y <= to.getFullYear() + 1; y++) {
+                            const d = new Date(y, base.getMonth(), base.getDate());
+                            if (d < base || d > limit) continue;
+                            calPush(out, ev, d, span, from, to);
+                        }
+                        break;
+                }
+            });
+            return out;
+        }
+        function calOccSort(a, b) {
+            const da = calDiff(a.sYmd, a.eYmd), db = calDiff(b.sYmd, b.eYmd);
+            if (da !== db) return db - da;
+            if (a.sYmd !== b.sYmd) return a.sYmd < b.sYmd ? -1 : 1;
+            const aa = a.ev.allDay ? 0 : 1, bb = b.ev.allDay ? 0 : 1;
+            if (aa !== bb) return aa - bb;
+            return calMin(a.ev.start) - calMin(b.ev.start);
+        }
+        function calIsDone(ev, dateStr) { return ev.doneDates.indexOf(dateStr) !== -1; }
+        function calTimeText(ev) {
+            if (ev.allDay) return '終日';
+            return (ev.start || '') + (ev.end ? '<br>' + ev.end : '');
+        }
+
+        /* ---------- 描画：シェル ---------- */
+        function calMonthTitle() {
+            if (calView === 'list') return { main: '予定リスト', sub: 'UPCOMING' };
+            if (calView === 'week') {
+                const ws = calAdd(calCursor, -calCursor.getDay());
+                const we = calAdd(ws, 6);
+                return {
+                    main: (ws.getMonth() + 1) + '/' + ws.getDate() + ' - ' + (we.getMonth() + 1) + '/' + we.getDate(),
+                    sub: ws.getFullYear() + ''
+                };
+            }
+            return { main: (calCursor.getMonth() + 1) + '月', sub: calCursor.getFullYear() + '' };
+        }
+        function calRenderShell() {
+            const t = calMonthTitle();
+            let h = '';
+            h += '<div class="cal-toolbar">';
+            h += '<div class="cal-nav">';
+            h += '<button data-act="prev">‹</button>';
+            h += '<div class="cal-title" data-act="today"><small>' + esc(t.sub) + '</small>' + esc(t.main) + '</div>';
+            h += '<button data-act="next">›</button>';
+            h += '</div>';
+            h += '<div class="cal-seg">';
+            ['month', 'week', 'list'].forEach(v => {
+                const nm = { month: '月', week: '週', list: 'リスト' }[v];
+                h += '<button class="' + (calView === v ? 'on' : '') + '" data-act="view" data-arg="' + v + '">' + nm + '</button>';
+            });
+            h += '</div>';
+            h += '<button class="cal-today-btn" data-act="today">今日</button>';
+            h += '</div>';
+
+            if (calSearchOpen) {
+                h += '<div class="cal-searchbar"><span>🔍</span>' +
+                    '<input id="calSearchInput" type="search" placeholder="予定を検索..." value="' + esc(calSearch) + '" oninput="calOnSearch(this.value)">' +
+                    '<span data-act="closesearch" style="cursor:pointer;color:#c3aeb4;">✕</span></div>';
+            }
+
+            h += '<div class="cal-chips">';
+            h += '<div class="cal-chip ' + (calLabelFilter.length === 0 ? 'on' : '') + '" data-act="label" data-arg="__all">すべて</div>';
+            calLabels.forEach(l => {
+                const on = calLabelFilter.indexOf(l.key) !== -1;
+                h += '<div class="cal-chip ' + (on ? 'on' : '') + '" data-act="label" data-arg="' + esc(l.key) + '">' +
+                    '<span class="dot" style="background:' + l.color + '"></span>' + esc(l.name) + '</div>';
+            });
+            h += '<div class="cal-chip cal-chip-edit" data-act="editlabels">⚙️ ラベル編集</div>';
+            h += '</div>';
+
+            // 誰の予定かで絞り込む
+            h += '<div class="cal-chips cal-chips-member">';
+            h += '<div class="cal-chip ' + (calMemberFilter.length === 0 ? 'on' : '') + '" data-act="member" data-arg="__all">👥 みんな</div>';
+            calMembers.forEach(m => {
+                const on = calMemberFilter.indexOf(m.id) !== -1;
+                h += '<div class="cal-chip ' + (on ? 'on' : '') + '" data-act="member" data-arg="' + esc(m.id) + '">' +
+                    '<span class="cal-av" style="background:' + m.color + '">' + esc(m.emoji) + '</span>' + esc(m.name) + '</div>';
+            });
+            h += '<div class="cal-chip cal-chip-edit" data-act="editmembers">⚙️ メンバー</div>';
+            h += '</div>';
+
+            h += calRenderNextBanner();
+            h += '<div id="calBody"></div>';
+            return h;
+        }
+        function calRenderNextBanner() {
+            if (calSearch) return '';
+            const today = calToday();
+            const occ = calOccurrences(today, calYmd(calAdd(new Date(), 400)))
+                .filter(o => o.eYmd >= today && !calIsDone(o.ev, o.sYmd))
+                .sort((a, b) => a.sYmd < b.sYmd ? -1 : a.sYmd > b.sYmd ? 1 : calMin(a.ev.start) - calMin(b.ev.start))[0];
+            if (!occ) return '';
+            const d = Math.max(0, calDiff(today, occ.sYmd));
+            const cd = d === 0 ? 'TODAY' : d === 1 ? '明日' : d;
+            const sub = d === 0 || d === 1 ? '' : '日後';
+            const dt = calParse(occ.sYmd);
+            const when = (dt.getMonth() + 1) + '/' + dt.getDate() + '(' + CAL_DOW[dt.getDay()] + ')' +
+                (occ.ev.allDay ? ' 終日' : ' ' + (occ.ev.start || ''));
+            return '<div class="cal-next" data-act="ev" data-arg="' + occ.ev.id + '" data-arg2="' + occ.sYmd + '">' +
+                '<div class="cd"><b>' + cd + '</b><span>' + sub + '</span></div>' +
+                '<div class="tx"><b>' + esc(occ.ev.title) + '</b><span>' + when +
+                (occ.ev.location ? ' · 📍' + esc(occ.ev.location) : '') + '</span></div>' +
+                '<div style="flex:0 0 auto;color:#e6bcc7;">›</div></div>';
+        }
+
+        /* ---------- 描画：メイン ---------- */
         function renderCalendar() {
             const container = document.getElementById('calendarContainer');
-            const year = currentCalYear;
-            const month = currentCalMonth;
+            if (!container) return;
+            calNormalizeAll();
+            container.innerHTML = calRenderShell();
+            calRenderBody();
+            calBindContainer(container);
+            calScheduleReminders();
+        }
+        function calRenderBody() {
+            const body = document.getElementById('calBody');
+            if (!body) return;
+            if (calView === 'month') body.innerHTML = calRenderMonth() + calRenderDayPanel();
+            else if (calView === 'week') body.innerHTML = calRenderWeek();
+            else body.innerHTML = calRenderList();
+            if (calView === 'week') calScrollWeek();
+        }
 
-            const firstDay = new Date(year, month, 1).getDay();
-            const daysInMonth = new Date(year, month + 1, 0).getDate();
-            const today = new Date();
-
-            const monthNames = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'];
-
-            let html = `
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-            <button class="btn-round" onclick="prevMonth()" style="width:30px;height:30px;font-size:14px;">‹</button>
-            <span style="font-weight:bold;font-size:16px;">${year}年 ${monthNames[month]}</span>
-            <button class="btn-round" onclick="nextMonth()" style="width:30px;height:30px;font-size:14px;">›</button>
-        </div>
-        <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center;">
-            <div style="font-size:11px;color:#e57373;font-weight:bold;">日</div>
-            <div style="font-size:11px;color:#888;font-weight:bold;">月</div>
-            <div style="font-size:11px;color:#888;font-weight:bold;">火</div>
-            <div style="font-size:11px;color:#888;font-weight:bold;">水</div>
-            <div style="font-size:11px;color:#888;font-weight:bold;">木</div>
-            <div style="font-size:11px;color:#888;font-weight:bold;">金</div>
-            <div style="font-size:11px;color:#6495ed;font-weight:bold;">土</div>
-    `;
-
-            for (let i = 0; i < firstDay; i++) {
-                html += `<div></div>`;
-            }
-
-            for (let d = 1; d <= daysInMonth; d++) {
-                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-                const hasEvent = events.some(e => e.date === dateStr);
-                const isToday = today.getFullYear() === year && today.getMonth() === month && today.getDate() === d;
-                const isSun = (firstDay + d - 1) % 7 === 0;
-                const isSat = (firstDay + d - 1) % 7 === 6;
-
-                let color = isSun ? '#e57373' : isSat ? '#6495ed' : '#333';
-                let bg = isToday ? 'linear-gradient(135deg,#ff9a9e,#fecfef)' : 'transparent';
-                let textColor = isToday ? 'white' : color;
-
-                html += `
-            <div onclick="onDateClick('${dateStr}')" style="
-                cursor:pointer;
-                border-radius:50%;
-                width:32px;
-                height:32px;
-                display:flex;
-                flex-direction:column;
-                align-items:center;
-                justify-content:center;
-                margin:auto;
-                background:${bg};
-                color:${textColor};
-                font-size:13px;
-                font-weight:${isToday ? 'bold' : 'normal'};
-                position:relative;
-            ">
-                ${d}
-                ${hasEvent ? `<div style="width:8px;height:8px;background:#ff9a9e;border-radius:50%;position:absolute;bottom:2px;"></div>` : ''}
-            </div>
-        `;
-            }
-
-            html += `</div>`;
-
-            if (selectedDate) {
-                const dayEvents = events.filter(e => e.date === selectedDate);
-                html += `<div style="margin-top:15px;border-top:1px dashed #ffe3e6;padding-top:12px;">`;
-                html +=
-                    `<div style="font-size:13px;font-weight:bold;color:#d81b60;margin-bottom:8px;">${selectedDate}の予定</div>`;
-                if (dayEvents.length === 0) {
-                    html += `<div style="font-size:12px;color:#999;">予定はありません</div>`;
-                } else {
-                    dayEvents.forEach((ev, i) => {
-                        const actualIdx = events.indexOf(ev);
-                        html += `
-                    <div style="background:#fff5f7;border-radius:10px;padding:10px;margin-bottom:8px;border-left:3px solid #ff9a9e;position:relative;">
-                        <div style="font-weight:bold;font-size:13px;">${ev.title}</div>
-                        ${ev.note ? `<div style="font-size:11px;color:#888;margin-top:4px;">${ev.note}</div>` : ''}
-                        <div style="position:absolute;top:8px;right:8px;display:flex;gap:6px;">
-                            <button onclick="editEvent(${actualIdx})" style="background:none;border:none;color:#ccc;font-size:12px;cursor:pointer;">✏️</button>
-                            <button onclick="deleteEvent(${actualIdx})" style="background:none;border:none;color:#ccc;font-size:12px;cursor:pointer;">🗑️</button>
-                        </div>
-                    </div>
-                `;
-                    });
+        /* ---------- 月ビュー ---------- */
+        function calLayoutLanes(items, weekStartYmd) {
+            const lanes = [];
+            const res = [];
+            items.slice().sort(calOccSort).forEach(o => {
+                const col = Math.max(0, calDiff(weekStartYmd, o.sYmd));
+                const endCol = Math.min(6, calDiff(weekStartYmd, o.eYmd));
+                if (endCol < 0 || col > 6) return;
+                let lane = 0;
+                while (lane < 40) {
+                    if (!lanes[lane]) lanes[lane] = [];
+                    const clash = lanes[lane].some(r => !(endCol < r[0] || col > r[1]));
+                    if (!clash) { lanes[lane].push([col, endCol]); break; }
+                    lane++;
                 }
-                html += `</div>`;
+                res.push({ o: o, col: col, endCol: endCol, span: endCol - col + 1, lane: lane });
+            });
+            return res;
+        }
+        function calRenderMonth() {
+            const y = calCursor.getFullYear(), m = calCursor.getMonth();
+            const first = new Date(y, m, 1);
+            const gridStart = calAdd(first, -first.getDay());
+            const last = new Date(y, m + 1, 0);
+            const gridEnd = calAdd(last, 6 - last.getDay());
+            const weeks = (calDiff(calYmd(gridStart), calYmd(gridEnd)) + 1) / 7;
+            const occs = calOccurrences(calYmd(gridStart), calYmd(gridEnd));
+            const maxLanes = calFullscreen ? 5 : 3;
+            const LH = 17;
+            const today = calToday();
+
+            // 1周目：各週のレーンを計算して行の高さを揃える
+            const rows = [];
+            let rowH = LH;
+            for (let w = 0; w < weeks; w++) {
+                const ws = calAdd(gridStart, w * 7);
+                const wsY = calYmd(ws);
+                const weY = calYmd(calAdd(ws, 6));
+                const placed = calLayoutLanes(occs.filter(o => !(o.eYmd < wsY || o.sYmd > weY)), wsY);
+                const overflowCount = [0, 0, 0, 0, 0, 0, 0];
+                placed.filter(p => p.lane >= maxLanes).forEach(p => {
+                    for (let c = p.col; c <= p.endCol; c++) overflowCount[c]++;
+                });
+                const hasOverflow = overflowCount.some(n => n > 0);
+                const usedLanes = Math.min(maxLanes, placed.reduce((a, p) => Math.max(a, p.lane + 1), 0));
+                rows.push({ ws, wsY, placed, overflowCount, hasOverflow, usedLanes });
+                rowH = Math.max(rowH, usedLanes * LH + (hasOverflow ? 14 : 0));
             }
 
-            container.innerHTML = html;
+            let h = '<div class="cal-dow">';
+            CAL_DOW.forEach((d, i) => {
+                h += '<div class="' + (i === 0 ? 'sun' : i === 6 ? 'sat' : '') + '">' + d + '</div>';
+            });
+            h += '</div><div class="cal-month" id="calMonthGrid">';
+
+            for (let w = 0; w < weeks; w++) {
+                const r = rows[w];
+                const ws = r.ws;
+                const placed = r.placed;
+
+                h += '<div class="cal-week"><div class="cal-week-nums">';
+                for (let i = 0; i < 7; i++) {
+                    const d = calAdd(ws, i);
+                    const ds = calYmd(d);
+                    const hol = calHolidayName(ds);
+                    const cls = ['cal-daycell'];
+                    if (i === 0) cls.push('sun');
+                    if (i === 6) cls.push('sat');
+                    if (hol) cls.push('hol');
+                    if (d.getMonth() !== m) cls.push('out');
+                    if (ds === today) cls.push('today');
+                    if (ds === selectedDate) cls.push('sel');
+                    h += '<div class="' + cls.join(' ') + '" data-act="day" data-arg="' + ds + '">' +
+                        '<div class="cal-daynum">' + d.getDate() + '</div>' +
+                        (hol ? '<div class="cal-holname">' + esc(hol) + '</div>' : '') +
+                        '</div>';
+                }
+                h += '</div>';
+
+                const vis = placed.filter(p => p.lane < maxLanes);
+                const overflowCount = r.overflowCount;
+                const usedLanes = r.usedLanes;
+
+                h += '<div class="cal-lanes" style="height:' + rowH + 'px">';
+                vis.forEach(p => {
+                    const ev = p.o.ev;
+                    const c = calColor(ev);
+                    const done = calIsDone(ev, p.o.sYmd);
+                    const multi = p.o.sYmd !== p.o.eYmd;
+                    const timedStyle = (!ev.allDay && !multi);
+                    const left = (p.col / 7 * 100).toFixed(4);
+                    const width = (p.span / 7 * 100).toFixed(4);
+                    // 誰の予定かを絵文字で先頭に出す
+                    const who = (ev.members || []).map(id => {
+                        const mb = calMember(id); return mb ? mb.emoji : '';
+                    }).join('').slice(0, 4);
+                    const title = (who ? who : '') + esc(ev.title);
+                    const label = timedStyle
+                        ? '<span class="tdot" style="background:' + c + '"></span>' + title
+                        : title;
+                    h += '<div class="cal-chipev ' + (timedStyle ? 'timed' : '') + (done ? ' done' : '') +
+                        '" style="left:calc(' + left + '% + 1px);width:calc(' + width + '% - 2px);top:' + (p.lane * LH) + 'px;background:' + c + '"' +
+                        ' data-act="ev" data-arg="' + ev.id + '" data-arg2="' + p.o.sYmd + '">' + label + '</div>';
+                });
+                if (r.hasOverflow) {
+                    for (let c = 0; c < 7; c++) {
+                        if (!overflowCount[c]) continue;
+                        h += '<div class="cal-more" style="left:' + (c / 7 * 100).toFixed(4) + '%;width:' + (100 / 7).toFixed(4) + '%;top:' + (usedLanes * LH) + 'px"' +
+                            ' data-act="day" data-arg="' + calYmd(calAdd(ws, c)) + '">+' + overflowCount[c] + '</div>';
+                    }
+                }
+                h += '</div></div>';
+            }
+            h += '</div>';
+            return h;
         }
 
-        function prevMonth() {
-            currentCalMonth--;
-            if (currentCalMonth < 0) {
-                currentCalMonth = 11;
-                currentCalYear--;
+        /* ---------- 選択日パネル ---------- */
+        function calRenderDayPanel() {
+            const ds = selectedDate || calToday();
+            const occs = calOccurrences(ds, ds).sort(calOccSort);
+            const d = calParse(ds);
+            const hol = calHolidayName(ds);
+            const diff = calDiff(calToday(), ds);
+            const cdText = diff === 0 ? '今日' : diff > 0 ? 'あと' + diff + '日' : Math.abs(diff) + '日前';
+
+            let h = '<div class="cal-daypanel"><div class="cal-daypanel-head">';
+            h += '<b>' + (d.getMonth() + 1) + '月' + d.getDate() + '日 (' + CAL_DOW[d.getDay()] + ')' +
+                (hol ? ' · ' + esc(hol) : '') + '</b>';
+            h += '<span>' + cdText + ' · ' + occs.length + '件</span>';
+            h += '</div>';
+            if (!occs.length) {
+                h += '<div class="cal-empty">予定はまだないよ 🌸<br>' +
+                    '<button class="cal-quick-add" data-act="add" data-arg="' + ds + '" ' +
+                    'style="margin-top:10px;border:none;background:linear-gradient(135deg,#ff9a9e,#fecfef);color:#fff;font-weight:700;font-size:12px;padding:8px 18px;border-radius:999px;cursor:pointer;">＋ 予定を追加</button></div>';
+            } else {
+                occs.forEach(o => { h += calEventRow(o); });
+                h += '<button data-act="add" data-arg="' + ds + '" style="width:100%;border:1px dashed #ffc9d4;background:#fff;color:#d81b60;font-weight:700;font-size:12px;padding:10px;border-radius:14px;cursor:pointer;">＋ この日に追加</button>';
+            }
+            h += '</div>';
+            return h;
+        }
+        function calEventRow(o) {
+            const ev = o.ev;
+            const done = calIsDone(ev, o.sYmd);
+            const multi = o.sYmd !== o.eYmd;
+            let time;
+            if (multi) {
+                const s = calParse(o.sYmd), e = calParse(o.eYmd);
+                time = (s.getMonth() + 1) + '/' + s.getDate() + '<br>↓<br>' + (e.getMonth() + 1) + '/' + e.getDate();
+            } else time = calTimeText(ev);
+            const meta = [];
+            if (ev.location) meta.push('📍' + esc(ev.location));
+            if (ev.repeat !== 'none') meta.push('🔁' + esc(calRepeatText(ev)));
+            if (ev.photos && ev.photos.length) meta.push('📷' + ev.photos.length);
+            if (ev.comments.length) meta.push('💬' + ev.comments.length);
+            if (ev.reminder) meta.push('🔔' + CAL_REMINDERS[ev.reminder]);
+            const avatars = calMemberAvatars(ev);
+            const strip = (ev.photos && ev.photos.length)
+                ? '<div class="cal-ev-photos">' + ev.photos.slice(0, 4).map(p =>
+                    '<img loading="lazy" decoding="async" src="' + esc(photoThumb(p)) + '" alt="">').join('') + '</div>'
+                : '';
+            return '<div class="cal-ev' + (done ? ' done' : '') + '" data-act="ev" data-arg="' + ev.id + '" data-arg2="' + o.sYmd + '">' +
+                '<div class="bar" style="background:' + calColor(ev) + '"></div>' +
+                '<div class="time">' + time + '</div>' +
+                '<div class="body"><b>' + (done ? '✓ ' : '') + esc(ev.title) +
+                (avatars ? '<span class="cal-avs">' + avatars + '</span>' : '') + '</b>' + strip +
+                (ev.note ? '<div style="font-size:11px;color:#a58b93;margin-top:2px;white-space:pre-wrap;">' + esc(ev.note.slice(0, 60)) + (ev.note.length > 60 ? '…' : '') + '</div>' : '') +
+                (meta.length ? '<div class="meta"><span>' + meta.join('</span><span>') + '</span></div>' : '') +
+                '</div></div>';
+        }
+
+        /* ---------- 週ビュー ---------- */
+        function calRenderWeek() {
+            const ws = calAdd(calCursor, -calCursor.getDay());
+            const wsY = calYmd(ws), weY = calYmd(calAdd(ws, 6));
+            const today = calToday();
+            const occs = calOccurrences(wsY, weY);
+            const HH = 44;
+
+            let h = '<div class="cal-wk-head"><div></div>';
+            for (let i = 0; i < 7; i++) {
+                const d = calAdd(ws, i), ds = calYmd(d);
+                const cls = ['h'];
+                if (i === 0) cls.push('sun');
+                if (i === 6) cls.push('sat');
+                if (calHolidayName(ds)) cls.push('hol');
+                if (ds === today) cls.push('today');
+                h += '<div class="' + cls.join(' ') + '" data-act="dayjump" data-arg="' + ds + '">' +
+                    '<small>' + CAL_DOW[i] + '</small><b>' + d.getDate() + '</b></div>';
+            }
+            h += '</div>';
+
+            // 終日 / 複数日
+            const allday = occs.filter(o => o.ev.allDay || o.sYmd !== o.eYmd);
+            const placed = calLayoutLanes(allday, wsY);
+            const lanes = placed.reduce((a, p) => Math.max(a, p.lane + 1), 0);
+            h += '<div class="cal-wk-allday"><div class="lbl">終日</div>' +
+                '<div class="cal-lanes" style="height:' + Math.max(16, lanes * 17 + 3) + 'px">';
+            placed.forEach(p => {
+                const ev = p.o.ev;
+                h += '<div class="cal-chipev' + (calIsDone(ev, p.o.sYmd) ? ' done' : '') + '" style="left:calc(' +
+                    (p.col / 7 * 100).toFixed(4) + '% + 1px);width:calc(' + (p.span / 7 * 100).toFixed(4) + '% - 2px);top:' +
+                    (p.lane * 17 + 2) + 'px;background:' + calColor(ev) + '" data-act="ev" data-arg="' + ev.id +
+                    '" data-arg2="' + p.o.sYmd + '">' + esc(ev.title) + '</div>';
+            });
+            h += '</div></div>';
+
+            // 時間グリッド
+            h += '<div class="cal-wk-scroll" id="calWkScroll"><div class="cal-wk-hours">';
+            for (let hr = 0; hr < 24; hr++) h += '<div class="hr">' + hr + ':00</div>';
+            h += '</div><div class="cal-wk-cols" style="height:' + (24 * HH) + 'px">';
+
+            for (let i = 0; i < 7; i++) {
+                const ds = calYmd(calAdd(ws, i));
+                const timed = occs.filter(o => !o.ev.allDay && o.sYmd === o.eYmd && o.sYmd === ds)
+                    .sort((a, b) => calMin(a.ev.start) - calMin(b.ev.start));
+                // 重なりを列分割
+                const clusters = [];
+                timed.forEach(o => {
+                    const s = calMin(o.ev.start);
+                    const rawE = o.ev.end ? calMin(o.ev.end) : s + 60;
+                    const e = Math.max(s + 30, rawE);
+                    const last = clusters[clusters.length - 1];
+                    if (last && last.end > s) { last.items.push({ o, s, e }); last.end = Math.max(last.end, e); }
+                    else clusters.push({ end: e, items: [{ o, s, e }] });
+                });
+                h += '<div class="cal-wk-col" data-act="dayjump" data-arg="' + ds + '">';
+                clusters.forEach(cl => {
+                    const n = cl.items.length;
+                    cl.items.forEach((it, idx) => {
+                        const top = it.s / 60 * HH;
+                        const height = Math.max(16, (it.e - it.s) / 60 * HH - 2);
+                        const w = 100 / n;
+                        h += '<div class="cal-wk-ev' + (calIsDone(it.o.ev, ds) ? ' done' : '') + '" style="top:' + top.toFixed(1) +
+                            'px;height:' + height.toFixed(1) + 'px;left:calc(' + (idx * w).toFixed(2) + '% + 1px);width:calc(' + w.toFixed(2) +
+                            '% - 2px);background:' + calColor(it.o.ev) + '" data-act="ev" data-arg="' + it.o.ev.id + '" data-arg2="' + ds + '">' +
+                            esc(it.o.ev.start) + ' ' + esc(it.o.ev.title) + '</div>';
+                    });
+                });
+                if (ds === today) {
+                    const now = new Date();
+                    const top = (now.getHours() * 60 + now.getMinutes()) / 60 * HH;
+                    h += '<div class="cal-now-line" style="top:' + top.toFixed(1) + 'px"></div>';
+                }
+                h += '</div>';
+            }
+            h += '</div></div>';
+            return h;
+        }
+        function calScrollWeek() {
+            const el = document.getElementById('calWkScroll');
+            if (!el) return;
+            const now = new Date();
+            const target = calView === 'week' ? Math.max(0, (now.getHours() - 2) * 44) : 7 * 44;
+            el.scrollTop = target;
+        }
+
+        /* ---------- リストビュー ---------- */
+        function calRenderList() {
+            const from = calSearch ? calYmd(calAdd(new Date(), -365)) : calToday();
+            const to = calYmd(calAdd(new Date(), 365));
+            const occs = calOccurrences(from, to).sort((a, b) =>
+                a.sYmd < b.sYmd ? -1 : a.sYmd > b.sYmd ? 1 : calMin(a.ev.start) - calMin(b.ev.start));
+            if (!occs.length) {
+                return '<div class="cal-empty">' + (calSearch ? '見つからなかったよ 🔍' : 'これからの予定はまだないよ 🌸') + '</div>';
+            }
+            const byDate = {};
+            occs.forEach(o => { (byDate[o.sYmd] = byDate[o.sYmd] || []).push(o); });
+            const today = calToday();
+            let h = '', lastMonth = '';
+            Object.keys(byDate).sort().forEach(ds => {
+                const mon = ds.slice(0, 7);
+                if (mon !== lastMonth) {
+                    lastMonth = mon;
+                    h += '<div class="cal-mon-sep">' + ds.slice(0, 4) + '年 ' + (+ds.slice(5, 7)) + '月</div>';
+                }
+                const d = calParse(ds);
+                const cls = ['cal-list-date'];
+                if (d.getDay() === 0) cls.push('sun');
+                if (d.getDay() === 6) cls.push('sat');
+                if (calHolidayName(ds)) cls.push('hol');
+                if (ds === today) cls.push('today');
+                h += '<div class="cal-list-day"><div class="' + cls.join(' ') + '">' +
+                    '<b>' + d.getDate() + '</b><small>' + CAL_DOW[d.getDay()] + '</small></div>' +
+                    '<div class="cal-list-items">';
+                byDate[ds].sort(calOccSort).forEach(o => { h += calEventRow(o); });
+                h += '</div></div>';
+            });
+            return h;
+        }
+
+        /* ---------- 操作 ---------- */
+        function calHandleAct(t) {
+            const act = t.dataset.act, arg = t.dataset.arg, arg2 = t.dataset.arg2;
+            if (act === 'prev') calStep(-1);
+            else if (act === 'next') calStep(1);
+            else if (act === 'today') calGoToday();
+            else if (act === 'view') calSetView(arg);
+            else if (act === 'label') calToggleLabel(arg);
+            else if (act === 'closesearch') { calSearchOpen = false; calSearch = ''; renderCalendar(); }
+            else if (act === 'editlabels') openLabelModal();
+            else if (act === 'editmembers') openMemberModal();
+            else if (act === 'member') calToggleMemberFilter(arg);
+            else if (act === 'day') { selectedDate = arg; renderCalendar(); openDaySheet(arg); }
+            else if (act === 'dayjump') { calCursor = calParse(arg); renderCalendar(); openDaySheet(arg); }
+            else if (act === 'add') openEventModal(arg);
+            else if (act === 'ev') openEventDetail(arg, arg2);
+        }
+        // ボトムシート内の予定もタップできるようにする
+        function calBindSheet() {
+            const sheet = document.getElementById('calSheetBody');
+            if (!sheet || sheet._calBound) return;
+            sheet._calBound = true;
+            sheet.addEventListener('click', e => {
+                const t = e.target.closest('[data-act]');
+                if (t && sheet.contains(t)) calHandleAct(t);
+            });
+        }
+        function calBindContainer(container) {
+            if (container._calBound) return;
+            container._calBound = true;
+            container.addEventListener('click', e => {
+                const t = e.target.closest('[data-act]');
+                if (t && container.contains(t)) calHandleAct(t);
+            });
+            // スワイプで月/週めくり
+            let sx = 0, sy = 0, moved = false;
+            container.addEventListener('touchstart', e => {
+                if (calView === 'list') return;
+                sx = e.touches[0].clientX; sy = e.touches[0].clientY; moved = false;
+            }, { passive: true });
+            container.addEventListener('touchend', e => {
+                if (calView === 'list' || moved) return;
+                const dx = e.changedTouches[0].clientX - sx;
+                const dy = e.changedTouches[0].clientY - sy;
+                if (Math.abs(dx) > 55 && Math.abs(dx) > Math.abs(dy) * 1.8) calStep(dx < 0 ? 1 : -1);
+            }, { passive: true });
+        }
+        function calStep(n) {
+            if (calView === 'week') calCursor = calAdd(calCursor, 7 * n);
+            else if (calView === 'list') calCursor = calAdd(calCursor, 30 * n);
+            else calCursor = new Date(calCursor.getFullYear(), calCursor.getMonth() + n, 1);
+            renderCalendar();
+        }
+        function calGoToday() {
+            calCursor = new Date();
+            selectedDate = calToday();
+            renderCalendar();
+        }
+        function calSetView(v) { calView = v; renderCalendar(); }
+        function calToggleMemberFilter(id) {
+            if (id === '__all') calMemberFilter = [];
+            else {
+                const i = calMemberFilter.indexOf(id);
+                if (i === -1) calMemberFilter.push(id); else calMemberFilter.splice(i, 1);
             }
             renderCalendar();
         }
-
-        function nextMonth() {
-            currentCalMonth++;
-            if (currentCalMonth > 11) {
-                currentCalMonth = 0;
-                currentCalYear++;
+        function calToggleLabel(k) {
+            if (k === '__all') calLabelFilter = [];
+            else {
+                const i = calLabelFilter.indexOf(k);
+                if (i === -1) calLabelFilter.push(k); else calLabelFilter.splice(i, 1);
             }
             renderCalendar();
         }
-
-        function onDateClick(dateStr) {
-            selectedDate = dateStr;
+        let calSearchTimer = null;
+        function calOnSearch(v) {
+            calSearch = v;
+            clearTimeout(calSearchTimer);
+            calSearchTimer = setTimeout(calRenderBody, 180);
+        }
+        function toggleCalSearch() {
+            calSearchOpen = !calSearchOpen;
+            if (!calSearchOpen) calSearch = '';
+            renderCalendar();
+            if (calSearchOpen) {
+                const i = document.getElementById('calSearchInput');
+                if (i) i.focus();
+            }
+        }
+        function toggleCalFullscreen() {
+            calFullscreen = !calFullscreen;
+            const card = document.getElementById('calendarCard');
+            card.classList.toggle('cal-fs', calFullscreen);
+            document.body.classList.toggle('cal-locked', calFullscreen);
+            const fab = document.getElementById('calFab');
+            if (fab) fab.classList.toggle('show', calFullscreen);
+            const btn = document.getElementById('calFsBtn');
+            if (btn) btn.innerHTML = calFullscreen ? '✕' : '⛶';
+            if (calFullscreen) window.scrollTo(0, 0);
             renderCalendar();
         }
+        // 旧API互換
+        function prevMonth() { calStep(-1); }
+        function nextMonth() { calStep(1); }
+        function onDateClick(ds) { selectedDate = ds; renderCalendar(); }
 
-        function openEventModal() {
-            if (selectedDate) {
-                document.getElementById('eventDateInput').value = selectedDate;
-            }
-            document.getElementById('eventModal').classList.add('active');
+        /* ---------- 予定フォーム ---------- */
+        let calFormLabel = 'rose';
+        function calFillLabelSwatches() {
+            const box = document.getElementById('eventLabelBox');
+            if (!box) return;
+            if (!calLabels.some(l => l.key === calFormLabel)) calFormLabel = calLabels[0].key;
+            box.innerHTML = calLabels.map(l =>
+                '<div class="sw ' + (l.key === calFormLabel ? 'on' : '') + '" title="' + esc(l.name) +
+                '" style="background:' + l.color + '" onclick="calPickLabel(\'' + esc(l.key) + '\')"></div>'
+            ).join('') +
+                '<div class="sw sw-edit" title="ラベルを編集" onclick="openLabelModal()">⚙️</div>';
+            const nm = document.getElementById('eventLabelName');
+            if (nm) nm.textContent = calLabel(calFormLabel).name;
+        }
+        function calPickLabel(k) { calFormLabel = k; calFillLabelSwatches(); }
+
+        /* 誰の予定か（複数選べる） */
+        let calFormMembers = [];
+        function calFillMemberPicker() {
+            const box = document.getElementById('eventMemberBox');
+            if (!box) return;
+            calEnsureMembers();
+            box.innerHTML = calMembers.map(m => {
+                const on = calFormMembers.indexOf(m.id) !== -1;
+                return '<div class="cal-mpick' + (on ? ' on' : '') + '" style="' +
+                    (on ? 'background:' + m.color + ';border-color:' + m.color : 'border-color:' + m.color + '55') +
+                    '" onclick="calToggleFormMember(&quot;' + esc(m.id) + '&quot;)">' +
+                    '<span class="cal-av" style="background:' + m.color + '">' + esc(m.emoji) + '</span>' +
+                    esc(m.name) + '</div>';
+            }).join('') +
+                '<div class="cal-mpick edit" onclick="openMemberModal()">⚙️ 編集</div>';
+        }
+        function calToggleFormMember(id) {
+            const i = calFormMembers.indexOf(id);
+            if (i === -1) calFormMembers.push(id); else calFormMembers.splice(i, 1);
+            calFillMemberPicker();
         }
 
-        function closeEventModal() {
-            document.getElementById('eventModal').classList.remove('active');
+        /* くり返しの詳細（曜日えらび・毎月のしかた・終了日） */
+        let calFormDows = [];
+        function calFillRepeatOptions() {
+            const rep = document.getElementById('eventRepeat').value;
+            const wrap = document.getElementById('eventRepeatDetail');
+            const dowBox = document.getElementById('eventDowBox');
+            const monthlyBox = document.getElementById('eventMonthlyBox');
+            const untilBox = document.getElementById('eventUntilBox');
+            if (!wrap) return;
+
+            wrap.style.display = rep === 'none' ? 'none' : 'block';
+            dowBox.style.display = (rep === 'weekly' || rep === 'biweekly') ? 'block' : 'none';
+            monthlyBox.style.display = rep === 'monthly' ? 'block' : 'none';
+            untilBox.style.display = rep === 'none' ? 'none' : 'block';
+
+            if (rep === 'weekly' || rep === 'biweekly') {
+                if (!calFormDows.length) {
+                    const d = document.getElementById('eventDateInput').value;
+                    if (d) calFormDows = [calParse(d).getDay()];
+                }
+                document.getElementById('eventDows').innerHTML = CAL_DOW.map((nm, i) =>
+                    '<div class="cal-dowpick' + (calFormDows.indexOf(i) !== -1 ? ' on' : '') +
+                    (i === 0 ? ' sun' : i === 6 ? ' sat' : '') +
+                    '" onclick="calToggleFormDow(' + i + ')">' + nm + '</div>').join('');
+            }
+            if (rep === 'monthly') {
+                const d = document.getElementById('eventDateInput').value;
+                const base = calParse(d || calToday());
+                const nth = calNthIndex(base);
+                document.getElementById('eventMonthlyNthLabel').textContent =
+                    (nth < 0 ? '最終' : '第' + nth) + CAL_DOW[base.getDay()] + '曜日';
+                document.getElementById('eventMonthlyDateLabel').textContent = base.getDate() + '日';
+            }
+        }
+        function calToggleFormDow(i) {
+            const k = calFormDows.indexOf(i);
+            if (k === -1) calFormDows.push(i);
+            else if (calFormDows.length > 1) calFormDows.splice(k, 1);
+            calFillRepeatOptions();
+        }
+        function calToggleAllDay() {
+            const on = document.getElementById('eventAllDay').checked;
+            document.getElementById('eventTimeRow').style.display = on ? 'none' : 'flex';
+        }
+        function calQuickDate(kind) {
+            const el = document.getElementById('eventDateInput');
+            const base = new Date();
+            let d = base;
+            if (kind === 'tomorrow') d = calAdd(base, 1);
+            if (kind === 'weekend') { const off = (6 - base.getDay() + 7) % 7 || 7; d = calAdd(base, off); }
+            if (kind === 'nextweek') d = calAdd(base, 7);
+            el.value = calYmd(d);
+            const e2 = document.getElementById('eventEndDateInput');
+            if (!e2.value || e2.value < el.value) e2.value = el.value;
+        }
+        function openEventModal(dateStr) {
+            editingEventId = null;
             editingEventIndex = null;
+            const d = dateStr || selectedDate || calToday();
+            document.getElementById('eventModalTitle').textContent = '予定を追加 📅';
+            document.getElementById('eventDateInput').value = d;
+            document.getElementById('eventEndDateInput').value = d;
             document.getElementById('eventTitleInput').value = '';
             document.getElementById('eventNoteInput').value = '';
-            document.getElementById('eventDateInput').value = '';
+            document.getElementById('eventLocationInput').value = '';
+            document.getElementById('eventAllDay').checked = true;
+            document.getElementById('eventStartTime').value = '19:00';
+            document.getElementById('eventEndTime').value = '21:00';
+            document.getElementById('eventRepeat').value = 'none';
+            document.getElementById('eventReminder').value = '0';
+            document.getElementById('eventUntil').value = '';
+            document.getElementById('eventMonthlyMode').value = 'date';
+            calFormLabel = calLabels[0].key;
+            calFormMembers = [calMyMemberId()];   // 自分を初期選択
+            calFormDows = [calParse(d).getDay()];
+            calFillLabelSwatches();
+            calFillMemberPicker();
+            calFillRepeatOptions();
+            calToggleAllDay();
+            document.getElementById('eventDeleteBtn').style.display = 'none';
+            document.getElementById('eventModal').classList.add('active');
         }
-
-        let editingEventIndex = null;
-
+        function editEvent(idOrIdx) {
+            const ev = typeof idOrIdx === 'number' ? events[idOrIdx] : events.find(x => x.id === idOrIdx);
+            if (!ev) return;
+            calNormalize(ev);
+            editingEventId = ev.id;
+            document.getElementById('eventModalTitle').textContent = '予定を編集 ✏️';
+            document.getElementById('eventDateInput').value = ev.date;
+            document.getElementById('eventEndDateInput').value = ev.endDate;
+            document.getElementById('eventTitleInput').value = ev.title || '';
+            document.getElementById('eventNoteInput').value = ev.note || '';
+            document.getElementById('eventLocationInput').value = ev.location || '';
+            document.getElementById('eventAllDay').checked = !!ev.allDay;
+            document.getElementById('eventStartTime').value = ev.start || '19:00';
+            document.getElementById('eventEndTime').value = ev.end || '21:00';
+            document.getElementById('eventRepeat').value = ev.repeat;
+            document.getElementById('eventReminder').value = String(ev.reminder || 0);
+            document.getElementById('eventUntil').value = ev.repeatUntil || '';
+            document.getElementById('eventMonthlyMode').value = ev.monthlyMode || 'date';
+            calFormLabel = ev.label;
+            calFormMembers = (ev.members || []).slice();
+            calFormDows = (ev.repeatDows && ev.repeatDows.length)
+                ? ev.repeatDows.slice() : [calParse(ev.date).getDay()];
+            calFillLabelSwatches();
+            calFillMemberPicker();
+            calFillRepeatOptions();
+            calToggleAllDay();
+            document.getElementById('eventDeleteBtn').style.display = 'block';
+            closeCalSheet();
+            document.getElementById('eventModal').classList.add('active');
+        }
+        function closeEventModal() {
+            document.getElementById('eventModal').classList.remove('active');
+            editingEventId = null;
+            editingEventIndex = null;
+        }
         async function saveEvent() {
             const date = document.getElementById('eventDateInput').value;
-            const title = document.getElementById('eventTitleInput').value;
+            let endDate = document.getElementById('eventEndDateInput').value || date;
+            const title = document.getElementById('eventTitleInput').value.trim();
             const note = document.getElementById('eventNoteInput').value;
+            const location = document.getElementById('eventLocationInput').value.trim();
+            const allDay = document.getElementById('eventAllDay').checked;
+            const start = document.getElementById('eventStartTime').value;
+            const end = document.getElementById('eventEndTime').value;
+            const repeat = document.getElementById('eventRepeat').value;
+            const reminder = parseInt(document.getElementById('eventReminder').value, 10) || 0;
+            const repeatUntil = document.getElementById('eventUntil').value || '';
+            const monthlyMode = document.getElementById('eventMonthlyMode').value === 'nth' ? 'nth' : 'date';
+            const repeatDows = (repeat === 'weekly' || repeat === 'biweekly')
+                ? calFormDows.slice().sort((a, b) => a - b) : [];
+            const members = calFormMembers.slice();
 
-            if (!date || !title) {
-                alert('日付とタイトルを入れてね！');
-                return;
-            }
+            if (!date || !title) { alert('日付とタイトルを入れてね！'); return; }
+            if (endDate < date) endDate = date;
+            if (!allDay && end && start && end < start) { alert('終了時刻が開始より前だよ！'); return; }
 
             const saveBtn = document.querySelector('#eventModal .btn-save');
             saveBtn.innerText = '保存中... ⏳';
             saveBtn.disabled = true;
-
             try {
-                if (editingEventIndex !== null) {
-                    events[editingEventIndex] = {
-                        date,
-                        title,
-                        note
-                    };
-                    editingEventIndex = null;
-                } else {
-                    events.push({
-                        date,
-                        title,
-                        note
+                if (editingEventId) {
+                    const ev = events.find(x => x.id === editingEventId);
+                    if (ev) Object.assign(ev, {
+                        date, endDate, title, note, location, allDay,
+                        start: allDay ? '' : start, end: allDay ? '' : end,
+                        repeat, reminder, label: calFormLabel,
+                        repeatDows, monthlyMode, repeatUntil, members,
+                        updatedBy: calMe(), updatedAt: new Date().toISOString()
                     });
+                } else {
+                    events.push(calNormalize({
+                        date, endDate, title, note, location, allDay,
+                        start: allDay ? '' : start, end: allDay ? '' : end,
+                        repeat, reminder, label: calFormLabel,
+                        repeatDows, monthlyMode, repeatUntil, members,
+                        author: calMe(), createdAt: new Date().toISOString(),
+                        photos: [], comments: [], doneDates: [], exdates: []
+                    }));
                 }
+                selectedDate = date;
+                calCursor = calParse(date);
                 await updateCloudData();
                 closeEventModal();
                 renderCalendar();
-                document.getElementById('eventTitleInput').value = '';
-                document.getElementById('eventNoteInput').value = '';
+                if (reminder) calAskNotifyPermission();
             } finally {
                 saveBtn.innerText = '保存';
                 saveBtn.disabled = false;
             }
         }
+        async function deleteEvent(idOrIdx, dateStr) {
+            const ev = typeof idOrIdx === 'number' ? events[idOrIdx] : events.find(x => x.id === idOrIdx);
+            if (!ev) return;
+            if (ev.repeat !== 'none' && dateStr) {
+                const onlyThis = confirm('くり返しの予定だよ。\n\nOK = この日だけ削除\nキャンセル = すべて削除するか選ぶ');
+                if (onlyThis) {
+                    ev.exdates.push(dateStr);
+                    await updateCloudData();
+                    closeCalSheet();
+                    renderCalendar();
+                    return;
+                }
+                if (!confirm('すべてのくり返しを削除する？')) return;
+            } else if (!confirm('この予定を削除する？')) return;
+            const i = events.indexOf(ev);
+            if (i !== -1) events.splice(i, 1);
+            // ギャラリーにも他の予定にも無い写真は、ファイルごと片づける
+            for (const ph of (ev.photos || [])) {
+                const stillUsed = photos.some(q => photoFull(q) === photoFull(ph)) ||
+                    events.some(e2 => (e2.photos || []).some(q => photoFull(q) === photoFull(ph)));
+                if (!stillUsed) await deletePhotoFiles(ph);
+            }
+            await updateCloudData();
+            closeCalSheet();
+            closeEventModal();
+            renderCalendar();
+        }
+        function deleteEventFromForm() {
+            if (editingEventId) deleteEvent(editingEventId, null);
+        }
 
-        async function deleteEvent(idx) {
-            if (!confirm('この予定を削除する？')) return;
-            events.splice(idx, 1);
+        /* ---------- ボトムシート（日別 / 予定詳細） ---------- */
+        function calOpenSheet() {
+            calRenderSheet();
+            calBindSheet();
+            document.getElementById('calSheet').classList.add('active');
+            document.getElementById('calSheet').querySelector('.cal-sheet-panel').scrollTop = 0;
+            document.body.classList.add('cal-locked');
+        }
+        // 日付タップ → その日の予定をぜんぶ表示
+        function openDaySheet(dateStr) {
+            calSheetMode = 'day';
+            calSheetDate = dateStr;
+            calSheetEvId = null;
+            calSheetFrom = null;
+            selectedDate = dateStr;
+            calOpenSheet();
+        }
+        function calDayStep(n) {
+            openDaySheet(calYmd(calAdd(calParse(calSheetDate), n)));
+            calCursor = calParse(calSheetDate);
+            renderCalendar();
+        }
+        function openEventDetail(id, dateStr) {
+            const ev = events.find(x => x.id === id);
+            if (!ev) return;
+            calSheetFrom = calSheetMode === 'day' ? calSheetDate : null;
+            calSheetMode = 'event';
+            calSheetEvId = id;
+            calSheetOcc = dateStr || ev.date;
+            calOpenSheet();
+        }
+        function calBackToDay() {
+            if (calSheetFrom) openDaySheet(calSheetFrom);
+            else closeCalSheet();
+        }
+        function closeCalSheet() {
+            const s = document.getElementById('calSheet');
+            if (s) s.classList.remove('active');
+            if (!calFullscreen) document.body.classList.remove('cal-locked');
+            calSheetEvId = null;
+            calSheetMode = 'event';
+            calSheetFrom = null;
+        }
+        function calRenderSheet() {
+            if (calSheetMode === 'day') return calRenderDaySheet();
+            const ev = events.find(x => x.id === calSheetEvId);
+            const box = document.getElementById('calSheetBody');
+            if (!ev || !box) return;
+            const ds = calSheetOcc;
+            const span = calDiff(ev.date, ev.endDate);
+            const sD = calParse(ds), eD = calAdd(sD, span);
+            const done = calIsDone(ev, ds);
+            const diff = calDiff(calToday(), ds);
+            const cd = diff === 0 ? '今日！' : diff === 1 ? '明日！' : diff > 0 ? 'あと' + diff + '日' : Math.abs(diff) + '日前';
+            const fmt = d => (d.getMonth() + 1) + '月' + d.getDate() + '日(' + CAL_DOW[d.getDay()] + ')';
+            let when = fmt(sD);
+            if (span > 0) when += ' 〜 ' + fmt(eD);
+            if (!ev.allDay) when += '　' + (ev.start || '') + (ev.end ? ' 〜 ' + ev.end : '');
+            else when += '　終日';
+
+            let h = '';
+            if (calSheetFrom) {
+                const bd = calParse(calSheetFrom);
+                h += '<div class="cal-sheet-back" onclick="calBackToDay()">‹ ' +
+                    (bd.getMonth() + 1) + '月' + bd.getDate() + '日の予定にもどる</div>';
+            }
+            h += '<div class="cal-detail-label" style="background:' + calColor(ev) + '">● ' + esc(calLabel(ev.label).name) + '</div>';
+            h += '<div class="cal-detail-title">' + (done ? '✓ ' : '') + esc(ev.title) +
+                '<span class="cal-cd-badge">' + cd + '</span></div>';
+            h += '<div style="height:10px"></div>';
+            h += '<div class="cal-row"><span class="ic">🕒</span><div>' + esc(when) + '</div></div>';
+            if ((ev.members || []).length) {
+                h += '<div class="cal-row"><span class="ic">👥</span><div class="cal-who">' +
+                    (ev.members || []).map(id => {
+                        const m = calMember(id);
+                        return m ? '<span class="cal-who-tag" style="background:' + m.color + '22;color:' + m.color + '">' +
+                            '<span class="cal-av" style="background:' + m.color + '">' + esc(m.emoji) + '</span>' +
+                            esc(m.name) + '</span>' : '';
+                    }).join('') + '</div></div>';
+            }
+            if (ev.repeat !== 'none') {
+                h += '<div class="cal-row"><span class="ic">🔁</span><div>' + esc(calRepeatText(ev)) +
+                    (ev.repeatUntil ? '（' + esc(ev.repeatUntil) + 'まで）' : '') + '</div></div>';
+            }
+            if (ev.location) {
+                h += '<div class="cal-row"><span class="ic">📍</span><div>' + esc(ev.location) +
+                    ' <a href="https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(ev.location) +
+                    '" target="_blank" rel="noopener">地図で見る ›</a></div></div>';
+            }
+            if (ev.reminder) h += '<div class="cal-row"><span class="ic">🔔</span><div>' + CAL_REMINDERS[ev.reminder] + 'に通知</div></div>';
+            if (ev.note) h += '<div class="cal-row"><span class="ic">📝</span><div style="white-space:pre-wrap;">' + esc(ev.note) + '</div></div>';
+            if (ev.author) h += '<div class="cal-row"><span class="ic">👤</span><div>' + esc(ev.author) + ' が作成</div></div>';
+
+            h += '<div class="cal-sheet-actions">';
+            h += '<button class="cal-btn-sub" onclick="calToggleDone()">' + (done ? '↩️ 未完了に戻す' : '✅ 完了にする') + '</button>';
+            h += '<button class="cal-btn-main" onclick="editEvent(\'' + ev.id + '\')">✏️ 編集</button>';
+            h += '</div>';
+            h += '<div class="cal-sheet-actions"><button class="cal-btn-danger" onclick="deleteEvent(\'' + ev.id + '\',\'' + ds + '\')">🗑️ 削除</button></div>';
+
+            // 思い出の写真
+            h += '<div class="cal-sec-head">📷 思い出の写真 (' + ev.photos.length + ')</div>';
+            if (ev.photos.length) {
+                h += '<div class="cal-ev-gallery">' + ev.photos.map((p, i) =>
+                    '<img loading="lazy" decoding="async" src="' + esc(photoThumb(p)) + '" alt="" ' +
+                    'onclick="calOpenEventPhoto(' + i + ')">').join('') + '</div>';
+            } else {
+                h += '<div class="cal-photo-empty">この日の写真をここに残しておけるよ 📸</div>';
+            }
+            h += '<div class="cal-photo-tools">' +
+                '<label class="cal-photo-add" id="calEvPhotoAdd">＋ 写真を追加' +
+                '<input type="file" accept="image/*" multiple hidden onchange="calAddEventPhotos(this)"></label>' +
+                '<label class="cal-photo-share"><input type="checkbox" id="calPhotoToGallery" ' +
+                (calPhotoShareDefault ? 'checked' : '') + ' onchange="calPhotoShareDefault=this.checked">' +
+                'ギャラリーにも追加</label></div>';
+
+            h += '<div class="cal-sec-head">💬 コメント (' + ev.comments.length + ')</div>';
+            h += '<div style="margin-top:10px;">';
+            if (!ev.comments.length) h += '<div style="font-size:11.5px;color:#c3aeb4;margin-bottom:8px;">まだコメントはないよ。ひとこと残してみよう！</div>';
+            ev.comments.forEach(c => {
+                h += '<div class="cal-cmt"><div class="av">' + esc((c.author || '?').slice(0, 1)) + '</div>' +
+                    '<div><div class="who">' + esc(c.author || '') + ' · ' + calAgo(c.at) + '</div>' +
+                    '<div class="bub">' + esc(c.text) + '</div></div></div>';
+            });
+            h += '</div>';
+            h += '<div class="cal-cmt-input"><input id="calCmtInput" type="text" placeholder="コメントを書く..." ' +
+                'onkeydown="if(event.key===\'Enter\'){calAddComment();}"><button onclick="calAddComment()">送信</button></div>';
+            box.innerHTML = h;
+        }
+        /* ---------- 日別シート（その日の予定をぜんぶ） ---------- */
+        function calRenderDaySheet() {
+            const box = document.getElementById('calSheetBody');
+            if (!box) return;
+            const ds = calSheetDate;
+            const d = calParse(ds);
+            const hol = calHolidayName(ds);
+            const diff = calDiff(calToday(), ds);
+            const cd = diff === 0 ? '今日' : diff === 1 ? '明日' : diff > 0 ? 'あと' + diff + '日' : Math.abs(diff) + '日前';
+            // 日別シートでは絞り込みを無視して「ぜんぶ」出す
+            const keep = calLabelFilter, keepM = calMemberFilter, keepQ = calSearch;
+            calLabelFilter = []; calMemberFilter = []; calSearch = '';
+            const occs = calOccurrences(ds, ds).sort(calOccSort);
+            calLabelFilter = keep; calMemberFilter = keepM; calSearch = keepQ;
+
+            const dowCls = d.getDay() === 0 || hol ? 'sun' : d.getDay() === 6 ? 'sat' : '';
+            let h = '';
+            h += '<div class="cal-daysheet-head">' +
+                '<button class="nav" onclick="calDayStep(-1)">‹</button>' +
+                '<div class="ttl"><b class="' + dowCls + '">' + (d.getMonth() + 1) + '月' + d.getDate() + '日 (' + CAL_DOW[d.getDay()] + ')</b>' +
+                '<small>' + (hol ? esc(hol) + ' · ' : '') + cd + ' · ' + occs.length + '件</small></div>' +
+                '<button class="nav" onclick="calDayStep(1)">›</button>' +
+                '</div>';
+
+            if (!occs.length) {
+                h += '<div class="cal-empty" style="padding:34px 0;">この日はまだ予定なし 🌸</div>';
+            } else {
+                const hidden = occs.filter(o => {
+                    if (keep.length && keep.indexOf(o.ev.label) === -1) return true;
+                    if (keepM.length && (o.ev.members || []).length &&
+                        !o.ev.members.some(id => keepM.indexOf(id) !== -1)) return true;
+                    return false;
+                }).length;
+                if (hidden) h += '<div class="cal-daysheet-note">絞り込み中の ' + hidden + '件 もふくめて表示しています</div>';
+                occs.forEach(o => { h += calEventRow(o); });
+            }
+            h += '<button class="cal-daysheet-add" onclick="closeCalSheet();openEventModal(\'' + ds + '\')">＋ この日に予定を追加</button>';
+            box.innerHTML = h;
+        }
+
+        /* ---------- 予定の思い出写真 ---------- */
+        let calPhotoShareDefault = true;
+        let calEvPhotoIndex = null;
+
+        async function calAddEventPhotos(input) {
+            const ev = events.find(x => x.id === calSheetEvId);
+            if (!ev || !input.files || !input.files.length) return;
+            const files = Array.from(input.files);
+            const toGallery = (document.getElementById('calPhotoToGallery') || {}).checked;
+            const btn = document.getElementById('calEvPhotoAdd');
+            const label = btn ? btn.firstChild : null;
+            input.disabled = true;
+            let okCount = 0;
+            for (let i = 0; i < files.length; i++) {
+                if (label) label.nodeValue = '追加中... (' + (i + 1) + '/' + files.length + ')';
+                try {
+                    const rec = await uploadOnePhoto(files[i], files[i].name);
+                    rec.eventId = ev.id;
+                    // 待っている間に相手の更新で events が入れ替わっているかもしれない
+                    const cur = events.find(x => x.id === rec.eventId);
+                    if (!cur) throw new Error('予定が見つからなくなりました');
+                    if (!Array.isArray(cur.photos)) cur.photos = [];
+                    cur.photos.push(rec);
+                    if (toGallery) photos.push(Object.assign({}, rec));
+                    okCount++;
+                } catch (e) { console.error('写真の追加に失敗', e); }
+            }
+            input.value = '';
+            input.disabled = false;
+            if (okCount) {
+                await updateCloudData();
+                calRenderSheet();
+                renderCalendar();
+                if (toGallery) renderGallery();
+                showToast(okCount + '枚を予定に追加しました📷');
+            } else {
+                calRenderSheet();
+                showToast('追加できませんでした🥲');
+            }
+        }
+
+        function calOpenEventPhoto(i) {
+            const ev = events.find(x => x.id === calSheetEvId);
+            if (!ev || !ev.photos[i]) return;
+            calEvPhotoIndex = i;
+            document.getElementById('calPhotoViewerImg').src = photoFull(ev.photos[i]);
+            document.getElementById('calPhotoViewerCount').textContent = (i + 1) + ' / ' + ev.photos.length;
+            document.getElementById('calPhotoViewer').style.display = 'flex';
+        }
+        function calCloseEventPhoto() {
+            document.getElementById('calPhotoViewer').style.display = 'none';
+            calEvPhotoIndex = null;
+        }
+        function calStepEventPhoto(n) {
+            const ev = events.find(x => x.id === calSheetEvId);
+            if (!ev || calEvPhotoIndex === null || !ev.photos.length) return;
+            calOpenEventPhoto((calEvPhotoIndex + n + ev.photos.length) % ev.photos.length);
+        }
+        async function calDeleteEventPhoto() {
+            const ev = events.find(x => x.id === calSheetEvId);
+            if (!ev || calEvPhotoIndex === null) return;
+            const p = ev.photos[calEvPhotoIndex];
+            const inGallery = photos.some(q => photoFull(q) === photoFull(p));
+            if (!confirm('この写真を予定から外す？' + (inGallery ? '\n（ギャラリーにある分は残ります）' : ''))) return;
+            ev.photos.splice(calEvPhotoIndex, 1);
+            if (!inGallery) await deletePhotoFiles(p);   // どこにも残らないならファイルも消す
+            calCloseEventPhoto();
+            await updateCloudData();
+            calRenderSheet();
+            renderCalendar();
+            showToast('写真を外しました🗑️');
+        }
+
+        /* ---------- メンバーの編集 ---------- */
+        let calMemberDraft = [];
+        function openMemberModal() {
+            calEnsureMembers();
+            calMemberDraft = calMembers.map(m => ({ id: m.id, name: m.name, color: m.color, emoji: m.emoji }));
+            calMemberPaletteOpen = -1;
+            calRenderMemberEditor();
+            document.getElementById('memberModal').classList.add('active');
+        }
+        function closeMemberModal() {
+            document.getElementById('memberModal').classList.remove('active');
+        }
+        let calMemberPaletteOpen = -1;
+        function calToggleMemberPalette(i) {
+            calMemberPaletteOpen = calMemberPaletteOpen === i ? -1 : i;
+            calRenderMemberEditor();
+        }
+        function calPickMemberColor(i, c) {
+            calMemberDraft[i].color = c;
+            calRenderMemberEditor();
+        }
+        function calPickMemberEmoji(i, e) {
+            calMemberDraft[i].emoji = e;
+            calMemberPaletteOpen = -1;
+            calRenderMemberEditor();
+        }
+        function calRenderMemberEditor() {
+            const box = document.getElementById('memberEditList');
+            if (!box) return;
+            const me = calMyMemberId();
+            const used = {};
+            events.forEach(e => (e.members || []).forEach(id => { used[id] = (used[id] || 0) + 1; }));
+            box.innerHTML = calMemberDraft.map((m, i) =>
+                '<div class="cal-lbl-row">' +
+                '<button class="cal-lbl-color" style="background:' + m.color + '" ' +
+                'onclick="calToggleMemberPalette(' + i + ')">' + esc(m.emoji) + '</button>' +
+                '<input class="cal-lbl-name" type="text" maxlength="12" value="' + esc(m.name) +
+                '" placeholder="なまえ" oninput="calMemberDraft[' + i + '].name=this.value">' +
+                '<button class="cal-me-btn' + (m.id === me ? ' on' : '') + '" ' +
+                'onclick="calSetMyMember(&quot;' + esc(m.id) + '&quot;);calRenderMemberEditor()">' +
+                (m.id === me ? '自分' : 'これが自分') + '</button>' +
+                '<button class="cal-lbl-del" onclick="calDeleteMember(' + i + ')" ' +
+                (calMemberDraft.length <= 1 ? 'disabled' : '') + '>🗑</button>' +
+                '<span class="cal-lbl-count">' + (used[m.id] ? used[m.id] + '件' : '') + '</span>' +
+                (calMemberPaletteOpen === i
+                    ? '<div class="cal-lbl-palette">' + CAL_PALETTE.map(c =>
+                        '<div class="sw' + (c.toLowerCase() === m.color.toLowerCase() ? ' on' : '') +
+                        '" style="background:' + c + '" onclick="calPickMemberColor(' + i + ',\'' + c + '\')"></div>').join('') +
+                    '</div><div class="cal-emoji-palette">' + CAL_MEMBER_EMOJI.map(e =>
+                        '<div class="em' + (e === m.emoji ? ' on' : '') + '" onclick="calPickMemberEmoji(' + i + ',\'' + e + '\')">' +
+                        e + '</div>').join('') + '</div>'
+                    : '') +
+                '</div>').join('');
+            const add = document.getElementById('memberAddBtn');
+            if (add) add.style.display = calMemberDraft.length >= CAL_MEMBER_MAX ? 'none' : 'block';
+        }
+        function calAddMember() {
+            if (calMemberDraft.length >= CAL_MEMBER_MAX) return;
+            const id = 'mb' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
+            calMemberDraft.push({
+                id: id, name: 'メンバー',
+                color: CAL_PALETTE[(calMemberDraft.length * 3) % CAL_PALETTE.length],
+                emoji: CAL_MEMBER_EMOJI[calMemberDraft.length % CAL_MEMBER_EMOJI.length]
+            });
+            calMemberPaletteOpen = -1;
+            calRenderMemberEditor();
+        }
+        function calDeleteMember(i) {
+            if (calMemberDraft.length <= 1) return;
+            const m = calMemberDraft[i];
+            const n = events.filter(e => (e.members || []).indexOf(m.id) !== -1).length;
+            if (n && !confirm('「' + m.name + '」の予定が' + n + '件あります。\n予定は残して、割り当てだけ外す？')) return;
+            calMemberDraft.splice(i, 1);
+            calMemberPaletteOpen = -1;
+            calRenderMemberEditor();
+        }
+        async function saveMembers() {
+            const btn = document.getElementById('memberSaveBtn');
+            btn.innerText = '保存中... ⏳';
+            btn.disabled = true;
+            try {
+                const gone = calMembers.filter(m => !calMemberDraft.some(d => d.id === m.id)).map(m => m.id);
+                calSetMembers(calMemberDraft.map(m => ({
+                    id: m.id, name: (m.name || '').trim() || 'メンバー', color: m.color, emoji: m.emoji
+                })));
+                if (gone.length) {
+                    events.forEach(e => {
+                        e.members = (e.members || []).filter(id => gone.indexOf(id) === -1);
+                    });
+                }
+                calMemberFilter = calMemberFilter.filter(id => calMember(id));
+                calSaveLocalMembers();
+                await updateCloudData();
+                closeMemberModal();
+                calFillMemberPicker();
+                renderCalendar();
+            } finally {
+                btn.innerText = '保存';
+                btn.disabled = false;
+            }
+        }
+
+        /* ---------- ラベルの編集 ---------- */
+        let calLabelDraft = [];
+        function openLabelModal() {
+            calLabelDraft = calLabels.map(l => ({ key: l.key, name: l.name, color: l.color }));
+            calRenderLabelEditor();
+            document.getElementById('labelModal').classList.add('active');
+        }
+        function closeLabelModal() {
+            document.getElementById('labelModal').classList.remove('active');
+        }
+        function calRenderLabelEditor() {
+            const box = document.getElementById('labelEditList');
+            if (!box) return;
+            const used = {};
+            events.forEach(e => { used[e.label] = (used[e.label] || 0) + 1; });
+            box.innerHTML = calLabelDraft.map((l, i) => {
+                const n = used[l.key] || 0;
+                return '<div class="cal-lbl-row">' +
+                    '<button class="cal-lbl-color" style="background:' + l.color + '" onclick="calToggleLabelPalette(' + i + ')">' +
+                    (calLabelPaletteOpen === i ? '×' : '') + '</button>' +
+                    '<input class="cal-lbl-name" type="text" maxlength="12" value="' + esc(l.name) +
+                    '" placeholder="ラベル名" oninput="calLabelDraft[' + i + '].name=this.value">' +
+                    '<span class="cal-lbl-count">' + (n ? n + '件' : '') + '</span>' +
+                    '<button class="cal-lbl-del" onclick="calDeleteLabel(' + i + ')" ' +
+                    (calLabelDraft.length <= 1 ? 'disabled' : '') + '>🗑</button>' +
+                    (calLabelPaletteOpen === i
+                        ? '<div class="cal-lbl-palette">' + CAL_PALETTE.map(c =>
+                            '<div class="sw' + (c.toLowerCase() === l.color.toLowerCase() ? ' on' : '') +
+                            '" style="background:' + c + '" onclick="calPickLabelColor(' + i + ',\'' + c + '\')"></div>').join('') +
+                        '</div>'
+                        : '') +
+                    '</div>';
+            }).join('');
+            const add = document.getElementById('labelAddBtn');
+            if (add) add.style.display = calLabelDraft.length >= CAL_LABEL_MAX ? 'none' : 'block';
+        }
+        let calLabelPaletteOpen = -1;
+        function calToggleLabelPalette(i) {
+            calLabelPaletteOpen = calLabelPaletteOpen === i ? -1 : i;
+            calRenderLabelEditor();
+        }
+        function calPickLabelColor(i, c) {
+            calLabelDraft[i].color = c;
+            calLabelPaletteOpen = -1;
+            calRenderLabelEditor();
+        }
+        function calAddLabel() {
+            if (calLabelDraft.length >= CAL_LABEL_MAX) return;
+            const key = 'lb' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
+            const c = CAL_PALETTE[calLabelDraft.length % CAL_PALETTE.length];
+            calLabelDraft.push({ key: key, name: '新しいラベル', color: c });
+            calLabelPaletteOpen = -1;
+            calRenderLabelEditor();
+        }
+        function calDeleteLabel(i) {
+            if (calLabelDraft.length <= 1) return;
+            const l = calLabelDraft[i];
+            const n = events.filter(e => e.label === l.key).length;
+            const fallback = calLabelDraft[i === 0 ? 1 : 0];
+            if (n && !confirm('「' + l.name + '」の予定が' + n + '件あります。\n「' + fallback.name + '」に付けかえて削除する？')) return;
+            calLabelDraft.splice(i, 1);
+            calLabelPaletteOpen = -1;
+            calRenderLabelEditor();
+        }
+        function calResetLabels() {
+            if (!confirm('ラベルを最初の状態にもどす？')) return;
+            calLabelDraft = CAL_DEFAULT_LABELS.map(l => ({ key: l.key, name: l.name, color: l.color }));
+            calLabelPaletteOpen = -1;
+            calRenderLabelEditor();
+        }
+        async function saveLabels() {
+            const btn = document.getElementById('labelSaveBtn');
+            btn.innerText = '保存中... ⏳';
+            btn.disabled = true;
+            try {
+                const gone = calLabels.filter(l => !calLabelDraft.some(d => d.key === l.key)).map(l => l.key);
+                calSetLabels(calLabelDraft.map(l => ({
+                    key: l.key, name: (l.name || '').trim() || 'ラベル', color: l.color
+                })));
+                // 消えたラベルの予定は先頭のラベルへ付けかえる
+                if (gone.length) {
+                    events.forEach(e => { if (gone.indexOf(e.label) !== -1) e.label = calLabels[0].key; });
+                }
+                calLabelFilter = calLabelFilter.filter(k => calLabels.some(l => l.key === k));
+                calSaveLocalLabels();
+                await updateCloudData();
+                closeLabelModal();
+                calFillLabelSwatches();
+                renderCalendar();
+            } finally {
+                btn.innerText = '保存';
+                btn.disabled = false;
+            }
+        }
+
+        function calAgo(iso) {
+            if (!iso) return '';
+            const d = new Date(iso), now = new Date();
+            const m = Math.floor((now - d) / 60000);
+            if (m < 1) return 'たった今';
+            if (m < 60) return m + '分前';
+            if (m < 1440) return Math.floor(m / 60) + '時間前';
+            if (m < 10080) return Math.floor(m / 1440) + '日前';
+            return (d.getMonth() + 1) + '/' + d.getDate();
+        }
+        async function calAddComment() {
+            const input = document.getElementById('calCmtInput');
+            const text = input.value.trim();
+            if (!text) return;
+            const ev = events.find(x => x.id === calSheetEvId);
+            if (!ev) return;
+            ev.comments.push({ author: calMe(), text: text, at: new Date().toISOString() });
+            input.value = '';
+            calRenderSheet();
+            await updateCloudData();
+            renderCalendar();
+        }
+        async function calToggleDone() {
+            const ev = events.find(x => x.id === calSheetEvId);
+            if (!ev) return;
+            const i = ev.doneDates.indexOf(calSheetOcc);
+            if (i === -1) ev.doneDates.push(calSheetOcc); else ev.doneDates.splice(i, 1);
+            calRenderSheet();
             await updateCloudData();
             renderCalendar();
         }
 
-        function editEvent(idx) {
-            const ev = events[idx];
-            document.getElementById('eventDateInput').value = ev.date;
-            document.getElementById('eventTitleInput').value = ev.title;
-            document.getElementById('eventNoteInput').value = ev.note || '';
-            editingEventIndex = idx;
-            document.getElementById('eventModal').classList.add('active');
+        /* ---------- リマインダー通知 ---------- */
+        function calAskNotifyPermission() {
+            if (!('Notification' in window)) return;
+            if (Notification.permission === 'default') Notification.requestPermission().then(() => calScheduleReminders());
+        }
+        function calScheduleReminders() {
+            calReminderTimers.forEach(clearTimeout);
+            calReminderTimers = [];
+            if (!('Notification' in window) || Notification.permission !== 'granted') return;
+            const now = Date.now();
+            // 一番長い通知が1週間前なので、9日先まで見る
+            const occs = calOccurrences(calToday(), calYmd(calAdd(new Date(), 9)), true);
+            occs.forEach(o => {
+                const ev = o.ev;
+                if (!ev.reminder) return;
+                const d = calParse(o.sYmd);
+                const at = ev.allDay
+                    ? new Date(d.getFullYear(), d.getMonth(), d.getDate(), 9, 0).getTime()
+                    : new Date(d.getFullYear(), d.getMonth(), d.getDate(),
+                        Math.floor(calMin(ev.start) / 60), calMin(ev.start) % 60).getTime();
+                const fire = at - ev.reminder * 60000;
+                const delay = fire - now;
+                if (delay > 0 && delay < 172800000) {
+                    calReminderTimers.push(setTimeout(() => calNotify(ev, o.sYmd), delay));
+                }
+            });
+        }
+        function calNotify(ev, ds) {
+            const body = (ev.allDay ? '終日' : ev.start || '') + (ev.location ? ' @' + ev.location : '');
+            try {
+                if (navigator.serviceWorker && navigator.serviceWorker.ready) {
+                    navigator.serviceWorker.ready.then(reg => {
+                        reg.showNotification('📅 ' + ev.title, { body: body, icon: '/loveeeee/icon.png', tag: ev.id + ds });
+                    }).catch(() => new Notification('📅 ' + ev.title, { body: body }));
+                } else new Notification('📅 ' + ev.title, { body: body });
+            } catch (e) { }
         }
 
+        document.addEventListener('DOMContentLoaded', () => {
+            selectedDate = calToday();
+            if (document.getElementById('calendarContainer')) renderCalendar();
+        });
 
 
         const DEFAULT_LOCATION = {
@@ -2629,15 +5814,24 @@
             photos: 0,
             shops: 0,
             diaries: 0,
-            voices: 0
+            voices: 0,
+            events: 0,
+            evComments: 0
         };
+
+        // 予定に付いたコメントの総数（予定数が変わらなくても更新を検知するため）
+        function calCommentTotal(list) {
+            return (list || []).reduce((a, e) => a + ((e && e.comments) ? e.comments.length : 0), 0);
+        }
 
         function initLastKnownCounts() {
             lastKnownCounts = {
                 photos: photos.length,
                 shops: shops.length,
                 diaries: diaries.length,
-                voices: voices.length
+                voices: voices.length,
+                events: events.length,
+                evComments: calCommentTotal(events)
             };
         }
 
@@ -2647,11 +5841,18 @@
             if (newData.diaries.length > lastKnownCounts.diaries) showNewBadge('diaryNewBadge');
             if (newData.voices && newData.voices.length > lastKnownCounts.voices) showNewBadge('voiceNewBadge');
 
+            const evs = newData.events || [];
+            if (evs.length > lastKnownCounts.events || calCommentTotal(evs) > lastKnownCounts.evComments) {
+                showNewBadge('calNewBadge');
+            }
+
             lastKnownCounts = {
                 photos: newData.photos.length,
                 shops: newData.shops.length,
                 diaries: newData.diaries.length,
-                voices: (newData.voices || []).length
+                voices: (newData.voices || []).length,
+                events: evs.length,
+                evComments: calCommentTotal(evs)
             };
         }
 
@@ -2928,6 +6129,14 @@
                         shops = newData.shops || [];
                         events = newData.events || [];
                         voices = newData.voices || [];
+                        if (newData.labels && newData.labels.length) {
+                            calSetLabels(newData.labels);
+                            calSaveLocalLabels();
+                        }
+                        if (newData.members && newData.members.length) {
+                            calSetMembers(newData.members);
+                            calSaveLocalMembers();
+                        }
                         // 自分のローカルが大きければ上書きしない（連打中の保護）
                         if ((newData.love_count || 0) > loveCount) {
                             loveCount = newData.love_count;
@@ -2937,6 +6146,8 @@
                         renderDiaries();
                         renderShops();
                         renderCalendar();
+                        // 開いているシート（予定の詳細 / その日の一覧）も更新
+                        if (calSheetEvId || (calSheetMode === 'day' && calSheetDate)) calRenderSheet();
                         updateLoveDisplay();
                         renderVoices();
                     }
@@ -3070,27 +6281,192 @@
         }
         animate();
     </script>
+    <!-- 📅 予定の追加・編集 -->
     <div id="eventModal" class="modal-overlay">
         <div class="modal-content">
-            <h3>予定を追加 📅</h3>
-            <div class="input-group">
-                <label>日付</label>
-                <input type="date" id="eventDateInput">
-            </div>
+            <h3 id="eventModalTitle">予定を追加 📅</h3>
+
             <div class="input-group">
                 <label>タイトル</label>
                 <input type="text" id="eventTitleInput" placeholder="例：ディナー🍽">
             </div>
+
+            <div class="input-group">
+                <label>ラベル <span id="eventLabelName" style="color:#d81b60;font-weight:700;"></span></label>
+                <div class="cal-form-labels" id="eventLabelBox"></div>
+            </div>
+
+            <div class="input-group">
+                <label>だれの予定？ 👥</label>
+                <div class="cal-mpicks" id="eventMemberBox"></div>
+            </div>
+
+            <div class="cal-quick">
+                <button type="button" onclick="calQuickDate('today')">今日</button>
+                <button type="button" onclick="calQuickDate('tomorrow')">明日</button>
+                <button type="button" onclick="calQuickDate('weekend')">今週の土曜</button>
+                <button type="button" onclick="calQuickDate('nextweek')">来週</button>
+            </div>
+
+            <div class="cal-time-row" style="margin-bottom:16px;">
+                <div>
+                    <label style="display:block;font-size:12px;color:#888;margin-bottom:6px;">開始日</label>
+                    <input type="date" id="eventDateInput" onchange="calFillRepeatOptions()">
+                </div>
+                <div>
+                    <label style="display:block;font-size:12px;color:#888;margin-bottom:6px;">終了日</label>
+                    <input type="date" id="eventEndDateInput">
+                </div>
+            </div>
+
+            <div class="cal-switch">
+                <span>終日の予定</span>
+                <input type="checkbox" id="eventAllDay" checked onchange="calToggleAllDay()">
+            </div>
+
+            <div class="cal-time-row" id="eventTimeRow" style="margin-bottom:16px;">
+                <div>
+                    <label style="display:block;font-size:12px;color:#888;margin-bottom:6px;">開始</label>
+                    <input type="time" id="eventStartTime" value="19:00">
+                </div>
+                <div>
+                    <label style="display:block;font-size:12px;color:#888;margin-bottom:6px;">終了</label>
+                    <input type="time" id="eventEndTime" value="21:00">
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label>場所</label>
+                <input type="text" id="eventLocationInput" placeholder="例：渋谷スカイ">
+            </div>
+
+            <div class="cal-time-row" style="margin-bottom:16px;">
+                <div>
+                    <label style="display:block;font-size:12px;color:#888;margin-bottom:6px;">くり返し 🔁</label>
+                    <select id="eventRepeat" onchange="calFillRepeatOptions()">
+                        <option value="none">くり返さない</option>
+                        <option value="daily">毎日</option>
+                        <option value="weekly">毎週</option>
+                        <option value="biweekly">隔週</option>
+                        <option value="monthly">毎月</option>
+                        <option value="yearly">毎年</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="display:block;font-size:12px;color:#888;margin-bottom:6px;">通知 🔔</label>
+                    <select id="eventReminder">
+                        <option value="0">なし</option>
+                        <option value="10">10分前</option>
+                        <option value="30">30分前</option>
+                        <option value="60">1時間前</option>
+                        <option value="180">3時間前</option>
+                        <option value="1440">1日前</option>
+                        <option value="2880">2日前</option>
+                        <option value="10080">1週間前</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="eventRepeatDetail" class="cal-repeat-detail" style="display:none;">
+                <div id="eventDowBox" style="display:none;">
+                    <label style="display:block;font-size:12px;color:#888;margin-bottom:8px;">くり返す曜日（複数えらべるよ）</label>
+                    <div class="cal-dows" id="eventDows"></div>
+                </div>
+                <div id="eventMonthlyBox" style="display:none;margin-top:10px;">
+                    <label style="display:block;font-size:12px;color:#888;margin-bottom:6px;">毎月のくり返し方</label>
+                    <select id="eventMonthlyMode">
+                        <option value="date">日付で（毎月おなじ日）</option>
+                        <option value="nth">曜日で（毎月 第◯曜日）</option>
+                    </select>
+                    <div class="cal-monthly-hint">
+                        日付で = 毎月 <b id="eventMonthlyDateLabel">1日</b> ／
+                        曜日で = 毎月 <b id="eventMonthlyNthLabel">第1月曜日</b>
+                    </div>
+                </div>
+                <div id="eventUntilBox" style="display:none;margin-top:10px;">
+                    <label style="display:block;font-size:12px;color:#888;margin-bottom:6px;">いつまでくり返す？（空ならずっと）</label>
+                    <input type="date" id="eventUntil">
+                </div>
+            </div>
+
             <div class="input-group">
                 <label>メモ</label>
                 <textarea id="eventNoteInput" rows="3" placeholder="詳細を書いてね！"></textarea>
             </div>
+
+            <button id="eventDeleteBtn" onclick="deleteEventFromForm()" style="display:none;width:100%;border:none;border-radius:14px;padding:12px;background:#ffeef0;color:#e5455f;font-size:13px;font-weight:700;cursor:pointer;margin-bottom:12px;">🗑️
+                この予定を削除</button>
+
             <div class="modal-actions">
                 <button class="btn" onclick="closeEventModal()">キャンセル</button>
                 <button class="btn btn-save" onclick="saveEvent()">保存</button>
             </div>
         </div>
     </div>
+
+    <!-- 📅 予定の詳細シート -->
+    <div id="calSheet" class="cal-sheet">
+        <div class="cal-sheet-bg" onclick="closeCalSheet()"></div>
+        <div class="cal-sheet-panel">
+            <div class="cal-sheet-grip" onclick="closeCalSheet()"></div>
+            <div id="calSheetBody"></div>
+        </div>
+    </div>
+
+    <!-- 🏷 ラベルの編集 -->
+    <div id="labelModal" class="modal-overlay">
+        <div class="modal-content">
+            <h3>ラベルを編集 🏷</h3>
+            <div class="cal-lbl-hint">
+                名前をタップで書きかえ、丸をタップで色を変えられるよ。<br>
+                変更はふたりのカレンダーに反映されます。
+            </div>
+            <div id="labelEditList"></div>
+            <button id="labelAddBtn" onclick="calAddLabel()">＋ ラベルを追加</button>
+            <div class="modal-actions" style="justify-content:space-between;">
+                <button class="btn" onclick="calResetLabels()"
+                    style="background:#fff5f7;color:#b07f8b;font-size:12px;">初期設定にもどす</button>
+                <div style="display:flex;gap:10px;">
+                    <button class="btn" onclick="closeLabelModal()">キャンセル</button>
+                    <button class="btn btn-save" id="labelSaveBtn" onclick="saveLabels()">保存</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 👥 メンバーの編集 -->
+    <div id="memberModal" class="modal-overlay">
+        <div class="modal-content">
+            <h3>メンバーを編集 👥</h3>
+            <div class="cal-lbl-hint">
+                名前をタップで書きかえ、丸をタップで色と絵文字を変えられるよ。<br>
+                「これが自分」を選んでおくと、新しい予定に自分が自動で入ります。
+            </div>
+            <div id="memberEditList"></div>
+            <button id="memberAddBtn" onclick="calAddMember()">＋ メンバーを追加</button>
+            <div class="modal-actions">
+                <button class="btn" onclick="closeMemberModal()">キャンセル</button>
+                <button class="btn btn-save" id="memberSaveBtn" onclick="saveMembers()">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 📷 予定の写真ビューア -->
+    <div id="calPhotoViewer" class="cal-photo-viewer" onclick="calCloseEventPhoto()">
+        <img id="calPhotoViewerImg" src="" alt="" onclick="event.stopPropagation()">
+        <div class="cal-pv-top" onclick="event.stopPropagation()">
+            <span id="calPhotoViewerCount"></span>
+            <div>
+                <button onclick="calDeleteEventPhoto()">🗑 外す</button>
+                <button onclick="calCloseEventPhoto()">✕</button>
+            </div>
+        </div>
+        <button class="cal-pv-nav left" onclick="event.stopPropagation();calStepEventPhoto(-1)">‹</button>
+        <button class="cal-pv-nav right" onclick="event.stopPropagation();calStepEventPhoto(1)">›</button>
+    </div>
+
+    <button id="calFab" class="cal-fab" onclick="openEventModal()">＋</button>
+
     <script>
         let currentUser = null;
         let USER_ID = null;
