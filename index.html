@@ -3984,7 +3984,15 @@
             0: 'なし', 10: '10分前', 30: '30分前', 60: '1時間前',
             180: '3時間前', 1440: '1日前', 2880: '2日前', 10080: '1週間前'
         };
-        const CAL_DOW = ['日', '月', '火', '水', '木', '金', '土'];
+        const CAL_DOW = ['日', '月', '火', '水', '木', '金', '土']; // getDay() の番号順
+        // 週のはじまり（0=日曜 / 1=月曜）。ここだけ変えれば全部がついてくる
+        const CAL_WEEK_START = 1;
+        // 表示順の曜日番号（月曜はじまりなら [1,2,3,4,5,6,0]）
+        const CAL_DOW_ORDER = [0, 1, 2, 3, 4, 5, 6].map(i => (i + CAL_WEEK_START) % 7);
+        // その日が週の何列めか
+        function calCol(d) { return (d.getDay() - CAL_WEEK_START + 7) % 7; }
+        // その日を含む週の初日
+        function calWeekStart(d) { return calAdd(d, -calCol(d)); }
 
         let calView = 'month';
         let calCursor = new Date();
@@ -4126,7 +4134,8 @@
                 const base = calParse(ev.date);
                 const dows = ev.repeatDows && ev.repeatDows.length ? ev.repeatDows : [base.getDay()];
                 return (ev.repeat === 'weekly' ? '毎週' : '隔週') + ' ' +
-                    dows.slice().sort((a, b) => a - b).map(d => CAL_DOW[d]).join('・');
+                    dows.slice().sort((a, b) => CAL_DOW_ORDER.indexOf(a) - CAL_DOW_ORDER.indexOf(b))
+                        .map(d => CAL_DOW[d]).join('・');
             }
             if (ev.repeat === 'monthly' && ev.monthlyMode === 'nth') {
                 const base = calParse(ev.date);
@@ -4182,7 +4191,7 @@
                         // 曜日を複数選べる（月・水・金 など）。未指定なら開始日の曜日
                         const step = ev.repeat === 'weekly' ? 7 : 14;
                         const dows = ev.repeatDows.length ? ev.repeatDows : [base.getDay()];
-                        let wk = calAdd(base, -base.getDay());          // 基準になる週の日曜
+                        let wk = calWeekStart(base);                   // 基準になる週の初日
                         const wkGuard = calAdd(guardStart, -6);
                         if (wk < wkGuard) {
                             const k = Math.floor((wkGuard - wk) / (step * 86400000));
@@ -4190,7 +4199,7 @@
                         }
                         while (wk <= limit && g++ < 400) {
                             for (let di = 0; di < dows.length; di++) {
-                                const d = calAdd(wk, dows[di]);
+                                const d = calAdd(wk, (dows[di] - CAL_WEEK_START + 7) % 7);
                                 if (d >= base && d <= limit) calPush(out, ev, d, span, from, to);
                             }
                             wk = calAdd(wk, step);
@@ -4251,7 +4260,7 @@
         function calMonthTitle() {
             if (calView === 'list') return { main: '予定リスト', sub: 'UPCOMING' };
             if (calView === 'week') {
-                const ws = calAdd(calCursor, -calCursor.getDay());
+                const ws = calWeekStart(calCursor);
                 const we = calAdd(ws, 6);
                 return {
                     main: (ws.getMonth() + 1) + '/' + ws.getDate() + ' - ' + (we.getMonth() + 1) + '/' + we.getDate(),
@@ -4370,9 +4379,9 @@
         function calRenderMonth() {
             const y = calCursor.getFullYear(), m = calCursor.getMonth();
             const first = new Date(y, m, 1);
-            const gridStart = calAdd(first, -first.getDay());
+            const gridStart = calWeekStart(first);
             const last = new Date(y, m + 1, 0);
-            const gridEnd = calAdd(last, 6 - last.getDay());
+            const gridEnd = calAdd(last, 6 - calCol(last));
             const weeks = (calDiff(calYmd(gridStart), calYmd(gridEnd)) + 1) / 7;
             const occs = calOccurrences(calYmd(gridStart), calYmd(gridEnd));
             const maxLanes = calFullscreen ? 5 : 3;
@@ -4398,8 +4407,8 @@
             }
 
             let h = '<div class="cal-dow">';
-            CAL_DOW.forEach((d, i) => {
-                h += '<div class="' + (i === 0 ? 'sun' : i === 6 ? 'sat' : '') + '">' + d + '</div>';
+            CAL_DOW_ORDER.forEach(dw => {
+                h += '<div class="' + (dw === 0 ? 'sun' : dw === 6 ? 'sat' : '') + '">' + CAL_DOW[dw] + '</div>';
             });
             h += '</div><div class="cal-month" id="calMonthGrid">';
 
@@ -4414,8 +4423,8 @@
                     const ds = calYmd(d);
                     const hol = calHolidayName(ds);
                     const cls = ['cal-daycell'];
-                    if (i === 0) cls.push('sun');
-                    if (i === 6) cls.push('sat');
+                    if (d.getDay() === 0) cls.push('sun');
+                    if (d.getDay() === 6) cls.push('sat');
                     if (hol) cls.push('hol');
                     if (d.getMonth() !== m) cls.push('out');
                     if (ds === today) cls.push('today');
@@ -4522,7 +4531,7 @@
 
         /* ---------- 週ビュー ---------- */
         function calRenderWeek() {
-            const ws = calAdd(calCursor, -calCursor.getDay());
+            const ws = calWeekStart(calCursor);
             const wsY = calYmd(ws), weY = calYmd(calAdd(ws, 6));
             const today = calToday();
             const occs = calOccurrences(wsY, weY);
@@ -4532,12 +4541,12 @@
             for (let i = 0; i < 7; i++) {
                 const d = calAdd(ws, i), ds = calYmd(d);
                 const cls = ['h'];
-                if (i === 0) cls.push('sun');
-                if (i === 6) cls.push('sat');
+                if (d.getDay() === 0) cls.push('sun');
+                if (d.getDay() === 6) cls.push('sat');
                 if (calHolidayName(ds)) cls.push('hol');
                 if (ds === today) cls.push('today');
                 h += '<div class="' + cls.join(' ') + '" data-act="dayjump" data-arg="' + ds + '">' +
-                    '<small>' + CAL_DOW[i] + '</small><b>' + d.getDate() + '</b></div>';
+                    '<small>' + CAL_DOW[d.getDay()] + '</small><b>' + d.getDate() + '</b></div>';
             }
             h += '</div>';
 
@@ -4817,10 +4826,10 @@
                     const d = document.getElementById('eventDateInput').value;
                     if (d) calFormDows = [calParse(d).getDay()];
                 }
-                document.getElementById('eventDows').innerHTML = CAL_DOW.map((nm, i) =>
-                    '<div class="cal-dowpick' + (calFormDows.indexOf(i) !== -1 ? ' on' : '') +
-                    (i === 0 ? ' sun' : i === 6 ? ' sat' : '') +
-                    '" onclick="calToggleFormDow(' + i + ')">' + nm + '</div>').join('');
+                document.getElementById('eventDows').innerHTML = CAL_DOW_ORDER.map(dw =>
+                    '<div class="cal-dowpick' + (calFormDows.indexOf(dw) !== -1 ? ' on' : '') +
+                    (dw === 0 ? ' sun' : dw === 6 ? ' sat' : '') +
+                    '" onclick="calToggleFormDow(' + dw + ')">' + CAL_DOW[dw] + '</div>').join('');
             }
             if (rep === 'monthly') {
                 const d = document.getElementById('eventDateInput').value;
