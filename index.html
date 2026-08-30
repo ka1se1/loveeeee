@@ -3446,17 +3446,17 @@
             document.getElementById('viewerImg').src = photoFull(photos[currentViewerIndex]);
         }
 
-        function viewerPrev() {
-            if (currentViewerIndex === null) return;
-            currentViewerIndex = (currentViewerIndex - 1 + photos.length) % photos.length;
+        // ギャラリーは新しい順に並べているので、画面の「‹ 左」は配列では1つ後ろ、
+        // 「右 ›」は1つ手前になる。ここを取り違えると、めくる向きが見た目と逆になる。
+        function viewerStep(n) {
+            if (currentViewerIndex === null || !photos.length) return;
+            currentViewerIndex = (currentViewerIndex + n + photos.length) % photos.length;
             viewerShow();
         }
 
-        function viewerNext() {
-            if (currentViewerIndex === null) return;
-            currentViewerIndex = (currentViewerIndex + 1) % photos.length;
-            viewerShow();
-        }
+        function viewerPrev() { viewerStep(1); }   // ‹ 左 = 画面上でひとつ前（より新しい）
+
+        function viewerNext() { viewerStep(-1); }  // 右 › = 画面上でひとつ次（より古い）
 
         async function deleteFromViewer() {
             if (currentViewerIndex === null) return;
