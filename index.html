@@ -1392,11 +1392,6 @@
             vertical-align: middle;
         }
 
-        .cal-chipev.done {
-            opacity: .45;
-            text-decoration: line-through;
-        }
-
         .cal-more {
             position: absolute;
             height: 13px;
@@ -1478,11 +1473,6 @@
             display: flex;
             flex-wrap: wrap;
             gap: 8px;
-        }
-
-        .cal-ev.done .body b {
-            text-decoration: line-through;
-            opacity: .55;
         }
 
         .cal-empty {
@@ -1797,11 +1787,6 @@
         .cal-btn-main {
             background: linear-gradient(135deg, #ff9a9e, #fecfef);
             color: #fff;
-        }
-
-        .cal-btn-sub {
-            background: #fff5f7;
-            color: #d81b60;
         }
 
         .cal-btn-danger {
@@ -4099,7 +4084,6 @@
             ev.members = ev.members.filter(id => typeof id === 'string');
             if (!Array.isArray(ev.photos)) ev.photos = [];
             if (!Array.isArray(ev.comments)) ev.comments = [];
-            if (!Array.isArray(ev.doneDates)) ev.doneDates = [];
             if (!Array.isArray(ev.exdates)) ev.exdates = [];
             if (typeof ev.reminder !== 'number') ev.reminder = 0;
             if (typeof ev.location !== 'string') ev.location = ev.location || '';
@@ -4250,7 +4234,6 @@
             if (aa !== bb) return aa - bb;
             return calMin(a.ev.start) - calMin(b.ev.start);
         }
-        function calIsDone(ev, dateStr) { return ev.doneDates.indexOf(dateStr) !== -1; }
         function calTimeText(ev) {
             if (ev.allDay) return '終日';
             return (ev.start || '') + (ev.end ? '<br>' + ev.end : '');
@@ -4322,7 +4305,7 @@
             if (calSearch) return '';
             const today = calToday();
             const occ = calOccurrences(today, calYmd(calAdd(new Date(), 400)))
-                .filter(o => o.eYmd >= today && !calIsDone(o.ev, o.sYmd))
+                .filter(o => o.eYmd >= today)
                 .sort((a, b) => a.sYmd < b.sYmd ? -1 : a.sYmd > b.sYmd ? 1 : calMin(a.ev.start) - calMin(b.ev.start))[0];
             if (!occ) return '';
             const d = Math.max(0, calDiff(today, occ.sYmd));
@@ -4444,7 +4427,6 @@
                 vis.forEach(p => {
                     const ev = p.o.ev;
                     const c = calColor(ev);
-                    const done = calIsDone(ev, p.o.sYmd);
                     const multi = p.o.sYmd !== p.o.eYmd;
                     const timedStyle = (!ev.allDay && !multi);
                     const left = (p.col / 7 * 100).toFixed(4);
@@ -4457,7 +4439,7 @@
                     const label = timedStyle
                         ? '<span class="tdot" style="background:' + c + '"></span>' + title
                         : title;
-                    h += '<div class="cal-chipev ' + (timedStyle ? 'timed' : '') + (done ? ' done' : '') +
+                    h += '<div class="cal-chipev ' + (timedStyle ? 'timed' : '') +
                         '" style="left:calc(' + left + '% + 1px);width:calc(' + width + '% - 2px);top:' + (p.lane * LH) + 'px;background:' + c + '"' +
                         ' data-act="ev" data-arg="' + ev.id + '" data-arg2="' + p.o.sYmd + '">' + label + '</div>';
                 });
@@ -4501,7 +4483,6 @@
         }
         function calEventRow(o) {
             const ev = o.ev;
-            const done = calIsDone(ev, o.sYmd);
             const multi = o.sYmd !== o.eYmd;
             let time;
             if (multi) {
@@ -4519,10 +4500,10 @@
                 ? '<div class="cal-ev-photos">' + ev.photos.slice(0, 4).map(p =>
                     '<img loading="lazy" decoding="async" src="' + esc(photoThumb(p)) + '" alt="">').join('') + '</div>'
                 : '';
-            return '<div class="cal-ev' + (done ? ' done' : '') + '" data-act="ev" data-arg="' + ev.id + '" data-arg2="' + o.sYmd + '">' +
+            return '<div class="cal-ev" data-act="ev" data-arg="' + ev.id + '" data-arg2="' + o.sYmd + '">' +
                 '<div class="bar" style="background:' + calColor(ev) + '"></div>' +
                 '<div class="time">' + time + '</div>' +
-                '<div class="body"><b>' + (done ? '✓ ' : '') + esc(ev.title) +
+                '<div class="body"><b>' + esc(ev.title) +
                 (avatars ? '<span class="cal-avs">' + avatars + '</span>' : '') + '</b>' + strip +
                 (ev.note ? '<div style="font-size:11px;color:#a58b93;margin-top:2px;white-space:pre-wrap;">' + esc(ev.note.slice(0, 60)) + (ev.note.length > 60 ? '…' : '') + '</div>' : '') +
                 (meta.length ? '<div class="meta"><span>' + meta.join('</span><span>') + '</span></div>' : '') +
@@ -4558,7 +4539,7 @@
                 '<div class="cal-lanes" style="height:' + Math.max(16, lanes * 17 + 3) + 'px">';
             placed.forEach(p => {
                 const ev = p.o.ev;
-                h += '<div class="cal-chipev' + (calIsDone(ev, p.o.sYmd) ? ' done' : '') + '" style="left:calc(' +
+                h += '<div class="cal-chipev" style="left:calc(' +
                     (p.col / 7 * 100).toFixed(4) + '% + 1px);width:calc(' + (p.span / 7 * 100).toFixed(4) + '% - 2px);top:' +
                     (p.lane * 17 + 2) + 'px;background:' + calColor(ev) + '" data-act="ev" data-arg="' + ev.id +
                     '" data-arg2="' + p.o.sYmd + '">' + esc(ev.title) + '</div>';
@@ -4591,7 +4572,7 @@
                         const top = it.s / 60 * HH;
                         const height = Math.max(16, (it.e - it.s) / 60 * HH - 2);
                         const w = 100 / n;
-                        h += '<div class="cal-wk-ev' + (calIsDone(it.o.ev, ds) ? ' done' : '') + '" style="top:' + top.toFixed(1) +
+                        h += '<div class="cal-wk-ev" style="top:' + top.toFixed(1) +
                             'px;height:' + height.toFixed(1) + 'px;left:calc(' + (idx * w).toFixed(2) + '% + 1px);width:calc(' + w.toFixed(2) +
                             '% - 2px);background:' + calColor(it.o.ev) + '" data-act="ev" data-arg="' + it.o.ev.id + '" data-arg2="' + ds + '">' +
                             esc(it.o.ev.start) + ' ' + esc(it.o.ev.title) + '</div>';
@@ -4964,7 +4945,7 @@
                         repeat, reminder, label: calFormLabel,
                         repeatDows, monthlyMode, repeatUntil, members,
                         author: calMe(), createdAt: new Date().toISOString(),
-                        photos: [], comments: [], doneDates: [], exdates: []
+                        photos: [], comments: [], exdates: []
                     }));
                 }
                 selectedDate = date;
@@ -5060,7 +5041,6 @@
             const ds = calSheetOcc;
             const span = calDiff(ev.date, ev.endDate);
             const sD = calParse(ds), eD = calAdd(sD, span);
-            const done = calIsDone(ev, ds);
             const diff = calDiff(calToday(), ds);
             const cd = diff === 0 ? '今日！' : diff === 1 ? '明日！' : diff > 0 ? 'あと' + diff + '日' : Math.abs(diff) + '日前';
             const fmt = d => (d.getMonth() + 1) + '月' + d.getDate() + '日(' + CAL_DOW[d.getDay()] + ')';
@@ -5076,7 +5056,7 @@
                     (bd.getMonth() + 1) + '月' + bd.getDate() + '日の予定にもどる</div>';
             }
             h += '<div class="cal-detail-label" style="background:' + calColor(ev) + '">● ' + esc(calLabel(ev.label).name) + '</div>';
-            h += '<div class="cal-detail-title">' + (done ? '✓ ' : '') + esc(ev.title) +
+            h += '<div class="cal-detail-title">' + esc(ev.title) +
                 '<span class="cal-cd-badge">' + cd + '</span></div>';
             h += '<div style="height:10px"></div>';
             h += '<div class="cal-row"><span class="ic">🕒</span><div>' + esc(when) + '</div></div>';
@@ -5103,8 +5083,7 @@
             if (ev.author) h += '<div class="cal-row"><span class="ic">👤</span><div>' + esc(ev.author) + ' が作成</div></div>';
 
             h += '<div class="cal-sheet-actions">';
-            h += '<button class="cal-btn-sub" onclick="calToggleDone()">' + (done ? '↩️ 未完了に戻す' : '✅ 完了にする') + '</button>';
-            h += '<button class="cal-btn-main" onclick="editEvent(\'' + ev.id + '\')">✏️ 編集</button>';
+            h += '<button class="cal-btn-main" onclick="editEvent(&quot;' + ev.id + '&quot;)">✏️ 編集</button>';
             h += '</div>';
             h += '<div class="cal-sheet-actions"><button class="cal-btn-danger" onclick="deleteEvent(\'' + ev.id + '\',\'' + ds + '\')">🗑️ 削除</button></div>';
 
@@ -5465,15 +5444,6 @@
             if (!ev) return;
             ev.comments.push({ author: calMe(), text: text, at: new Date().toISOString() });
             input.value = '';
-            calRenderSheet();
-            await updateCloudData();
-            renderCalendar();
-        }
-        async function calToggleDone() {
-            const ev = events.find(x => x.id === calSheetEvId);
-            if (!ev) return;
-            const i = ev.doneDates.indexOf(calSheetOcc);
-            if (i === -1) ev.doneDates.push(calSheetOcc); else ev.doneDates.splice(i, 1);
             calRenderSheet();
             await updateCloudData();
             renderCalendar();
