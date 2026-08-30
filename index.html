@@ -4674,14 +4674,26 @@
                 const t = e.target.closest('[data-act]');
                 if (t && container.contains(t)) calHandleAct(t);
             });
-            // スワイプで月/週めくり
-            let sx = 0, sy = 0, moved = false;
+            // スワイプで月/週めくり。
+            // カレンダーの升目の上で始めたときだけ効かせる。
+            // ラベルやメンバーの行は横スクロールしたいので、めくりの対象にしない。
+            const SWIPE_ZONE = '.cal-month, .cal-wk-head, .cal-wk-allday, .cal-wk-cols';
+            let sx = 0, sy = 0, swiping = false;
             container.addEventListener('touchstart', e => {
-                if (calView === 'list') return;
-                sx = e.touches[0].clientX; sy = e.touches[0].clientY; moved = false;
+                swiping = calView !== 'list' &&
+                    e.touches.length === 1 &&
+                    !!e.target.closest(SWIPE_ZONE);
+                if (!swiping) return;
+                sx = e.touches[0].clientX;
+                sy = e.touches[0].clientY;
+            }, { passive: true });
+            container.addEventListener('touchmove', e => {
+                // 2本指になったらピンチなので、めくりは取り消す
+                if (e.touches.length > 1) swiping = false;
             }, { passive: true });
             container.addEventListener('touchend', e => {
-                if (calView === 'list' || moved) return;
+                if (!swiping) return;
+                swiping = false;
                 const dx = e.changedTouches[0].clientX - sx;
                 const dy = e.changedTouches[0].clientY - sy;
                 if (Math.abs(dx) > 55 && Math.abs(dx) > Math.abs(dy) * 1.8) calStep(dx < 0 ? 1 : -1);
