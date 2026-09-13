@@ -1,0 +1,3463 @@
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Segoe UI", Roboto, Arial, sans-serif;
+            background: linear-gradient(180deg, #ffb7c5, #ffc8b4, #ffdab9);
+            background-attachment: fixed;
+            color: #333;
+            scroll-behavior: smooth;
+        }
+
+        header {
+            background: linear-gradient(135deg, #ff9a9e, #fecfef, #fad0c4);
+            background-size: 200% 200%;
+            animation: gradientMove 5s ease infinite;
+            color: white;
+            padding: 24px 20px;
+            text-align: center;
+            font-size: 22px;
+            font-weight: 800;
+            letter-spacing: 2px;
+            box-shadow: 0 4px 12px rgba(255, 154, 158, 0.3);
+            border-bottom-left-radius: 20px;
+            border-bottom-right-radius: 20px;
+            position: relative;
+        }
+
+        @keyframes gradientMove {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        .input-group input,
+        .input-group textarea {
+            font-size: 16px;
+        }
+
+        .photo-viewer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+
+            background: rgba(0, 0, 0, 0.9);
+            display: none;
+
+            align-items: center;
+            justify-content: center;
+
+            z-index: 9999;
+        }
+
+        .photo-viewer img {
+            max-width: 90%;
+            max-height: 90%;
+            border-radius: 16px;
+
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            animation: zoomIn 0.3s ease;
+        }
+
+        @keyframes zoomIn {
+            from {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .container {
+            padding: 20px 15px;
+            max-width: 600px;
+            margin: auto;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(255, 154, 158, 0.15);
+            /* ← ここだけ変更 */
+            border: 1px solid rgba(255, 255, 255, 0.4);
+        }
+
+        .card-header-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        h2 {
+            font-size: 18px;
+            margin: 0;
+        }
+
+
+
+        .btn-round {
+            background: linear-gradient(135deg, #ff9a9e, #fecfef);
+            color: white;
+
+            border: none;
+            /* ← これで縁消える */
+            outline: none;
+            /* ← 念のため */
+
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+
+            box-shadow: 0 6px 16px rgba(255, 154, 158, 0.3);
+            transition: all 0.2s ease;
+        }
+
+        .btn-round:active {
+            transform: scale(0.9);
+        }
+
+        .btn-round:disabled {
+            background: #ccc;
+        }
+
+        .slider {
+            overflow: auto;
+            border-radius: 16px;
+            height: 220px;
+            position: relative;
+            scroll-behavior: smooth;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scroll-snap-type: x mandatory;
+        }
+
+        .slides {
+            display: flex;
+            gap: 12px;
+            width: 100%;
+            align-items: center;
+            justify-content: flex-start;
+            transition: transform 0.3s ease;
+            padding: 0 20px;
+            box-sizing: border-box;
+        }
+
+        .slides img {
+            height: 220px;
+            width: auto;
+            border-radius: 16px;
+            object-fit: cover;
+            flex-shrink: 0;
+            scroll-snap-align: center;
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+
+            transition: all 0.25s ease;
+            /* ← 追加 */
+            cursor: pointer;
+            /* ← 追加 */
+        }
+
+        .slides img:hover {
+            transform: translateY(-8px) scale(1.05);
+            /* ← 浮いて拡大 */
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.25);
+            /* ← 影強く */
+            z-index: 5;
+        }
+
+        @keyframes scrollLoop {
+            0% {
+                transform: translateX(0);
+            }
+
+            100% {
+                transform: translateX(-50%);
+            }
+        }
+
+        .delete-sheet {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+
+            background: rgba(0, 0, 0, 0.3);
+            display: none;
+            justify-content: center;
+            align-items: flex-end;
+
+            z-index: 9999;
+        }
+
+        .delete-sheet.active {
+            display: flex;
+        }
+
+        .delete-box {
+            width: 100%;
+            background: white;
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
+            padding: 20px;
+            text-align: center;
+
+            animation: slideUp 0.3s ease;
+        }
+
+        .delete-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(4px);
+
+            display: none;
+            justify-content: center;
+            align-items: center;
+
+            z-index: 9999;
+        }
+
+        .delete-modal.active {
+            display: flex;
+        }
+
+        .delete-card {
+            background: white;
+            padding: 24px;
+            border-radius: 20px;
+            width: 80%;
+            max-width: 300px;
+            text-align: center;
+
+            animation: pop 0.25s ease;
+        }
+
+        @keyframes pop {
+            from {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .delete-btn {
+            width: 100%;
+            padding: 12px;
+            margin-top: 12px;
+            border: none;
+            border-radius: 12px;
+            background: #ff4d6d;
+            color: white;
+            font-weight: bold;
+        }
+
+        .cancel-btn {
+            width: 100%;
+            padding: 12px;
+            margin-top: 8px;
+            border: none;
+            border-radius: 12px;
+            background: #eee;
+        }
+
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.7);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            color: #ff9a9e;
+            font-weight: bold;
+            z-index: 10;
+            text-align: center;
+        }
+
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+            align-items: start;
+        }
+
+        .gallery-grid img {
+            width: 100%;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 12px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        /* 読み込み中アニメーション */
+        .loading-pulse {
+            text-align: center;
+            padding: 40px 20px;
+            color: #ff9a9e;
+            font-weight: bold;
+            font-size: 14px;
+            animation: pulse 1.5s infinite ease-in-out;
+            align-self: center;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+        }
+
+        @keyframes pulse {
+            0% {
+                opacity: 0.4;
+            }
+
+            50% {
+                opacity: 1;
+            }
+
+            100% {
+                opacity: 0.4;
+            }
+        }
+
+        #shopListContainer {
+            display: flex;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+        }
+
+        .shop-page {
+            flex: 0 0 100%;
+            width: 100%;
+            max-width: 100%;
+            /* ← これ追加 */
+            box-sizing: border-box;
+            scroll-snap-align: start;
+
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+
+            padding: 0 5px;
+            /* ← 左右に少し余白つける */
+        }
+
+        .shop-card {
+            width: 100%;
+            padding: 12px;
+            border-radius: 14px;
+            background: #ffffff;
+            box-sizing: border-box;
+
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+
+            transition: all 0.25s ease;
+            cursor: pointer;
+        }
+
+        .shop-card:hover {
+            transform: translateY(-6px) scale(1.02);
+            box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12);
+        }
+
+        .shop-card:active {
+            transform: scale(0.97);
+        }
+
+        .shop-card.deleting {
+            transform: scale(0.85);
+            opacity: 0;
+            transition: transform 0.25s ease, opacity 0.25s ease;
+        }
+
+        .shop-title {
+            font-weight: bold;
+            font-size: 12px;
+            margin-bottom: 4px;
+            word-break: break-word;
+            line-height: 1.2;
+        }
+
+        .shop-note {
+            font-size: 10px;
+            color: #666;
+            flex-grow: 1;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            margin-bottom: 6px;
+        }
+
+        .shop-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            margin-top: auto;
+        }
+
+        .insta-link {
+            font-size: 9px;
+            color: #fff;
+            text-decoration: none;
+            background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+            padding: 4px;
+            border-radius: 8px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .btn-delete-small {
+            background: #ffe3e6;
+            color: #d81b60;
+            border: none;
+            border-radius: 8px;
+            padding: 4px;
+            font-size: 9px;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 24px;
+            border-radius: 20px;
+            width: 85%;
+            max-width: 400px;
+        }
+
+        .input-group {
+            margin-bottom: 16px;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 12px;
+            color: #888;
+            margin-bottom: 6px;
+        }
+
+        .input-group input,
+        .input-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            box-sizing: border-box;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 10px 16px;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+        }
+
+        .auth-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 99999;
+            background: linear-gradient(135deg, #ff9a9e, #fecfef);
+        }
+
+        .auth-card {
+            background: white;
+            padding: 30px 20px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 320px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .auth-card input {
+            width: 100%;
+            max-width: 260px;
+            padding: 12px;
+            margin-bottom: 10px;
+            border-radius: 10px;
+            border: 1px solid #eee;
+            box-sizing: border-box;
+        }
+
+        .btn-primary,
+        .btn-secondary {
+            width: 100%;
+            max-width: 260px;
+            padding: 12px;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #ff9a9e, #fecfef);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #eee;
+        }
+
+        /* hover */
+        .btn-primary:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary:hover {
+            background: #ddd;
+        }
+
+        /* click */
+        .btn-primary:active,
+        .btn-secondary:active {
+            transform: scale(0.95);
+        }
+
+        /* ローディング */
+        .btn-loading {
+            position: relative;
+            pointer-events: none;
+            opacity: 0.8;
+        }
+
+        .btn-loading::after {
+            content: "";
+            width: 16px;
+            height: 16px;
+            border: 2px solid white;
+            border-top: 2px solid transparent;
+            border-radius: 50%;
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            animation: spin 0.7s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: translateY(-50%) rotate(360deg);
+            }
+        }
+
+        .btn-like-small {
+            background: #fff0f3;
+            color: #d81b60;
+            border: none;
+            border-radius: 8px;
+            padding: 4px;
+            font-size: 12px;
+        }
+
+        .btn-save {
+            background: #ff9a9e;
+            color: white;
+        }
+
+        /* 🚀 スプラッシュスクリーン（ようこそ画面） */
+        .splash-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(135deg, #ff9a9e, #fecfef, #fad0c4);
+            background-size: 200% 200%;
+            animation: gradientMove 5s ease infinite;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            /* 一番手前に表示 */
+            color: white;
+            transition: opacity 0.8s ease, visibility 0.8s ease;
+        }
+
+        .splash-screen.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .splash-content {
+            text-align: center;
+            animation: popIn 1s cubic-bezier(0.28, 0.84, 0.42, 1);
+        }
+
+        .splash-content h1 {
+            font-size: 40px;
+            margin: 0;
+            letter-spacing: 2px;
+            text-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .splash-content p {
+            font-size: 16px;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+
+        @keyframes popIn {
+            0% {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+
+            50% {
+                transform: scale(1.05);
+                opacity: 1;
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.4);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 999;
+        }
+
+        /* 📔 交換日記 */
+        .diary-container {
+            max-height: 300px;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+
+        .diary-container::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .diary-container::-webkit-scrollbar-thumb {
+            background: #fad0c4;
+            border-radius: 10px;
+        }
+
+        .diary-entry {
+            background: #fff;
+            border: 1px solid #ffe3e6;
+            border-radius: 16px;
+            padding: 15px;
+            margin-bottom: 12px;
+            position: relative;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+        }
+
+        .diary-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 10px;
+            border-bottom: 1px dashed #ffe3e6;
+            padding-bottom: 6px;
+        }
+
+        .diary-author {
+            font-weight: bold;
+            font-size: 14px;
+            color: #d81b60;
+        }
+
+        .diary-date {
+            font-size: 10px;
+            color: #999;
+            margin-right: 20px;
+        }
+
+        .diary-content {
+            font-size: 13px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-break: break-word;
+            color: #444;
+        }
+
+        .btn-delete-diary {
+            background: none;
+            border: none;
+            color: #ccc;
+            font-size: 12px;
+            cursor: pointer;
+            padding: 4px;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+
+        /* 💬 返信用のデザイン */
+        .reply-list {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px dashed #eee;
+        }
+
+        .reply-entry {
+            background: #fdfdfd;
+            border-radius: 10px;
+            padding: 10px;
+            margin-bottom: 6px;
+            font-size: 12px;
+            position: relative;
+            border-left: 3px solid #ff9a9e;
+        }
+
+        .reply-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 4px;
+        }
+
+        .reply-author {
+            font-weight: bold;
+            color: #e6683c;
+        }
+
+        .reply-date {
+            font-size: 9px;
+            color: #999;
+            margin-right: 15px;
+        }
+
+        .btn-reply {
+            background: #ffe3e6;
+            color: #d81b60;
+            border: none;
+            border-radius: 8px;
+            padding: 6px 12px;
+            font-size: 10px;
+            cursor: pointer;
+            margin-top: 5px;
+            font-weight: bold;
+        }
+
+        .btn-delete-reply {
+            background: none;
+            border: none;
+            color: #ccc;
+            font-size: 10px;
+            cursor: pointer;
+            padding: 2px;
+            position: absolute;
+            top: 5px;
+            right: 5px;
+        }
+
+        /* ⏳ ボタンが押せない時（保存中）のデザイン */
+        .btn-save:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        /* ハートのカウントダウンと愛のボタン */
+        .countdown-container {
+            background: linear-gradient(135deg, #fff5f7 0%, #ffe3e6 100%);
+            border-radius: 20px;
+            padding: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+            border: 2px solid #fff;
+            box-shadow: 0 4px 15px rgba(255, 182, 193, 0.3);
+        }
+
+        .countdown-item {
+            margin: 5px 0;
+            font-size: 14px;
+            color: #d81b60;
+        }
+
+        .countdown-number {
+            font-size: 20px;
+            font-weight: bold;
+            margin: 0 4px;
+        }
+
+        /* 🤍 スタイリッシュなすりガラス風カプセルボタン */
+        .love-float-btn {
+            position: fixed;
+            bottom: 25px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.85);
+            /* 半透明の白 */
+            backdrop-filter: blur(8px);
+            /* 背景をぼかす（すりガラス効果） */
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 182, 193, 0.4);
+            border-radius: 30px;
+            /* 横長のカプセル型 */
+            padding: 10px 18px;
+            display: flex;
+            flex-direction: row;
+            /* 縦積みではなく横並びにする */
+            align-items: center;
+            gap: 6px;
+            /* アイコンと数字の隙間 */
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+            /* 影をふんわり薄く */
+            cursor: pointer;
+            z-index: 1000;
+            transition: transform 0.1s;
+        }
+
+        .love-float-btn:active {
+            transform: scale(0.92);
+        }
+
+        .love-icon {
+            font-size: 18px;
+            line-height: 1;
+        }
+
+        .love-count-badge {
+            font-size: 14px;
+            font-weight: bold;
+            color: #d81b60;
+            /* 数字の色はアクセントで残す */
+            background: transparent;
+            padding: 0;
+        }
+
+        /* ハートが飛ぶアニメーション */
+        @keyframes floatUp {
+            0% {
+                transform: translateY(0) scale(1);
+                opacity: 1;
+            }
+
+            100% {
+                transform: translateY(-100px) scale(1.5);
+                opacity: 0;
+            }
+        }
+
+        .flying-heart {
+            position: fixed;
+            pointer-events: none;
+            font-size: 24px;
+            z-index: 999;
+            animation: floatUp 1s ease-out forwards;
+        }
+
+        .love-float-btn {
+            /* 既存のスタイルはそのままで、以下を追加 */
+            touch-action: manipulation;
+        }
+
+        /* ✨ ボタンキラキラエフェクト */
+        .btn-round {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-round::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.4s ease, height 0.4s ease, opacity 0.4s ease;
+            opacity: 0;
+        }
+
+        .btn-round:active::after {
+            width: 80px;
+            height: 80px;
+            opacity: 0;
+            transition: 0s;
+        }
+
+        .btn-save {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-save::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.4s ease, height 0.4s ease, opacity 0.4s ease;
+            opacity: 0;
+        }
+
+        .btn-save:active::after {
+            width: 200px;
+            height: 200px;
+            opacity: 0;
+            transition: 0s;
+        }
+
+        input[type="date"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            box-sizing: border-box;
+            font-size: 16px;
+            appearance: none;
+            -webkit-appearance: none;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes fall {
+            to {
+                transform: translateY(110vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+        #annivTitleInput,
+        #annivDateInput,
+        #annivTypeInput {
+            font-size: 16px !important;
+        }
+
+        /* ========================================================
+           📅 カレンダー v2  (TimeTree風アップグレード)
+           ======================================================== */
+        .cal-card.cal-fs {
+            position: fixed;
+            inset: 0;
+            z-index: 1200;
+            margin: 0;
+            width: 100%;
+            max-width: none;
+            border-radius: 0;
+            padding: 14px 12px calc(90px + env(safe-area-inset-bottom));
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            background: linear-gradient(180deg, #fff7f8, #fffdfc 40%);
+            backdrop-filter: none;
+            border: none;
+        }
+
+        .cal-card.cal-fs .card-header-actions {
+            position: sticky;
+            top: -14px;
+            z-index: 6;
+            margin: -14px -12px 10px;
+            padding: 14px 12px 10px;
+            background: linear-gradient(180deg, #fff7f8 70%, rgba(255, 247, 248, 0));
+        }
+
+        body.cal-locked {
+            overflow: hidden;
+        }
+
+        .cal-head-tools {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+
+        .cal-icon-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: none;
+            background: #fff5f7;
+            color: #d81b60;
+            font-size: 14px;
+            line-height: 1;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(255, 154, 158, .25);
+            transition: transform .15s ease, background .15s ease;
+        }
+
+        .cal-icon-btn:active {
+            transform: scale(.9);
+        }
+
+        .cal-icon-btn.on {
+            background: linear-gradient(135deg, #ff9a9e, #fecfef);
+            color: #fff;
+        }
+
+        /* --- ツールバー --- */
+        .cal-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
+        .cal-nav {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+        }
+
+        .cal-nav button {
+            width: 28px;
+            height: 28px;
+            border: none;
+            border-radius: 10px;
+            background: #fff5f7;
+            color: #d81b60;
+            font-size: 15px;
+            cursor: pointer;
+        }
+
+        .cal-nav button:active {
+            background: #ffe3e6;
+        }
+
+        .cal-title {
+            font-weight: 800;
+            font-size: 16px;
+            color: #4a3b40;
+            letter-spacing: .5px;
+            min-width: 96px;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        .cal-title small {
+            display: block;
+            font-size: 9px;
+            font-weight: 600;
+            color: #b98b96;
+            letter-spacing: 1px;
+        }
+
+        .cal-today-btn {
+            border: none;
+            background: linear-gradient(135deg, #ff9a9e, #fecfef);
+            color: #fff;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 6px 12px;
+            border-radius: 999px;
+            cursor: pointer;
+            box-shadow: 0 3px 8px rgba(255, 154, 158, .35);
+        }
+
+        /* --- ビュー切替（セグメント） --- */
+        .cal-seg {
+            display: flex;
+            background: #fdeef1;
+            border-radius: 999px;
+            padding: 3px;
+            gap: 2px;
+        }
+
+        .cal-seg button {
+            border: none;
+            background: transparent;
+            color: #b07f8b;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 5px 10px;
+            border-radius: 999px;
+            cursor: pointer;
+            transition: all .18s ease;
+        }
+
+        .cal-seg button.on {
+            background: #fff;
+            color: #d81b60;
+            box-shadow: 0 2px 6px rgba(216, 27, 96, .15);
+        }
+
+        /* --- 検索 / フィルタ --- */
+        .cal-searchbar {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: #fff;
+            border-radius: 12px;
+            padding: 8px 12px;
+            margin-bottom: 8px;
+            box-shadow: 0 2px 10px rgba(255, 154, 158, .18);
+        }
+
+        .cal-searchbar input {
+            flex: 1;
+            border: none;
+            outline: none;
+            font-size: 16px;
+            background: transparent;
+        }
+
+        .cal-chips {
+            display: flex;
+            gap: 6px;
+            overflow-x: auto;
+            padding-bottom: 6px;
+            margin-bottom: 4px;
+            scrollbar-width: none;
+        }
+
+        .cal-chips::-webkit-scrollbar {
+            display: none;
+        }
+
+        .cal-chip {
+            flex: 0 0 auto;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            border: 1px solid #f2dfe4;
+            background: #fff;
+            color: #8a707a;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 5px 11px;
+            border-radius: 999px;
+            cursor: pointer;
+        }
+
+        .cal-chip .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .cal-chip.on {
+            background: #4a3b40;
+            border-color: #4a3b40;
+            color: #fff;
+        }
+
+        /* --- 次の予定バナー --- */
+        .cal-next {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: linear-gradient(135deg, #fff5f7, #ffeef4);
+            border: 1px solid #ffe0e8;
+            border-radius: 16px;
+            padding: 9px 12px;
+            margin-bottom: 10px;
+            cursor: pointer;
+        }
+
+        .cal-next .cd {
+            flex: 0 0 auto;
+            text-align: center;
+            background: #fff;
+            border-radius: 12px;
+            padding: 5px 9px;
+            box-shadow: 0 2px 6px rgba(255, 154, 158, .25);
+        }
+
+        .cal-next .cd b {
+            display: block;
+            font-size: 18px;
+            color: #d81b60;
+            line-height: 1.1;
+        }
+
+        .cal-next .cd span {
+            font-size: 9px;
+            color: #b98b96;
+        }
+
+        .cal-next .tx {
+            min-width: 0;
+            flex: 1;
+        }
+
+        .cal-next .tx b {
+            display: block;
+            font-size: 13px;
+            color: #4a3b40;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .cal-next .tx span {
+            font-size: 11px;
+            color: #a58b93;
+        }
+
+        /* --- 月ビュー --- */
+        .cal-dow {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            margin-bottom: 2px;
+        }
+
+        .cal-dow div {
+            text-align: center;
+            font-size: 10px;
+            font-weight: 700;
+            color: #aa9;
+            letter-spacing: .5px;
+        }
+
+        .cal-dow div.sun {
+            color: #e57373;
+        }
+
+        .cal-dow div.sat {
+            color: #6495ed;
+        }
+
+        .cal-month {
+            border-top: 1px solid #f6e6ea;
+            touch-action: pan-y;
+        }
+
+        .cal-week {
+            border-bottom: 1px solid #f6e6ea;
+            padding-bottom: 3px;
+        }
+
+        .cal-week-nums {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+        }
+
+        .cal-daycell {
+            text-align: center;
+            padding: 4px 0 1px;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .cal-daynum {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 22px;
+            height: 22px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #4a3b40;
+        }
+
+        .cal-daycell.sun .cal-daynum,
+        .cal-daycell.hol .cal-daynum {
+            color: #e57373;
+        }
+
+        .cal-daycell.sat .cal-daynum {
+            color: #6495ed;
+        }
+
+        .cal-daycell.out {
+            opacity: .3;
+        }
+
+        .cal-daycell.today .cal-daynum {
+            background: linear-gradient(135deg, #ff9a9e, #fb8fa4);
+            color: #fff;
+            box-shadow: 0 2px 6px rgba(251, 143, 164, .5);
+        }
+
+        .cal-daycell.sel {
+            background: rgba(255, 154, 158, .13);
+            border-radius: 10px;
+        }
+
+        .cal-daycell.sel .cal-daynum {
+            outline: 2px solid #ff9a9e;
+            outline-offset: 1px;
+        }
+
+        .cal-holname {
+            font-size: 8px;
+            color: #e57373;
+            line-height: 1.1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            padding: 0 2px;
+        }
+
+        .cal-lanes {
+            position: relative;
+            margin-top: 1px;
+        }
+
+        .cal-chipev {
+            position: absolute;
+            height: 15px;
+            line-height: 15px;
+            font-size: 9px;
+            font-weight: 700;
+            color: #fff;
+            padding: 0 4px;
+            border-radius: 5px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            cursor: pointer;
+            box-sizing: border-box;
+        }
+
+        .cal-chipev.timed {
+            background: transparent !important;
+            color: #5a4850;
+            padding-left: 2px;
+        }
+
+        .cal-chipev.timed .tdot {
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            margin-right: 3px;
+            vertical-align: middle;
+        }
+
+        .cal-more {
+            position: absolute;
+            height: 13px;
+            line-height: 13px;
+            font-size: 9px;
+            font-weight: 700;
+            color: #b07f8b;
+            cursor: pointer;
+            padding-left: 4px;
+        }
+
+        /* --- 選択日パネル --- */
+        .cal-daypanel {
+            margin-top: 12px;
+            border-top: 1px dashed #ffdde4;
+            padding-top: 12px;
+        }
+
+        .cal-daypanel-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .cal-daypanel-head b {
+            font-size: 13px;
+            color: #d81b60;
+        }
+
+        .cal-daypanel-head span {
+            font-size: 10px;
+            color: #b98b96;
+            font-weight: 600;
+        }
+
+        .cal-ev {
+            display: flex;
+            gap: 9px;
+            align-items: stretch;
+            background: #fff;
+            border-radius: 14px;
+            padding: 10px 12px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(180, 130, 145, .12);
+        }
+
+        .cal-ev .bar {
+            flex: 0 0 4px;
+            border-radius: 4px;
+        }
+
+        .cal-ev .time {
+            flex: 0 0 44px;
+            font-size: 10px;
+            font-weight: 700;
+            color: #a58b93;
+            line-height: 1.35;
+            padding-top: 1px;
+        }
+
+        .cal-ev .body {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .cal-ev .body b {
+            display: block;
+            font-size: 13px;
+            color: #4a3b40;
+            word-break: break-word;
+        }
+
+        .cal-ev .body .meta {
+            font-size: 10.5px;
+            color: #a58b93;
+            margin-top: 3px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .cal-empty {
+            text-align: center;
+            font-size: 12px;
+            color: #c3aeb4;
+            padding: 18px 0;
+        }
+
+        /* --- 週ビュー --- */
+        .cal-wk-head {
+            display: grid;
+            grid-template-columns: 38px repeat(7, 1fr);
+            border-bottom: 1px solid #f6e6ea;
+        }
+
+        .cal-wk-head .h {
+            text-align: center;
+            padding: 4px 0 6px;
+            cursor: pointer;
+        }
+
+        .cal-wk-head .h small {
+            display: block;
+            font-size: 9px;
+            color: #aa9;
+            font-weight: 700;
+        }
+
+        .cal-wk-head .h b {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            font-size: 12px;
+            color: #4a3b40;
+        }
+
+        .cal-wk-head .h.today b {
+            background: linear-gradient(135deg, #ff9a9e, #fb8fa4);
+            color: #fff;
+        }
+
+        .cal-wk-head .h.sun b,
+        .cal-wk-head .h.hol b {
+            color: #e57373;
+        }
+
+        .cal-wk-head .h.sat b {
+            color: #6495ed;
+        }
+
+        .cal-wk-allday {
+            display: grid;
+            grid-template-columns: 38px 1fr;
+            border-bottom: 1px solid #f6e6ea;
+        }
+
+        .cal-wk-allday .lbl {
+            font-size: 8px;
+            color: #bbaaae;
+            text-align: right;
+            padding: 3px 4px 0 0;
+        }
+
+        .cal-wk-scroll {
+            display: grid;
+            grid-template-columns: 38px 1fr;
+            max-height: 58vh;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .cal-card.cal-fs .cal-wk-scroll {
+            max-height: 66vh;
+        }
+
+        .cal-wk-hours .hr {
+            height: 44px;
+            font-size: 9px;
+            color: #bbaaae;
+            text-align: right;
+            padding-right: 4px;
+            transform: translateY(-5px);
+        }
+
+        .cal-wk-cols {
+            position: relative;
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            background-image: repeating-linear-gradient(to bottom, #f6e6ea 0, #f6e6ea 1px, transparent 1px, transparent 44px);
+        }
+
+        .cal-wk-col {
+            position: relative;
+            border-left: 1px solid #faf0f2;
+            cursor: pointer;
+        }
+
+        .cal-wk-ev {
+            position: absolute;
+            border-radius: 6px;
+            padding: 2px 4px;
+            font-size: 9px;
+            font-weight: 700;
+            color: #fff;
+            overflow: hidden;
+            cursor: pointer;
+            box-sizing: border-box;
+            line-height: 1.2;
+        }
+
+        .cal-now-line {
+            position: absolute;
+            left: 0;
+            right: 0;
+            height: 0;
+            border-top: 2px solid #ff4d6d;
+            z-index: 4;
+            pointer-events: none;
+        }
+
+        .cal-now-line::before {
+            content: '';
+            position: absolute;
+            left: -3px;
+            top: -4px;
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #ff4d6d;
+        }
+
+        /* --- リストビュー --- */
+        .cal-list-day {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .cal-list-date {
+            flex: 0 0 40px;
+            text-align: center;
+        }
+
+        .cal-list-date b {
+            display: block;
+            font-size: 18px;
+            color: #4a3b40;
+            line-height: 1.3;
+        }
+
+        .cal-list-date small {
+            font-size: 9px;
+            color: #aa9;
+            font-weight: 700;
+        }
+
+        .cal-list-date.today b {
+            color: #fff;
+            background: linear-gradient(135deg, #ff9a9e, #fb8fa4);
+            border-radius: 999px;
+        }
+
+        .cal-list-date.sun b,
+        .cal-list-date.hol b {
+            color: #e57373;
+        }
+
+        .cal-list-date.sat b {
+            color: #6495ed;
+        }
+
+        .cal-list-items {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .cal-mon-sep {
+            font-size: 11px;
+            font-weight: 800;
+            color: #d81b60;
+            letter-spacing: 1px;
+            margin: 14px 0 10px;
+            padding-bottom: 4px;
+            border-bottom: 1px solid #ffe0e8;
+        }
+
+        /* --- ボトムシート --- */
+        .cal-sheet {
+            position: fixed;
+            inset: 0;
+            z-index: 1400;
+            display: none;
+        }
+
+        .cal-sheet.active {
+            display: block;
+        }
+
+        .cal-sheet-bg {
+            position: absolute;
+            inset: 0;
+            background: rgba(60, 30, 40, .45);
+            animation: fadeIn .2s ease;
+        }
+
+        .cal-sheet-panel {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            max-height: 88vh;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            background: #fff;
+            border-radius: 26px 26px 0 0;
+            padding: 10px 20px calc(24px + env(safe-area-inset-bottom));
+            animation: sheetUp .28s cubic-bezier(.2, .9, .3, 1);
+            box-shadow: 0 -10px 40px rgba(0, 0, 0, .2);
+        }
+
+        @keyframes sheetUp {
+            from {
+                transform: translateY(100%);
+            }
+
+            to {
+                transform: translateY(0);
+            }
+        }
+
+        .cal-sheet-grip {
+            width: 38px;
+            height: 4px;
+            border-radius: 4px;
+            background: #eddde2;
+            margin: 0 auto 14px;
+        }
+
+        .cal-detail-title {
+            font-size: 19px;
+            font-weight: 800;
+            color: #3d2f34;
+            line-height: 1.35;
+            word-break: break-word;
+        }
+
+        .cal-detail-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 10px;
+            font-weight: 700;
+            color: #fff;
+            padding: 3px 10px;
+            border-radius: 999px;
+            margin-bottom: 8px;
+        }
+
+        .cal-row {
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+            font-size: 13px;
+            color: #5a4850;
+            padding: 9px 0;
+            border-bottom: 1px solid #f7eef1;
+            word-break: break-word;
+        }
+
+        .cal-row .ic {
+            flex: 0 0 18px;
+            text-align: center;
+            opacity: .8;
+        }
+
+        .cal-row a {
+            color: #d81b60;
+        }
+
+        .cal-cd-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #ff9a9e, #fecfef);
+            color: #fff;
+            font-size: 11px;
+            font-weight: 800;
+            padding: 4px 12px;
+            border-radius: 999px;
+            margin-left: 8px;
+            vertical-align: middle;
+        }
+
+        .cal-sheet-actions {
+            display: flex;
+            gap: 8px;
+            margin: 14px 0 4px;
+        }
+
+        .cal-sheet-actions button {
+            flex: 1;
+            border: none;
+            border-radius: 14px;
+            padding: 12px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .cal-btn-main {
+            background: linear-gradient(135deg, #ff9a9e, #fecfef);
+            color: #fff;
+        }
+
+        .cal-btn-danger {
+            background: #ffeef0;
+            color: #e5455f;
+        }
+
+        /* --- コメント --- */
+        .cal-cmt {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
+        .cal-cmt .av {
+            flex: 0 0 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #ff9a9e, #fecfef);
+            color: #fff;
+            font-size: 12px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .cal-cmt .bub {
+            background: #fff5f7;
+            border-radius: 4px 14px 14px 14px;
+            padding: 8px 12px;
+            font-size: 12.5px;
+            color: #4a3b40;
+            word-break: break-word;
+            min-width: 0;
+        }
+
+        .cal-cmt .who {
+            font-size: 9.5px;
+            color: #b98b96;
+            font-weight: 700;
+            margin-bottom: 2px;
+        }
+
+        .cal-cmt-input {
+            display: flex;
+            gap: 6px;
+            margin-top: 6px;
+        }
+
+        .cal-cmt-input input {
+            flex: 1;
+            border: 1px solid #f2dfe4;
+            border-radius: 999px;
+            padding: 10px 14px;
+            font-size: 16px;
+            outline: none;
+        }
+
+        .cal-cmt-input button {
+            border: none;
+            border-radius: 999px;
+            padding: 0 16px;
+            background: linear-gradient(135deg, #ff9a9e, #fecfef);
+            color: #fff;
+            font-weight: 700;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        /* --- 予定フォーム --- */
+        .cal-form-labels {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 9px;
+        }
+
+        .cal-form-labels .sw {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 3px solid transparent;
+            transition: transform .15s ease;
+            box-sizing: border-box;
+        }
+
+        .cal-form-labels .sw.on {
+            border-color: #4a3b40;
+            transform: scale(1.12);
+        }
+
+        .cal-switch {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 13px;
+            color: #5a4850;
+            margin-bottom: 14px;
+        }
+
+        .cal-switch input {
+            width: 44px;
+            height: 26px;
+            appearance: none;
+            -webkit-appearance: none;
+            background: #eee;
+            border-radius: 999px;
+            position: relative;
+            outline: none;
+            cursor: pointer;
+            transition: background .2s ease;
+            flex: 0 0 44px;
+            margin: 0;
+        }
+
+        .cal-switch input::after {
+            content: '';
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #fff;
+            transition: transform .2s ease;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, .2);
+        }
+
+        .cal-switch input:checked {
+            background: linear-gradient(135deg, #ff9a9e, #fb8fa4);
+        }
+
+        .cal-switch input:checked::after {
+            transform: translateX(18px);
+        }
+
+        .cal-time-row {
+            display: flex;
+            gap: 8px;
+        }
+
+        .cal-time-row>div {
+            flex: 1;
+            min-width: 0;
+        }
+
+        #eventModal select,
+        #eventModal input[type="time"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            box-sizing: border-box;
+            font-size: 16px;
+            background: #fff;
+            appearance: none;
+            -webkit-appearance: none;
+        }
+
+        /* 全画面カレンダー(1200)・詳細シート(1400)より上に出す */
+        #eventModal {
+            z-index: 1600;
+        }
+
+        #eventModal .modal-content {
+            max-height: 88vh;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .cal-quick {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-bottom: 14px;
+        }
+
+        .cal-quick button {
+            border: 1px solid #f2dfe4;
+            background: #fff;
+            color: #8a707a;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 6px 10px;
+            border-radius: 999px;
+            cursor: pointer;
+        }
+
+        .cal-fab {
+            position: fixed;
+            right: 18px;
+            bottom: calc(22px + env(safe-area-inset-bottom));
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(135deg, #ff9a9e, #fb8fa4);
+            color: #fff;
+            font-size: 28px;
+            line-height: 1;
+            cursor: pointer;
+            box-shadow: 0 8px 22px rgba(251, 143, 164, .5);
+            z-index: 1250;
+            display: none;
+        }
+
+        .cal-fab.show {
+            display: block;
+        }
+
+        /* ---- ラベル編集への導線 ---- */
+        .cal-chip-edit {
+            border-style: dashed;
+            color: #b07f8b;
+        }
+
+        .cal-form-labels .sw-edit {
+            background: #fff5f7;
+            border: 2px dashed #f0cdd6;
+            color: #d81b60;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* ---- 日別シート ---- */
+        .cal-daysheet-head {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 14px;
+        }
+
+        .cal-daysheet-head .nav {
+            flex: 0 0 34px;
+            height: 34px;
+            border: none;
+            border-radius: 12px;
+            background: #fff5f7;
+            color: #d81b60;
+            font-size: 17px;
+            cursor: pointer;
+        }
+
+        .cal-daysheet-head .nav:active {
+            background: #ffe3e6;
+        }
+
+        .cal-daysheet-head .ttl {
+            flex: 1;
+            text-align: center;
+            min-width: 0;
+        }
+
+        .cal-daysheet-head .ttl b {
+            display: block;
+            font-size: 17px;
+            font-weight: 800;
+            color: #3d2f34;
+        }
+
+        .cal-daysheet-head .ttl b.sun {
+            color: #e57373;
+        }
+
+        .cal-daysheet-head .ttl b.sat {
+            color: #6495ed;
+        }
+
+        .cal-daysheet-head .ttl small {
+            font-size: 10.5px;
+            color: #b98b96;
+            font-weight: 700;
+        }
+
+        .cal-daysheet-note {
+            font-size: 10.5px;
+            color: #b98b96;
+            background: #fff5f7;
+            border-radius: 10px;
+            padding: 7px 10px;
+            margin-bottom: 10px;
+        }
+
+        .cal-daysheet-add {
+            width: 100%;
+            border: 1px dashed #ffc9d4;
+            background: #fff;
+            color: #d81b60;
+            font-weight: 700;
+            font-size: 13px;
+            padding: 13px;
+            border-radius: 14px;
+            cursor: pointer;
+            margin-top: 4px;
+        }
+
+        .cal-sheet-back {
+            font-size: 12px;
+            font-weight: 700;
+            color: #d81b60;
+            margin-bottom: 10px;
+            cursor: pointer;
+        }
+
+        /* ---- ラベル編集モーダル ---- */
+        #labelModal {
+            z-index: 1700;
+        }
+
+        #labelModal .modal-content {
+            max-height: 88vh;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .cal-lbl-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            padding: 7px 0;
+            border-bottom: 1px solid #f7eef1;
+        }
+
+        .cal-lbl-color {
+            flex: 0 0 30px;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: 2px solid #fff;
+            box-shadow: 0 0 0 1px #eddde2;
+            cursor: pointer;
+            color: #fff;
+            font-size: 14px;
+            line-height: 1;
+            padding: 0;
+        }
+
+        .cal-lbl-name {
+            flex: 1;
+            min-width: 0;
+            border: 1px solid #f2dfe4;
+            border-radius: 10px;
+            padding: 9px 11px;
+            font-size: 16px;
+            outline: none;
+            background: #fff;
+            box-sizing: border-box;
+        }
+
+        .cal-lbl-name:focus {
+            border-color: #ff9a9e;
+        }
+
+        .cal-lbl-count {
+            flex: 0 0 auto;
+            font-size: 10px;
+            color: #c3aeb4;
+            font-weight: 700;
+            min-width: 26px;
+            text-align: right;
+        }
+
+        .cal-lbl-del {
+            flex: 0 0 30px;
+            width: 30px;
+            height: 30px;
+            border: none;
+            border-radius: 10px;
+            background: #fff5f7;
+            font-size: 12px;
+            cursor: pointer;
+            padding: 0;
+        }
+
+        .cal-lbl-del:disabled {
+            opacity: .3;
+            cursor: default;
+        }
+
+        .cal-lbl-palette {
+            flex: 1 0 100%;
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 8px;
+            background: #fff8fa;
+            border-radius: 12px;
+            padding: 10px;
+            margin-top: 6px;
+        }
+
+        .cal-lbl-palette .sw {
+            width: 100%;
+            aspect-ratio: 1;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 3px solid transparent;
+            box-sizing: border-box;
+        }
+
+        .cal-lbl-palette .sw.on {
+            border-color: #4a3b40;
+        }
+
+        #labelAddBtn {
+            width: 100%;
+            border: 1px dashed #ffc9d4;
+            background: #fff;
+            color: #d81b60;
+            font-weight: 700;
+            font-size: 12px;
+            padding: 11px;
+            border-radius: 14px;
+            cursor: pointer;
+            margin: 12px 0;
+        }
+
+        .cal-lbl-hint {
+            font-size: 10.5px;
+            color: #b98b96;
+            line-height: 1.6;
+            margin-bottom: 12px;
+        }
+
+        /* ---- メンバー（誰の予定か） ---- */
+        .cal-av {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            font-size: 9px;
+            line-height: 1;
+            vertical-align: middle;
+            box-shadow: 0 0 0 1.5px #fff;
+        }
+
+        .cal-avs {
+            display: inline-flex;
+            gap: 3px;
+            margin-left: 6px;
+            vertical-align: middle;
+        }
+
+        .cal-chips-member .cal-chip {
+            padding-left: 6px;
+        }
+
+        .cal-chips-member .cal-chip.on .cal-av {
+            box-shadow: 0 0 0 1.5px #4a3b40;
+        }
+
+        .cal-who {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .cal-who-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 11.5px;
+            font-weight: 700;
+            padding: 4px 10px 4px 5px;
+            border-radius: 999px;
+        }
+
+        /* 予定フォームのメンバー選択 */
+        .cal-mpicks {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .cal-mpick {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            font-weight: 700;
+            color: #6b5a60;
+            background: #fff;
+            border: 2px solid #f0dfe4;
+            border-radius: 999px;
+            padding: 6px 12px 6px 6px;
+            cursor: pointer;
+            transition: all .15s ease;
+        }
+
+        .cal-mpick.on {
+            color: #fff;
+        }
+
+        .cal-mpick.edit {
+            color: #b07f8b;
+            border-style: dashed;
+            padding: 6px 12px;
+        }
+
+        .cal-me-btn {
+            flex: 0 0 auto;
+            border: 1px solid #f0dfe4;
+            background: #fff;
+            color: #b07f8b;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 6px 9px;
+            border-radius: 999px;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .cal-me-btn.on {
+            background: #4a3b40;
+            border-color: #4a3b40;
+            color: #fff;
+        }
+
+        .cal-emoji-palette {
+            flex: 1 0 100%;
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            gap: 6px;
+            background: #fff8fa;
+            border-radius: 12px;
+            padding: 10px;
+            margin-top: 6px;
+        }
+
+        .cal-emoji-palette .em {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            border-radius: 10px;
+            cursor: pointer;
+            background: #fff;
+            border: 2px solid transparent;
+        }
+
+        .cal-emoji-palette .em.on {
+            border-color: #4a3b40;
+        }
+
+        /* ---- くり返しの詳細 ---- */
+        .cal-repeat-detail {
+            background: #fff8fa;
+            border-radius: 14px;
+            padding: 12px;
+            margin: -6px 0 16px;
+        }
+
+        .cal-dows {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+        }
+
+        .cal-dowpick {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 34px;
+            border-radius: 10px;
+            background: #fff;
+            border: 1.5px solid #f0dfe4;
+            font-size: 12px;
+            font-weight: 700;
+            color: #7a666d;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .cal-dowpick.sun {
+            color: #e57373;
+        }
+
+        .cal-dowpick.sat {
+            color: #6495ed;
+        }
+
+        .cal-dowpick.on {
+            background: linear-gradient(135deg, #ff9a9e, #fb8fa4);
+            border-color: #fb8fa4;
+            color: #fff;
+        }
+
+        .cal-monthly-hint {
+            font-size: 10.5px;
+            color: #b98b96;
+            margin-top: 6px;
+            line-height: 1.6;
+        }
+
+        /* ---- 予定の写真 ---- */
+        .cal-sec-head {
+            margin-top: 18px;
+            font-size: 12px;
+            font-weight: 800;
+            color: #d81b60;
+        }
+
+        .cal-ev-gallery {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+            margin-top: 10px;
+        }
+
+        .cal-ev-gallery img {
+            width: 100%;
+            aspect-ratio: 1;
+            object-fit: cover;
+            border-radius: 12px;
+            cursor: pointer;
+            background: #f7eef1;
+        }
+
+        .cal-photo-empty {
+            font-size: 11.5px;
+            color: #c3aeb4;
+            margin-top: 8px;
+        }
+
+        .cal-photo-tools {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+
+        .cal-photo-add {
+            flex: 1;
+            min-width: 140px;
+            text-align: center;
+            border: 1px dashed #ffc9d4;
+            background: #fff;
+            color: #d81b60;
+            font-weight: 700;
+            font-size: 12.5px;
+            padding: 11px;
+            border-radius: 14px;
+            cursor: pointer;
+        }
+
+        .cal-photo-share {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            color: #8a707a;
+            cursor: pointer;
+        }
+
+        .cal-photo-share input {
+            width: 16px;
+            height: 16px;
+            accent-color: #fb8fa4;
+        }
+
+        /* 一覧に出す写真の帯 */
+        .cal-ev-photos {
+            display: flex;
+            gap: 4px;
+            margin-top: 6px;
+        }
+
+        .cal-ev-photos img {
+            width: 40px;
+            height: 40px;
+            object-fit: cover;
+            border-radius: 8px;
+            background: #f7eef1;
+        }
+
+        /* 予定写真のビューア */
+        .cal-photo-viewer {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, .92);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1800;
+        }
+
+        .cal-photo-viewer img {
+            max-width: 92%;
+            max-height: 82%;
+            border-radius: 14px;
+        }
+
+        .cal-pv-top {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: calc(14px + env(safe-area-inset-top)) 16px 14px;
+            color: #fff;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .cal-pv-top button {
+            background: rgba(255, 255, 255, .95);
+            border: none;
+            padding: 9px 12px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 700;
+            margin-left: 8px;
+            cursor: pointer;
+        }
+
+        .cal-pv-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 42px;
+            height: 42px;
+            border: none;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, .85);
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .cal-pv-nav.left {
+            left: 14px;
+        }
+
+        .cal-pv-nav.right {
+            right: 14px;
+        }
+
+        /* ---- ギャラリーのボタン ---- */
+        .gallery-main-btn {
+            padding: 10px 24px;
+            background: linear-gradient(135deg, #ff9a9e, #fecfef);
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .gallery-sub-btn {
+            display: block;
+            margin: 8px auto 0;
+            padding: 9px 20px;
+            background: #fff5f7;
+            color: #d81b60;
+            border: 1px solid #ffdde4;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        /* 読み込み中も高さが崩れないようにする */
+        .gallery-grid img {
+            background: #f7eef1;
+        }
+
+        .slides img {
+            background: #f7eef1;
+        }
+
+/* ============================================================
+   ここから下は作り直しにともなって足したぶん。
+   見た目の方向性は変えず、足りない部品だけを補っています。
+   ============================================================ */
+
+:root {
+    --pink: #ff9a9e;
+    --pink-deep: #d81b60;
+    --pink-soft: #ffe3e6;
+    --pink-wash: #fff5f7;
+    --ink: #333;
+    --ink-soft: #8a7d80;
+    --ink-faint: #b9a9ad;
+    --danger: #e5455f;
+    --radius: 16px;
+}
+
+/* ---------- 支援技術のための読み上げ専用テキスト ---------- */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* ---------- キーボード操作が見えるように ---------- */
+:focus-visible {
+    outline: 3px solid #7c5cff;
+    outline-offset: 2px;
+    border-radius: 6px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.001ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+body.modal-open,
+body.in-game {
+    overflow: hidden;
+}
+
+#sakura {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* ---------- ヘッダー ---------- */
+header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.header-title {
+    flex: 1;
+    text-align: center;
+}
+
+.header-btn {
+    background: rgba(255, 255, 255, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    border-radius: 20px;
+    padding: 6px 12px;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    backdrop-filter: blur(4px);
+    min-height: 32px;
+}
+
+/* ---------- 空の状態 ---------- */
+.empty-state {
+    width: 100%;
+    text-align: center;
+    font-size: 12.5px;
+    line-height: 1.7;
+    color: var(--ink-faint);
+    padding: 26px 16px;
+}
+
+/* ---------- 新着バッジ ---------- */
+.new-badge {
+    font-size: 11px;
+    font-weight: 700;
+    color: #ff4d6d;
+    background: var(--pink-soft);
+    border: none;
+    padding: 3px 9px;
+    border-radius: 20px;
+    cursor: pointer;
+    vertical-align: middle;
+}
+
+/* ---------- トースト ---------- */
+.toast {
+    position: fixed;
+    left: 50%;
+    bottom: 30px;
+    transform: translate(-50%, 12px);
+    background: rgba(30, 20, 24, 0.92);
+    color: #fff;
+    padding: 11px 18px;
+    border-radius: 20px;
+    font-size: 13px;
+    max-width: min(90vw, 420px);
+    text-align: center;
+    z-index: 99999;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .2s ease, transform .2s ease;
+}
+
+.toast.show {
+    opacity: 1;
+    transform: translate(-50%, 0);
+}
+
+/* ---------- 確認ダイアログ ---------- */
+.dlg-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(40, 25, 30, 0.45);
+    backdrop-filter: blur(3px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    z-index: 100000;
+}
+
+.dlg-card {
+    background: #fff;
+    border-radius: 20px;
+    padding: 22px 20px 16px;
+    width: min(340px, 100%);
+    box-shadow: 0 18px 50px rgba(0, 0, 0, .25);
+}
+
+.dlg-msg {
+    margin: 0 0 18px;
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--ink);
+    white-space: pre-wrap;
+}
+
+.dlg-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+}
+
+.dlg-btn {
+    border: none;
+    border-radius: 12px;
+    padding: 10px 16px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    background: #f1edee;
+    color: #6b5d61;
+    min-height: 40px;
+}
+
+.dlg-btn.danger {
+    background: var(--danger);
+    color: #fff;
+}
+
+.dlg-btn.primary {
+    background: var(--pink);
+    color: #fff;
+}
+
+/* ---------- 汎用ボタン ---------- */
+.btn-wide {
+    width: 100%;
+    border: none;
+    border-radius: 14px;
+    padding: 13px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    background: #fff;
+    color: var(--pink-deep);
+    box-shadow: 0 3px 10px rgba(255, 154, 158, .2);
+    min-height: 46px;
+}
+
+.btn-wide.primary {
+    background: linear-gradient(135deg, #ff9a9e, #fecfef);
+    color: #fff;
+}
+
+.btn-wide.danger {
+    background: #ffeef0;
+    color: var(--danger);
+    box-shadow: none;
+    margin-bottom: 12px;
+}
+
+.btn-wide:disabled {
+    opacity: .55;
+    cursor: default;
+}
+
+.btn-chip {
+    border: none;
+    border-radius: 9px;
+    padding: 6px 10px;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    background: #eef3f8;
+    color: #45688f;
+    min-height: 30px;
+}
+
+.btn-chip.danger {
+    background: #ffeef0;
+    color: var(--danger);
+}
+
+.btn-chip.primary {
+    background: linear-gradient(135deg, #ff9a9e, #fecfef);
+    color: #fff;
+}
+
+.btn-chip.like {
+    background: var(--pink-soft);
+    color: var(--pink-deep);
+}
+
+.btn-chip.like.on {
+    background: var(--pink);
+    color: #fff;
+}
+
+.link-btn {
+    background: none;
+    border: none;
+    color: var(--pink);
+    font-size: 11.5px;
+    cursor: pointer;
+    text-decoration: underline;
+    padding: 4px;
+}
+
+.section-note {
+    font-size: 12.5px;
+    line-height: 1.8;
+    color: var(--ink-soft);
+    margin: 4px 0 12px;
+}
+
+.inline-label {
+    color: var(--pink-deep);
+    font-weight: 700;
+}
+
+/* ---------- 天気 ---------- */
+.weather-box {
+    text-align: center;
+    padding: 10px;
+}
+
+.weather-icon {
+    font-size: 58px;
+    line-height: 1.1;
+}
+
+.weather-label {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--pink-deep);
+    margin-top: 4px;
+}
+
+.weather-temp {
+    font-size: 30px;
+    font-weight: 800;
+    margin: 6px 0 12px;
+}
+
+.weather-sub {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    font-size: 12px;
+    color: var(--ink-soft);
+    margin-bottom: 14px;
+}
+
+.weather-advice {
+    background: linear-gradient(135deg, var(--pink-wash), var(--pink-soft));
+    border-radius: 14px;
+    padding: 12px;
+    font-size: 13px;
+    color: var(--pink-deep);
+    font-weight: 700;
+    margin: 0;
+}
+
+.weather-loc {
+    margin-top: 12px;
+    font-size: 11px;
+    color: var(--ink-faint);
+}
+
+/* ---------- ギャラリー ---------- */
+.gallery-btns {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.gallery-btns button {
+    flex: 1;
+}
+
+.gallery-foot {
+    grid-column: 1/-1;
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.gallery-foot button {
+    flex: 1;
+    margin-top: 0;
+}
+
+/* ---------- 写真ビューア ---------- */
+.photo-viewer-bg {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+}
+
+.photo-viewer img {
+    position: relative;
+    z-index: 2;
+}
+
+.photo-viewer-top {
+    position: absolute;
+    top: 18px;
+    right: 18px;
+    display: flex;
+    gap: 10px;
+    z-index: 3;
+}
+
+.photo-viewer-top button {
+    background: rgba(255, 255, 255, .95);
+    border: none;
+    padding: 10px 13px;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    min-height: 40px;
+}
+
+.photo-viewer-top button.danger {
+    color: #ff4d6d;
+}
+
+.photo-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255, 255, 255, .9);
+    border: none;
+    border-radius: 50%;
+    width: 44px;
+    height: 44px;
+    font-size: 20px;
+    cursor: pointer;
+    z-index: 3;
+}
+
+.photo-nav.left {
+    left: 16px;
+}
+
+.photo-nav.right {
+    right: 16px;
+}
+
+/* ---------- お店 ---------- */
+.shop-both {
+    background: linear-gradient(135deg, var(--pink-wash), var(--pink-soft));
+    border: 2px solid var(--pink);
+}
+
+.shop-both-tag {
+    text-align: center;
+    color: var(--pink-deep);
+    font-size: 10px;
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+.shop-card h3.shop-title {
+    margin: 0 0 4px;
+}
+
+.shop-card-actions {
+    display: flex;
+    gap: 5px;
+    margin-top: 8px;
+}
+
+.shop-card-actions button {
+    flex: 1;
+}
+
+/* ---------- メッセージ ---------- */
+.diary-actions {
+    text-align: right;
+    margin-top: 8px;
+}
+
+.diary-content {
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+/* ---------- ボイス ---------- */
+.voice-entry {
+    background: #fff;
+    border: 1px solid var(--pink-soft);
+    border-radius: var(--radius);
+    padding: 12px;
+    margin-bottom: 10px;
+}
+
+.voice-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    gap: 8px;
+}
+
+.voice-author {
+    font-weight: 700;
+    font-size: 13px;
+    color: var(--pink-deep);
+}
+
+.voice-meta {
+    font-size: 10.5px;
+    color: var(--ink-faint);
+}
+
+.voice-audio {
+    width: 100%;
+    border-radius: 8px;
+}
+
+.voice-delete {
+    width: 100%;
+    margin-top: 8px;
+}
+
+.record-box {
+    margin-top: 14px;
+    text-align: center;
+}
+
+.record-btn {
+    background: linear-gradient(135deg, #ff9a9e, #fecfef);
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    width: 64px;
+    height: 64px;
+    font-size: 28px;
+    cursor: pointer;
+    box-shadow: 0 6px 16px rgba(255, 154, 158, .4);
+}
+
+.record-btn.recording {
+    background: linear-gradient(135deg, #ff4d6d, #ff9a9e);
+    animation: pulse 1s infinite;
+}
+
+.record-status {
+    font-size: 12px;
+    color: var(--ink-soft);
+    margin-top: 8px;
+}
+
+.record-name {
+    padding: 12px 16px;
+    border: 1px solid var(--pink-soft);
+    border-radius: var(--radius);
+    font-size: 16px;
+    width: min(80%, 280px);
+    margin: 14px auto 0;
+    display: block;
+    outline: none;
+    background: #fff;
+}
+
+/* ---------- 地図 ---------- */
+.map-card {
+    text-align: center;
+}
+
+.map-card iframe {
+    width: 100%;
+    max-width: 500px;
+    height: 250px;
+    border: none;
+    border-radius: var(--radius);
+    display: block;
+    margin: 12px auto 0;
+}
+
+/* ---------- ゲーム ---------- */
+#gameScreen {
+    padding: 20px 15px 60px;
+    max-width: 600px;
+    margin: auto;
+    position: relative;
+    z-index: 1;
+}
+
+.game-home {
+    background: rgba(255, 255, 255, .85);
+    border: none;
+    border-radius: 50%;
+    width: 44px;
+    height: 44px;
+    font-size: 20px;
+    cursor: pointer;
+    margin-bottom: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, .1);
+}
+
+.game-waiting {
+    text-align: center;
+    padding: 30px 20px;
+}
+
+.game-waiting-icon {
+    font-size: 54px;
+    margin-bottom: 14px;
+    animation: pulse 1.5s infinite;
+}
+
+.game-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.game-word {
+    flex: 1;
+    background: linear-gradient(135deg, var(--pink-wash), var(--pink-soft));
+    border-radius: 14px;
+    padding: 8px 14px;
+    text-align: center;
+}
+
+.game-word strong {
+    display: block;
+    font-size: 22px;
+    color: var(--pink-deep);
+}
+
+.game-clock {
+    background: #fff;
+    border-radius: 14px;
+    padding: 8px 14px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, .08);
+}
+
+.game-clock strong {
+    display: block;
+    font-size: 20px;
+    color: var(--ink-soft);
+}
+
+.game-clock strong.hurry {
+    color: #ff4d6d;
+}
+
+.game-label {
+    font-size: 10px;
+    color: var(--ink-faint);
+}
+
+.game-canvas {
+    width: 100%;
+    height: 300px;
+    background: #fff;
+    border-radius: 14px;
+    border: 2px solid var(--pink-soft);
+    touch-action: none;
+    display: block;
+}
+
+.game-tools {
+    display: flex;
+    gap: 6px;
+    margin-top: 8px;
+}
+
+.game-tools button {
+    flex: 1;
+    min-height: 40px;
+}
+
+.game-tools input {
+    flex: 2;
+    padding: 10px 14px;
+    border: 1px solid #e6dcde;
+    border-radius: 12px;
+    font-size: 16px;
+    outline: none;
+}
+
+.guess-box {
+    margin-top: 10px;
+    background: var(--pink-wash);
+    border-radius: 10px;
+    padding: 10px;
+    font-size: 12.5px;
+    min-height: 44px;
+    max-height: 160px;
+    overflow-y: auto;
+}
+
+.guess-hint {
+    color: var(--ink-faint);
+    margin: 0;
+}
+
+.guess-line {
+    padding: 4px;
+    margin-top: 4px;
+    color: var(--ink-soft);
+}
+
+.guess-line.correct {
+    background: var(--pink-soft);
+    color: var(--pink-deep);
+    font-weight: 700;
+    border-radius: 6px;
+}
+
+.round-end {
+    position: fixed;
+    inset: 0;
+    background: rgba(100, 100, 120, .95);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 99999;
+    color: #fff;
+    text-align: center;
+    padding: 24px;
+}
+
+.round-end.win {
+    background: rgba(255, 107, 157, .95);
+}
+
+.round-end-icon {
+    font-size: 74px;
+}
+
+.round-end-title {
+    font-size: 32px;
+    margin: 16px 0 8px;
+}
+
+.round-end-word {
+    font-size: 20px;
+    font-weight: 700;
+    margin: 0;
+}
+
+.round-end-sub {
+    font-size: 13px;
+    opacity: .85;
+    margin: 8px 0 0;
+}
+
+.round-end-next {
+    margin-top: 26px;
+    background: #fff;
+    color: var(--pink-deep);
+    border: none;
+    border-radius: 30px;
+    padding: 14px 32px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.round-end-quit {
+    margin-top: 12px;
+    background: rgba(255, 255, 255, .2);
+    border: 1px solid #fff;
+    color: #fff;
+    border-radius: 20px;
+    padding: 9px 20px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+/* ---------- 記念日 ---------- */
+.anniv-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    background: rgba(255, 255, 255, .2);
+    border-radius: 14px;
+    padding: 8px 12px;
+    margin-bottom: 6px;
+}
+
+.anniv-row.today {
+    background: rgba(255, 255, 255, .42);
+}
+
+.anniv-main {
+    text-align: left;
+    min-width: 0;
+}
+
+.anniv-title {
+    font-size: 13px;
+    font-weight: 700;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.anniv-date {
+    font-size: 10px;
+    opacity: .9;
+}
+
+.anniv-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.anniv-count {
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.anniv-del {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, .75);
+    font-size: 12px;
+    cursor: pointer;
+    padding: 4px;
+}
+
+.anniv-add {
+    margin-top: 10px;
+    background: rgba(255, 255, 255, .3);
+    border: 1px solid rgba(255, 255, 255, .5);
+    color: #fff;
+    border-radius: 20px;
+    padding: 7px 14px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+/* ---------- お祝い ---------- */
+.celebration {
+    position: fixed;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255, 107, 157, .95), rgba(255, 154, 158, .95), rgba(254, 207, 239, .95));
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 99999;
+    color: #fff;
+    text-align: center;
+    padding: 24px;
+}
+
+.celebration-icon {
+    font-size: 92px;
+    margin-bottom: 18px;
+}
+
+.celebration-title {
+    font-size: 36px;
+    margin: 0;
+}
+
+.celebration-sub {
+    font-size: 20px;
+    font-weight: 700;
+    margin-top: 14px;
+}
+
+.celebration-close {
+    margin-top: 28px;
+    background: rgba(255, 255, 255, .3);
+    border: 2px solid #fff;
+    color: #fff;
+    border-radius: 30px;
+    padding: 12px 30px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.celebration-petal {
+    position: fixed;
+    top: -20px;
+    z-index: 100000;
+    pointer-events: none;
+    animation: fall linear forwards;
+}
+
+/* ---------- モーダルの細かい調整 ---------- */
+.modal-actions.spread {
+    justify-content: space-between;
+}
+
+.modal-actions-right {
+    display: flex;
+    gap: 10px;
+}
+
+.btn.subtle {
+    background: var(--pink-wash);
+    color: #b07f8b;
+    font-size: 12px;
+}
+
+.cal-time-row label,
+.cal-repeat-detail label {
+    display: block;
+    font-size: 12px;
+    color: var(--ink-soft);
+    margin-bottom: 6px;
+}
+
+.cal-time-row {
+    margin-bottom: 16px;
+}
+
+.cal-repeat-detail>div+div {
+    margin-top: 10px;
+}
+
+#annivTypeInput {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #e6dcde;
+    border-radius: 10px;
+    font-size: 16px;
+    background: #fff;
+}
+
+/* iOS で入力時に画面が拡大しないよう、文字は16px以上にする */
+input,
+textarea,
+select {
+    font-size: 16px;
+}
+
+/* 押せるものは最低44px角を確保する */
+button {
+    min-height: 32px;
+}
