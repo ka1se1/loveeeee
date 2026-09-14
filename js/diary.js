@@ -237,6 +237,8 @@ function openChat() {
   const screen = $('chatScreen');
   if (!screen) return;
   showing = PAGE;
+  screen.style.height = '';        // 過去の指定が残っていても打ち消す
+  screen.style.paddingBottom = '';
   screen.classList.add('open');
   document.body.classList.add('chat-open');
   renderChat();
@@ -248,7 +250,11 @@ function openChat() {
 
 function closeChat() {
   const screen = $('chatScreen');
-  if (screen) screen.classList.remove('open');
+  if (screen) {
+    screen.classList.remove('open');
+    screen.style.height = '';
+    screen.style.paddingBottom = '';
+  }
   document.body.classList.remove('chat-open');
 }
 
@@ -398,16 +404,30 @@ export function initDiary() {
     growInput();
   }
 
-  // キーボードが出ると iOS では画面が縮む。入力欄が隠れないよう高さを合わせる
+  // キーボードが出たときの対処。
+  //
+  // 以前はここで画面の height を書きかえていましたが、これは誤りでした。
+  // .chat-screen は inset:0（上下とも0）で画面全体を覆っています。
+  // そこへ height を足すと bottom が無視され、要素が画面の途中で終わり、
+  // その下から後ろのホーム画面が見えてしまいます。
+  //
+  // 正しくは、覆うのはやめずに「下側に内側の余白」を作ります。
+  // 余白のぶん入力欄が持ち上がり、余白自体はキーボードに隠れるので、
+  // 後ろが見えることは構造上ありえません。
   if (window.visualViewport) {
+    const vv = window.visualViewport;
     const fit = () => {
       const screen = $('chatScreen');
-      if (screen && screen.classList.contains('open')) {
-        screen.style.height = window.visualViewport.height + 'px';
+      if (!screen || !screen.classList.contains('open')) return;
+      const keyboard = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
+      screen.style.paddingBottom = keyboard + 'px';
+      if (keyboard > 0) {
+        const scroller = $('chatScroll');
+        if (scroller) scroller.scrollTop = scroller.scrollHeight;
       }
     };
-    window.visualViewport.addEventListener('resize', fit);
-    window.visualViewport.addEventListener('scroll', fit);
+    vv.addEventListener('resize', fit);
+    vv.addEventListener('scroll', fit);
   }
 
   document.addEventListener('keydown', e => {

@@ -3614,6 +3614,9 @@ button {
     z-index: 2000;
     display: none;
     flex-direction: column;
+    /* キーボードぶんの余白を内側に取る。要素自体は inset:0 のまま
+       画面全体を覆い続けるので、後ろが見えることはありません。 */
+    box-sizing: border-box;
     background: linear-gradient(160deg, #fff5f7 0%, #ffe9ee 100%);
 }
 
