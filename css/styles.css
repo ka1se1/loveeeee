@@ -4969,3 +4969,33 @@ select {
     background: var(--accent) !important;
     color: #fff !important;
 }
+
+/* 週ビューの予定ブロック。
+   時刻とタイトルを1行に繋げていたため、その途中で折り返して
+   「19:00 / ディ / ナー」のように読めなくなっていました。
+   行を分け、はみ出すぶんは省略します。 */
+.cal-wk-ev {
+    padding: 2px 3px;
+    line-height: 1.25;
+}
+
+.cal-wk-ev b {
+    display: block;
+    font-size: 9px;
+    font-weight: 700;
+    opacity: .75;
+    margin-bottom: 1px;
+}
+
+/* タイトルは2行まで。それ以上は「…」で切る */
+.cal-wk-ev {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* 月ビューの空いた週は、必要なぶんだけの高さになります */
+.cal-week {
+    padding-bottom: 2px;
+}

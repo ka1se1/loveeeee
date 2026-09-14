@@ -561,7 +561,6 @@ function calRenderMonth() {
 
     // 1周目：各週のレーンを計算して行の高さを揃える
     const rows = [];
-    let rowH = LH;
     for (let w = 0; w < weeks; w++) {
         const ws = calAdd(gridStart, w * 7);
         const wsY = calYmd(ws);
@@ -574,7 +573,12 @@ function calRenderMonth() {
         const hasOverflow = overflowCount.some(n => n > 0);
         const usedLanes = Math.min(maxLanes, placed.reduce((a, p) => Math.max(a, p.lane + 1), 0));
         rows.push({ ws, wsY, placed, overflowCount, hasOverflow, usedLanes });
-        rowH = Math.max(rowH, usedLanes * LH + (hasOverflow ? 14 : 0));
+        // 以前はここで全週の最大をとり、それを全部の週に当てていました。
+        // 1週でも予定が重なると、空の週まで同じ高さになります。
+        // 週ごとに必要なぶんだけにします。
+        rows[rows.length - 1].h = usedLanes
+            ? usedLanes * LH + (hasOverflow ? 14 : 0)
+            : 2;
     }
 
     let h = '<div class="cal-dow">';
@@ -611,7 +615,7 @@ function calRenderMonth() {
         const overflowCount = r.overflowCount;
         const usedLanes = r.usedLanes;
 
-        h += '<div class="cal-lanes" style="height:' + rowH + 'px">';
+        h += '<div class="cal-lanes" style="height:' + r.h + 'px">';
         vis.forEach(p => {
             const ev = p.o.ev;
             const c = calColor(ev);
@@ -763,7 +767,7 @@ function calRenderWeek() {
                 h += '<div class="cal-wk-ev" style="top:' + top.toFixed(1) +
                     'px;height:' + height.toFixed(1) + 'px;left:calc(' + (idx * w).toFixed(2) + '% + 1px);width:calc(' + w.toFixed(2) +
                     '% - 2px);background:' + calTint(calColor(it.o.ev), .22) + ';border-left:3px solid ' + calColor(it.o.ev) + '" data-act="ev" data-arg="' + it.o.ev.id + '" data-arg2="' + ds + '">' +
-                    esc(it.o.ev.start) + ' ' + esc(it.o.ev.title) + '</div>';
+                    '<b>' + esc(it.o.ev.start) + '</b>' + esc(it.o.ev.title) + '</div>';
             });
         });
         if (ds === today) {
