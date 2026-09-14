@@ -646,7 +646,7 @@ function calRenderMonth() {
                 : title;
             h += '<div class="cal-chipev ' + (timedStyle ? 'timed' : '') +
                 '" style="left:calc(' + left + '% + 1px);width:calc(' + width + '% - 2px);top:' + (p.lane * LH) + 'px;background:' + calTint(c, .22) + ';border-left:3px solid ' + c + '"' +
-                ' data-act="ev" data-arg="' + ev.id + '" data-arg2="' + p.o.sYmd + '">' + label + '</div>';
+                '>' + label + '</div>';
         });
         if (r.hasOverflow) {
             for (let c = 0; c < 7; c++) {
