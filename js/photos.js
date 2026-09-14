@@ -179,22 +179,15 @@ function makeImg(photo, className) {
 }
 
 export function renderGallery() {
-  const slides = $('slides');
   const grid = $('galleryGrid');
-  const photos = state.photos;
-
-  if (slides) {
-    clear(slides);
-    if (!photos.length) {
-      slides.appendChild(emptyState('まだ写真がありません。\n右上の＋から追加してみてください'));
-    } else {
-      photos.slice(0, 20).forEach(p => slides.appendChild(makeImg(p, '')));
-    }
-  }
-
   if (!grid) return;
   clear(grid);
-  if (!photos.length) return;
+
+  const photos = state.photos;
+  if (!photos.length) {
+    grid.appendChild(emptyState('まだ写真がありません。\n右上の＋から追加してみてください'));
+    return;
+  }
 
   const shown = expanded ? photos : photos.slice(0, GALLERY_PREVIEW);
   shown.forEach(p => grid.appendChild(makeImg(p, '')));
@@ -203,7 +196,7 @@ export function renderGallery() {
     grid.appendChild(el('div', { class: 'gallery-foot' }, [
       el('button', {
         class: expanded ? 'gallery-sub-btn' : 'gallery-main-btn',
-        text: expanded ? '閉じる' : `もっと見る（残り${photos.length - GALLERY_PREVIEW}枚）`,
+        text: expanded ? '閉じる' : `すべて見る（${photos.length}枚）`,
         onclick: () => { expanded = !expanded; renderGallery(); }
       })
     ]));

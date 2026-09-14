@@ -30,7 +30,7 @@ export const VOICE_URL_TTL = 60 * 60;   // 署名付きURLの有効期間（秒�
 export const PHOTO_MAX_EDGE = 1600;     // 長辺の上限（px）
 export const THUMB_MAX_EDGE = 480;      // 一覧用サムネの長辺（px）
 export const PHOTO_QUALITY = 0.82;      // JPEG の品質
-export const GALLERY_PREVIEW = 12;      // 「もっと見る」を押す前に出す枚数
+export const GALLERY_PREVIEW = 9;       // 「すべて見る」を押す前に出す枚数（3行）
 
 /* ---------- ボイスメッセージ ---------- */
 export const VOICE_MAX_MS = 90 * 1000;  // 最長90秒

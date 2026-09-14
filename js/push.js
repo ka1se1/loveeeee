@@ -101,6 +101,8 @@ function updateButton(state) {
 
   // ボタンは消さない。消すと、なぜ使えないのかが誰にも分からなくなります。
   btn.style.display = '';
+  const card = $('notifyCard');
+  if (card) card.hidden = false;
 
   if (state === 'swfailed') {
     btn.textContent = '🔔 通知を準備できませんでした';
@@ -118,6 +120,8 @@ function updateButton(state) {
   }
 
   if (Notification.permission === 'granted') {
+    // もう使わないボタンのために、カード1枚ぶんの高さを占め続ける必要はありません
+    if (card) card.hidden = true;
     btn.textContent = '🔔 通知オン';
     btn.disabled = true;
     setHint('この端末では通知がオンになっています。');

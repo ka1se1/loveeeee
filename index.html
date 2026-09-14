@@ -68,14 +68,10 @@
     <main id="homeScreen">
         <div class="container">
 
-            <section class="card" id="weatherCard">
-                <div class="card-header-actions">
-                    <h2>🌤️ 今日の天気</h2>
-                    <button class="btn-round" data-action="weather:refresh" aria-label="天気を読み込み直す">🔄</button>
-                </div>
-                <div id="weatherContainer" class="weather-box">
-                    <div class="loading-pulse">天気を読み込み中…</div>
-                </div>
+            <section class="card countdown-container">
+                <div class="countdown-item">いっしょに <span id="anniversaryDays" class="countdown-number">-</span> 日目</div>
+                <div id="anniversaryList"></div>
+                <button class="anniv-add" data-action="anniv:open">＋ 記念日を追加</button>
             </section>
 
             <section class="card cal-card" id="calendarCard">
@@ -94,18 +90,29 @@
 
             <section class="card">
                 <div class="card-header-actions">
+                    <h2>💌 メッセージ
+                        <button id="diaryNewBadge" class="new-badge" hidden data-action="badge:dismiss">新着</button>
+                    </h2>
+                    <button class="btn-round" data-action="chat:open" aria-label="メッセージを書く">＋</button>
+                </div>
+                <div id="diaryListContainer" class="chat">
+                    <div class="loading-pulse">読み込み中…</div>
+                </div>
+            </section>
+
+            <section class="card">
+                <div class="card-header-actions">
                     <h2>📸 共有ギャラリー
                         <button id="galleryNewBadge" class="new-badge" hidden data-action="badge:dismiss">新着</button>
                     </h2>
                     <button class="btn-round" id="uploadBtn" data-action="photo:pick" aria-label="写真を追加">＋</button>
                 </div>
-                <div class="slider">
+                <div class="gallery-wrap">
                     <div class="loading-overlay" id="uploadLoading">アップロード中…</div>
-                    <div class="slides" id="slides">
+                    <div class="gallery-grid" id="galleryGrid">
                         <div class="loading-pulse">写真を読み込み中…</div>
                     </div>
                 </div>
-                <div class="gallery-grid" id="galleryGrid"></div>
                 <label class="sr-only" for="photoUpload">写真を選ぶ</label>
                 <input type="file" id="photoUpload" accept="image/*" multiple hidden
                     data-action-change="photo:upload">
@@ -125,18 +132,6 @@
 
             <section class="card">
                 <div class="card-header-actions">
-                    <h2>💌 メッセージ
-                        <button id="diaryNewBadge" class="new-badge" hidden data-action="badge:dismiss">新着</button>
-                    </h2>
-                    <button class="btn-round" data-action="chat:open" aria-label="メッセージを書く">＋</button>
-                </div>
-                <div id="diaryListContainer" class="chat">
-                    <div class="loading-pulse">読み込み中…</div>
-                </div>
-            </section>
-
-            <section class="card">
-                <div class="card-header-actions">
                     <h2>🎤 ボイスメッセージ
                         <button id="voiceNewBadge" class="new-badge" hidden data-action="badge:dismiss">新着</button>
                     </h2>
@@ -147,12 +142,20 @@
                 <div class="record-box">
                     <button id="recordBtn" class="record-btn" data-action="voice:toggle" aria-label="録音する">🎤</button>
                     <div id="recordStatus" class="record-status">タップして録音（最長90秒）</div>
-                    <label class="sr-only" for="voiceAuthorInput">名前</label>
-                    <input type="text" id="voiceAuthorInput" class="record-name" placeholder="名前">
                 </div>
             </section>
 
-            <section class="card">
+            <section class="card" id="weatherCard">
+                <div class="card-header-actions">
+                    <h2>🌤️ 今日の天気</h2>
+                    <button class="btn-round" data-action="weather:refresh" aria-label="天気を読み込み直す">🔄</button>
+                </div>
+                <div id="weatherContainer" class="weather-box">
+                    <div class="loading-pulse">天気を読み込み中…</div>
+                </div>
+            </section>
+
+            <section class="card" id="notifyCard">
                 <div class="card-header-actions">
                     <h2>🔔 通知</h2>
                 </div>
@@ -160,12 +163,6 @@
                     オンにすると、相手が写真やメッセージを追加したときにお知らせが届きます。
                 </p>
                 <button id="pushBtn" class="btn-wide" data-action="push:enable">🔔 通知をオンにする</button>
-            </section>
-
-            <section class="card map-card">
-                <h2>📍 地図</h2>
-                <iframe id="map" title="お店の場所" loading="lazy"
-                    src="https://maps.google.co.jp/maps?q=%E6%9D%B1%E4%BA%AC&output=embed"></iframe>
             </section>
 
         </div>
@@ -487,12 +484,6 @@
 
     <!-- ===================== 常に出ているもの ===================== -->
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
-
-    <div class="countdown-container">
-        <div class="countdown-item">Days <span id="anniversaryDays" class="countdown-number">-</span> 日</div>
-        <div id="anniversaryList"></div>
-        <button class="anniv-add" data-action="anniv:open">＋ 記念日を追加</button>
-    </div>
 
     <button class="love-float-btn" data-action="love:send" aria-label="ハートを送る">
         <span class="love-icon" aria-hidden="true">🤍</span>

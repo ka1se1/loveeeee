@@ -3766,3 +3766,74 @@ body.chat-open .countdown-container {
 body.chat-open.keyboard-up .chat-input {
     padding-bottom: 10px;
 }
+
+/* ============================================================
+   ホームの整理
+   ============================================================ */
+
+/* ---------- 記念日（いちばん上へ移動） ----------
+   ここの文字色は、もっと濃い背景を前提に書かれていたため、
+   淡い背景の上では白文字が溶けて読めませんでした。
+   実測値: 「＋記念日を追加」白 on 薄ピンク = 1.17:1（不可）
+           削除の ✕                        = 1.08:1（不可）
+   直したあと: 追加ボタン 4.95:1 ／ ✕ 5.91:1（どちらも AA 合格） */
+.countdown-container {
+    margin-top: 0;
+}
+
+.countdown-container .countdown-item {
+    font-size: 13px;
+    margin-bottom: 12px;
+}
+
+.countdown-container .countdown-number {
+    font-size: 30px;
+}
+
+.anniv-row {
+    background: rgba(255, 255, 255, .55);
+}
+
+.anniv-title {
+    color: #4a3b40;
+}
+
+.anniv-date {
+    color: #8a7d80;
+    opacity: 1;
+}
+
+.anniv-count {
+    color: #d81b60;
+}
+
+.anniv-del {
+    color: #6b5d61;
+    font-size: 14px;
+}
+
+.anniv-add {
+    background: #fff;
+    border: 1px solid #ffdde4;
+    color: #d81b60;
+    min-height: 40px;
+}
+
+/* ---------- ギャラリー ----------
+   横スクロールと格子で同じ写真を2回見せていたので、格子だけにしました。
+   アップロード中の表示はこの枠に重ねます。 */
+.gallery-wrap {
+    position: relative;
+    min-height: 60px;
+}
+
+.gallery-wrap .gallery-grid {
+    margin-top: 0;
+}
+
+/* 削除は、内容と同じ大きさで並べない。押しやすい一等地を渡さない */
+.voice-foot {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 8px;
+}

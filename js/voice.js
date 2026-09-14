@@ -29,11 +29,6 @@ function entry(path) {
   return hit && hit.expires > Date.now() ? hit : null;
 }
 
-function cachedUrl(path) {
-  const hit = entry(path);
-  return hit ? hit.url : null;
-}
-
 /** 足りないぶんのURLをまとめて作る。1つでも新しく作れたら true */
 async function signMissing(paths) {
   const need = [...new Set(paths.filter(p => p && !entry(p)))];
@@ -70,7 +65,12 @@ async function signMissing(paths) {
    ------------------------------------------------------------ */
 function voiceNode(voice) {
   // 移行前の公開URLがそのまま入っていることがあるので、その場合はそれを使う
-  const url = /^https?:/.test(voice.path || '') ? voice.path : cachedUrl(voice.path);
+  const direct = /^https?:/.test(voice.path || '');
+  const hit = direct ? null : entry(voice.path);
+  const url = direct ? voice.path : (hit ? hit.url : null);
+  // URL を作ろうとして失敗した場合は、いつまでも「読み込み中」と
+  // 出し続けないで、そうと分かるように出す
+  const failed = !!hit && !hit.url;
   const meta = [timeAgo(voice.created_at), formatDuration(voice.duration_ms)]
     .filter(Boolean).join(' ・ ');
 
@@ -81,11 +81,16 @@ function voiceNode(voice) {
     ]),
     url
       ? el('audio', { class: 'voice-audio', controls: true, preload: 'none', src: url })
-      : el('div', { class: 'voice-meta', text: '読み込み中…' }),
-    el('button', {
-      class: 'btn-chip danger voice-delete', text: '削除',
-      'data-action': 'voice:delete', 'data-arg': voice.id
-    })
+      : el('div', {
+          class: 'voice-meta',
+          text: failed ? '再生できませんでした。更新すると再試行します' : '読み込み中…'
+        }),
+    el('div', { class: 'voice-foot' }, [
+      el('button', {
+        class: 'btn-chip danger', text: '削除',
+        'data-action': 'voice:delete', 'data-arg': voice.id
+      })
+    ])
   ]);
 }
 
@@ -193,7 +198,7 @@ async function startRecording() {
 }
 
 async function upload(blob, duration) {
-  const author = ($('voiceAuthorInput') && $('voiceAuthorInput').value.trim()) || userName || 'わたし';
+  const author = userName || 'わたし';   // ログインしているので聞く必要がない
   const ext = extensionFor(blob.type || '');
   const path = `${userId}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
 
@@ -250,9 +255,6 @@ async function remove(id) {
    ------------------------------------------------------------ */
 export function initVoice() {
   registerActions({ 'voice:toggle': toggle, 'voice:delete': remove });
-
-  const nameInput = $('voiceAuthorInput');
-  if (nameInput && !nameInput.value) nameInput.value = userName || '';
 
   on('voices', renderVoices);
 
