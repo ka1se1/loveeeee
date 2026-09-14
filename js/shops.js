@@ -37,25 +37,30 @@ function shopNode(shop) {
   children.push(el('h3', { class: 'shop-title', text: shop.name || '名称未設定' }));
   if (shop.note) children.push(el('div', { class: 'shop-note', text: shop.note }));
 
-  if (shop.insta) {
-    children.push(el('div', { class: 'shop-actions' }, [
-      el('a', {
-        class: 'insta-link', text: '📷 Instagram を見る',
-        href: shop.insta, target: '_blank', rel: 'noopener noreferrer'
-      })
-    ]));
-  }
-
-  children.push(el('div', { class: 'shop-card-actions' }, [
+  // よく使うもの（行きたい／お店を見る）を横に並べる。
+  // Instagram は全幅の派手な帯をやめ、同じ大きさの小さなボタンにします。
+  const main = [
     el('button', {
       class: 'btn-chip like' + (mine ? ' on' : ''),
       text: likes.length ? `♥ ${likes.length}` : '♡ 行きたい',
       'aria-pressed': mine ? 'true' : 'false',
       'data-action': 'shop:like', 'data-arg': shop.id
-    }),
-    el('button', { class: 'btn-chip', text: '編集', 'data-action': 'shop:edit', 'data-arg': shop.id }),
-    el('button', { class: 'btn-chip danger', text: '削除', 'data-action': 'shop:delete', 'data-arg': shop.id })
+    })
+  ];
+  if (shop.insta) {
+    main.push(el('a', {
+      class: 'insta-link', text: '📷 Instagram',
+      href: shop.insta, target: '_blank', rel: 'noopener noreferrer'
+    }));
+  }
+  // 編集と削除はふだん使うものではないので、同じ行の右端に小さく置く。
+  // 行を増やすと、めったに使わない操作のために高さを使うことになります。
+  main.push(el('div', { class: 'shop-manage' }, [
+    el('button', { text: '編集', 'data-action': 'shop:edit', 'data-arg': shop.id }),
+    el('button', { class: 'danger', text: '削除', 'data-action': 'shop:delete', 'data-arg': shop.id })
   ]));
+
+  children.push(el('div', { class: 'shop-card-actions' }, main));
 
   return el('div', { class: 'shop-card' + (both ? ' shop-both' : '') }, children);
 }

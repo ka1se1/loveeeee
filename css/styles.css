@@ -3828,3 +3828,74 @@ body.chat-open.keyboard-up .chat-input {
     justify-content: flex-end;
     margin-top: 8px;
 }
+
+/* ============================================================
+   お店カードの力関係を直す
+   Instagram が全幅の強いグラデーション帯で、店名(12px)より
+   はるかに目立っていました。しかもオレンジ側は白文字との
+   コントラストが 2.34:1 しかなく、読めてもいませんでした。
+   ============================================================ */
+.shop-card h3.shop-title {
+    font-size: 15px;
+    color: #2f2a2c;
+    line-height: 1.4;
+    margin: 0 0 5px;
+}
+
+.shop-card .shop-note {
+    font-size: 12px;
+    color: #666;
+    line-height: 1.6;
+    margin-bottom: 10px;
+}
+
+/* Instagram は「帯」から「ボタン」へ。実測 5.32:1（AA合格） */
+.shop-card .insta-link {
+    flex: 1;
+    background: #fff0f5;
+    border: 1px solid #f6d9e6;
+    color: #c2185b;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 0 10px;
+    border-radius: 9px;
+    min-height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+}
+
+/* 編集と削除は、ふだん使うものではないので下の行に控えめに */
+/* 行きたい / Instagram は中身ぶんの幅。伸ばすと1件だけのとき間延びする */
+.shop-card .shop-card-actions {
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.shop-card .shop-card-actions>button,
+.shop-card .shop-card-actions>a {
+    flex: 0 0 auto;
+}
+
+.shop-manage {
+    display: flex;
+    gap: 12px;
+    margin-left: auto;
+}
+
+.shop-manage button {
+    background: none;
+    border: none;
+    padding: 4px 2px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #6b5d61;
+    cursor: pointer;
+    min-height: 32px;
+}
+
+.shop-manage button.danger {
+    color: #9c3f52;
+}
