@@ -3685,6 +3685,9 @@ body.chat-open {
 .chat-input textarea {
     flex: 1;
     resize: none;
+    /* 高さを中身に合わせて書きかえるので、枠と余白を高さに含める。
+       content-box のままだと、合わせるたびに余白ぶん伸びていきます。 */
+    box-sizing: border-box;
     max-height: 120px;
     border: 1px solid #ffe3e6;
     border-radius: 20px;

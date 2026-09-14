@@ -270,6 +270,7 @@ function openChat() {
   screen.classList.add('open');
   lockPage();
   fitKeyboard();
+  growInput();   // 見えるようになってから測り直す
   renderChat();
   const badge = $('diaryNewBadge');
   if (badge) badge.hidden = true;
@@ -340,7 +341,14 @@ function growInput() {
     scroller.scrollHeight - scroller.scrollTop - scroller.clientHeight < 60;
 
   input.style.height = 'auto';
-  input.style.height = Math.min(input.scrollHeight, 120) + 'px';
+
+  // 会話画面が閉じているあいだは高さを測れず 0 が返ります。
+  // そこで 0 を書き込むと、開いたときに文字が下で切れてしまいます。
+  if (input.scrollHeight > 0) {
+    // scrollHeight は余白を含みますが枠線は含まないので、そのぶんを足す
+    const border = input.offsetHeight - input.clientHeight;
+    input.style.height = Math.min(input.scrollHeight + border, 120) + 'px';
+  }
 
   const send = $('chatSend');
   if (send) send.disabled = !input.value.trim();
