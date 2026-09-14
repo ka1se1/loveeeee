@@ -576,9 +576,10 @@ function calRenderMonth() {
         // 以前はここで全週の最大をとり、それを全部の週に当てていました。
         // 1週でも予定が重なると、空の週まで同じ高さになります。
         // 週ごとに必要なぶんだけにします。
+        // 予定が無い週も、指で押せるだけの高さは残します
         rows[rows.length - 1].h = usedLanes
             ? usedLanes * LH + (hasOverflow ? 14 : 0)
-            : 2;
+            : 12;
     }
 
     let h = '<div class="cal-dow">';
@@ -616,6 +617,18 @@ function calRenderMonth() {
         const usedLanes = r.usedLanes;
 
         h += '<div class="cal-lanes" style="height:' + r.h + 'px">';
+
+        // 日付の数字の行しか押せないと、マスの下半分を触っても反応せず
+        // 押しづらい。チップの後ろに、日付を選ぶための受け皿を敷きます。
+        // チップはこの後に置くので、チップの上をタップしたときは
+        // そちらが優先されます。
+        h += '<div class="cal-taps">';
+        for (let i = 0; i < 7; i++) {
+            const td = calYmd(calAdd(ws, i));
+            h += '<div class="cal-tap' + (td === selectedDate ? ' sel' : '') +
+                '" data-act="day" data-arg="' + td + '"></div>';
+        }
+        h += '</div>';
         vis.forEach(p => {
             const ev = p.o.ev;
             const c = calColor(ev);
@@ -871,7 +884,10 @@ function calHandleAct(t) {
     else if (act === 'editlabels') openLabelModal();
     else if (act === 'editmembers') openMemberModal();
     else if (act === 'member') calToggleMemberFilter(arg);
-    else if (act === 'day') { selectedDate = arg; renderCalendar(); openDaySheet(arg); }
+    // 日付をタップしたら、下の予定一覧を切りかえるだけにします。
+    // 毎回シートがせり上がると、見たいだけのときに邪魔になるためです。
+    // （週ビューの dayjump は下にパネルが無いので、そちらはシートのまま）
+    else if (act === 'day') { selectedDate = arg; renderCalendar(); }
     else if (act === 'dayjump') { calCursor = calParse(arg); renderCalendar(); openDaySheet(arg); }
     else if (act === 'add') openEventModal(arg);
     else if (act === 'ev') openEventDetail(arg, arg2);

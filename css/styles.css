@@ -4999,3 +4999,27 @@ select {
 .cal-week {
     padding-bottom: 2px;
 }
+
+/* 日付を選ぶための受け皿。予定チップの帯の後ろに敷きます。
+   これが無いと、マスの下半分を触っても反応しませんでした。 */
+.cal-taps {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+}
+
+.cal-tap {
+    cursor: pointer;
+}
+
+/* 選んだ日は、数字の行から帯まで続けて色を付ける */
+.cal-tap.sel {
+    background: var(--accent-soft);
+}
+
+/* マスを指で押せる大きさにする。
+   4px の余白では的が小さく、日付を選びづらいためです。 */
+.cal-daycell {
+    padding: 7px 0 5px;
+}
