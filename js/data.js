@@ -43,6 +43,28 @@ async function selectAll(table, order = 'created_at') {
 /** 配列の中身だけ入れ替える（参照を保つ） */
 function replace(arr, next) { arr.length = 0; arr.push(...next); }
 
+/* 最後にサーバーから取り直した時刻。
+   リアルタイムが切れているあいだの変更は届かないので、
+   繋ぎ直したときと、画面に戻ってきたときに取り直します。 */
+let lastSync = 0;
+export function syncedAt() { return lastSync; }
+
+let resyncing = false;
+
+/** サーバーから全部取り直して、画面に描き直させる */
+export async function resync() {
+  if (resyncing || Date.now() - lastSync < 3000) return;   // 連続でばたついても1回にする
+  resyncing = true;
+  try {
+    await loadAll();
+    emit('resync');
+  } catch (e) {
+    console.warn('取り直せませんでした', e);
+  } finally {
+    resyncing = false;
+  }
+}
+
 export async function loadAll() {
   const [photos, diaries, replies, shops, likes, voices, anniversaries, settings, counter] =
     await Promise.all([
@@ -66,6 +88,7 @@ export async function loadAll() {
   replace(state.anniversaries, anniversaries);
   state.settings = Object.fromEntries(settings.map(s => [s.key, s.value]));
   state.love = counter ? Number(counter.value) : 0;
+  lastSync = Date.now();
 }
 
 // ---------- 写真 ----------
@@ -223,6 +246,7 @@ function applyChange(table, payload) {
 }
 
 let channel = null;
+let dropped = false;   // 一度でも切れたか
 
 export function startRealtime({ onEvents } = {}) {
   if (channel) db.removeChannel(channel);
@@ -255,8 +279,13 @@ export function startRealtime({ onEvents } = {}) {
   });
 
   channel.subscribe(status => {
-    if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+    if (status === 'SUBSCRIBED') {
+      // 繋ぎ直したときは、切れているあいだの変更が届いていません。
+      // 繋ぎ直すだけでは欠けたままになるので、ここで取り直します。
+      if (dropped) { dropped = false; resync(); }
+    } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
       console.warn('リアルタイム接続が切れました。5秒後に繋ぎ直します:', status);
+      dropped = true;
       setTimeout(() => startRealtime({ onEvents }), 5000);
     }
   });

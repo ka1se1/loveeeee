@@ -5,7 +5,7 @@
 // ============================================================
 import { initActions, registerActions } from './actions.js';
 import { checkLogin, initAuth } from './auth.js';
-import { state, loadAll, startRealtime, on } from './data.js';
+import { state, loadAll, startRealtime, on, resync, syncedAt } from './data.js';
 import { $, showError } from './util.js';
 import { initPhotos, renderGallery } from './photos.js';
 import { initDiary, renderDiaries } from './diary.js';
@@ -17,7 +17,7 @@ import { initLove, renderLove } from './love.js';
 import { initGame } from './game.js';
 import { initPush } from './push.js';
 import { initSakura } from './sakura.js';
-import { initCalendar, calApplyRemote, calApplySettings } from './calendar.js';
+import { initCalendar, calApplyRemote, calApplySettings, calReload } from './calendar.js';
 
 const BADGE = {
   photos: 'galleryNewBadge',
@@ -86,6 +86,16 @@ async function boot() {
 
   startRealtime({
     onEvents: (type, row) => { calApplyRemote(type, row); showBadge('events'); }
+  });
+
+  // 取り直したら、全部描き直す
+  on('resync', () => { renderAll(); calReload(); });
+
+  // スマホはアプリを閉じるたびに接続が切れます。繋ぎ直しても
+  // 切れているあいだの変更は届かないので、戻ってきたときに
+  // 一定時間経っていれば取り直します。
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden && Date.now() - syncedAt() > 60000) resync();
   });
 
   fetchWeather();

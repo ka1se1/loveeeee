@@ -1832,6 +1832,28 @@ async function calPersist() {
 }
 
 /* ============================================================
+   取り直す
+   リアルタイムが切れているあいだの変更は届きません。カレンダーは
+   予定を自前で持っているので、他のデータとは別に取り直します。
+   ============================================================ */
+export async function calReload() {
+    if (Array.isArray(state.settings.labels) && state.settings.labels.length) calSetLabels(state.settings.labels);
+    if (Array.isArray(state.settings.members) && state.settings.members.length) calSetMembers(state.settings.members);
+
+    try {
+        events = await loadEvents();
+    } catch (e) {
+        console.warn('予定を取り直せませんでした', e);
+        return;
+    }
+    calNormalizeAll();
+    calRemember();          // 取り直したものを「保存済み」として覚え直す
+    renderCalendar();
+    if (calSheetEvId || (calSheetMode === 'day' && calSheetDate)) calRenderSheet();
+    calScheduleReminders();
+}
+
+/* ============================================================
    相手の変更を受け取る（1件ずつ差分で当てる）
    ============================================================ */
 export function calApplyRemote(type, row) {
