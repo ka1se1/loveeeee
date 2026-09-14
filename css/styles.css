@@ -4741,3 +4741,10 @@ select {
 .cal-daycell.out.hol .cal-daynum {
     color: #060606;
 }
+
+/* width:100% と左右の余白を同時に持っていて、親からはみ出していました。
+   これまでは親側の overflow に偶然隠されていただけです。 */
+.loading-pulse,
+.empty-state {
+    box-sizing: border-box;
+}
