@@ -191,6 +191,19 @@ function esc(s) {
 function calMe() { return userName || 'わたし'; }
 function calColor(ev) { return calLabel(ev.label).color; }
 
+/** ラベル色を白で薄める。
+ *  ラベルの色はふたりが自由に決められるので、そのまま背景にして
+ *  文字を載せると読めない色が出ます（#7c83fd は白3.22／黒4.26で
+ *  どちらも不足）。薄く敷いて、文字は常に濃い色にします。 */
+function calTint(hex, ratio) {
+    const m = /^#?([0-9a-fA-F]{6})$/.exec(String(hex || ''));
+    if (!m) return '#f2ede8';
+    const n = parseInt(m[1], 16);
+    const mix = v => Math.round(v * ratio + 255 * (1 - ratio));
+    const r = mix((n >> 16) & 255), g = mix((n >> 8) & 255), b = mix(n & 255);
+    return '#' + [r, g, b].map(v => v.toString(16).padStart(2, '0')).join('');
+}
+
 /* ---------- 日本の祝日 ---------- */
 const calHolidayCache = {};
 function calNthMonday(y, m, n) {
@@ -448,7 +461,7 @@ function calRenderShell() {
     if (calSearchOpen) {
         h += '<div class="cal-searchbar"><span>🔍</span>' +
             '<input id="calSearchInput" type="search" placeholder="予定を検索..." value="' + esc(calSearch) + '" oninput="calOnSearch(this.value)">' +
-            '<span data-act="closesearch" style="cursor:pointer;color:#c3aeb4;">✕</span></div>';
+            '<span data-act="closesearch" style="cursor:pointer;color:#6b5d61;">✕</span></div>';
     }
 
     h += '<div class="cal-chips">';
@@ -493,7 +506,7 @@ function calRenderNextBanner() {
         '<div class="cd"><b>' + cd + '</b><span>' + sub + '</span></div>' +
         '<div class="tx"><b>' + esc(occ.ev.title) + '</b><span>' + when +
         (occ.ev.location ? ' · 📍' + esc(occ.ev.location) : '') + '</span></div>' +
-        '<div style="flex:0 0 auto;color:#e6bcc7;">›</div></div>';
+        '<div style="flex:0 0 auto;color:#6b5d61;">›</div></div>';
 }
 
 /* ---------- 描画：メイン ---------- */
@@ -615,7 +628,7 @@ function calRenderMonth() {
                 ? '<span class="tdot" style="background:' + c + '"></span>' + title
                 : title;
             h += '<div class="cal-chipev ' + (timedStyle ? 'timed' : '') +
-                '" style="left:calc(' + left + '% + 1px);width:calc(' + width + '% - 2px);top:' + (p.lane * LH) + 'px;background:' + c + '"' +
+                '" style="left:calc(' + left + '% + 1px);width:calc(' + width + '% - 2px);top:' + (p.lane * LH) + 'px;background:' + calTint(c, .22) + ';border-left:3px solid ' + c + '"' +
                 ' data-act="ev" data-arg="' + ev.id + '" data-arg2="' + p.o.sYmd + '">' + label + '</div>';
         });
         if (r.hasOverflow) {
@@ -648,7 +661,7 @@ function calRenderDayPanel() {
     if (!occs.length) {
         h += '<div class="cal-empty">予定はまだないよ 🌸<br>' +
             '<button class="cal-quick-add" data-act="add" data-arg="' + ds + '" ' +
-            'style="margin-top:10px;border:none;background:linear-gradient(135deg,#ff9a9e,#fecfef);color:#fff;font-weight:700;font-size:12px;padding:8px 18px;border-radius:999px;cursor:pointer;">＋ 予定を追加</button></div>';
+            'style="margin-top:10px;border:none;background:#c2185b;color:#fff;font-weight:700;font-size:12px;padding:8px 18px;border-radius:999px;cursor:pointer;">＋ 予定を追加</button></div>';
     } else {
         occs.forEach(o => { h += calEventRow(o); });
         h += '<button data-act="add" data-arg="' + ds + '" style="width:100%;border:1px dashed #ffc9d4;background:#fff;color:#d81b60;font-weight:700;font-size:12px;padding:10px;border-radius:14px;cursor:pointer;">＋ この日に追加</button>';
@@ -680,7 +693,7 @@ function calEventRow(o) {
         '<div class="time">' + time + '</div>' +
         '<div class="body"><b>' + esc(ev.title) +
         (avatars ? '<span class="cal-avs">' + avatars + '</span>' : '') + '</b>' + strip +
-        (ev.note ? '<div style="font-size:11px;color:#a58b93;margin-top:2px;white-space:pre-wrap;">' + esc(ev.note.slice(0, 60)) + (ev.note.length > 60 ? '…' : '') + '</div>' : '') +
+        (ev.note ? '<div style="font-size:11px;color:#6b5d61;margin-top:2px;white-space:pre-wrap;">' + esc(ev.note.slice(0, 60)) + (ev.note.length > 60 ? '…' : '') + '</div>' : '') +
         (meta.length ? '<div class="meta"><span>' + meta.join('</span><span>') + '</span></div>' : '') +
         '</div></div>';
 }
@@ -716,7 +729,7 @@ function calRenderWeek() {
         const ev = p.o.ev;
         h += '<div class="cal-chipev" style="left:calc(' +
             (p.col / 7 * 100).toFixed(4) + '% + 1px);width:calc(' + (p.span / 7 * 100).toFixed(4) + '% - 2px);top:' +
-            (p.lane * 17 + 2) + 'px;background:' + calColor(ev) + '" data-act="ev" data-arg="' + ev.id +
+            (p.lane * 17 + 2) + 'px;background:' + calTint(calColor(ev), .22) + ';border-left:3px solid ' + calColor(ev) + '" data-act="ev" data-arg="' + ev.id +
             '" data-arg2="' + p.o.sYmd + '">' + esc(ev.title) + '</div>';
     });
     h += '</div></div>';
@@ -749,7 +762,7 @@ function calRenderWeek() {
                 const w = 100 / n;
                 h += '<div class="cal-wk-ev" style="top:' + top.toFixed(1) +
                     'px;height:' + height.toFixed(1) + 'px;left:calc(' + (idx * w).toFixed(2) + '% + 1px);width:calc(' + w.toFixed(2) +
-                    '% - 2px);background:' + calColor(it.o.ev) + '" data-act="ev" data-arg="' + it.o.ev.id + '" data-arg2="' + ds + '">' +
+                    '% - 2px);background:' + calTint(calColor(it.o.ev), .22) + ';border-left:3px solid ' + calColor(it.o.ev) + '" data-act="ev" data-arg="' + it.o.ev.id + '" data-arg2="' + ds + '">' +
                     esc(it.o.ev.start) + ' ' + esc(it.o.ev.title) + '</div>';
             });
         });
@@ -1283,7 +1296,7 @@ function calRenderSheet() {
         h += '<div class="cal-sheet-back" data-act="backtoday">‹ ' +
             (bd.getMonth() + 1) + '月' + bd.getDate() + '日の予定にもどる</div>';
     }
-    h += '<div class="cal-detail-label" style="background:' + calColor(ev) + '">● ' + esc(calLabel(ev.label).name) + '</div>';
+    h += '<div class="cal-detail-label" style="background:' + calTint(calColor(ev), .22) + ';border-left:3px solid ' + calColor(ev) + '">● ' + esc(calLabel(ev.label).name) + '</div>';
     h += '<div class="cal-detail-title">' + esc(ev.title) +
         '<span class="cal-cd-badge">' + cd + '</span></div>';
     h += '<div style="height:10px"></div>';
@@ -1333,7 +1346,7 @@ function calRenderSheet() {
 
     h += '<div class="cal-sec-head">💬 コメント (' + ev.comments.length + ')</div>';
     h += '<div style="margin-top:10px;">';
-    if (!ev.comments.length) h += '<div style="font-size:11.5px;color:#c3aeb4;margin-bottom:8px;">まだコメントはないよ。ひとこと残してみよう！</div>';
+    if (!ev.comments.length) h += '<div style="font-size:11.5px;color:#6b5d61;margin-bottom:8px;">まだコメントはないよ。ひとこと残してみよう！</div>';
     ev.comments.forEach(c => {
         h += '<div class="cal-cmt"><div class="av">' + esc((c.author || '?').slice(0, 1)) + '</div>' +
             '<div><div class="who">' + esc(c.author || '') + ' · ' + calAgo(c.at) + '</div>' +

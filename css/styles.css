@@ -4895,3 +4895,77 @@ select {
     color: var(--ink-2);
     padding: 14px 0 4px;
 }
+
+/* ============================================================
+   カレンダー：予定の色の扱い
+   ラベル色をそのまま背景にして白文字を載せていたため、
+   黄色を選ぶと 1.76:1 で読めませんでした。色は薄く敷いて
+   左の縁で示し、文字は常に濃い色にします。
+   ============================================================ */
+.cal-chipev,
+.cal-wk-ev,
+.cal-detail-label {
+    color: var(--ink) !important;
+    text-shadow: none;
+}
+
+.cal-chipev {
+    font-weight: 700;
+}
+
+.cal-wk-ev {
+    font-size: 10px;
+    line-height: 1.3;
+    padding: 2px 4px;
+    overflow: hidden;
+}
+
+.cal-detail-label {
+    color: var(--ink) !important;
+    font-weight: 700;
+}
+
+/* 週ビューの見出し。9px や 8px は小さすぎて、色も薄すぎました
+   （曜日 2.35:1 ／「終日」2.22:1） */
+.cal-wk-head .h {
+    font-size: 11px;
+    color: var(--ink-2);
+}
+
+.cal-wk-head .h b {
+    color: var(--ink);
+}
+
+.cal-wk-allday .lbl {
+    font-size: 11px;
+    color: var(--ink-2);
+}
+
+.cal-wk-hours .hr {
+    font-size: 10.5px;
+    color: var(--ink-2);
+}
+
+/* 週の見出し。元の指定のほうが詳細度が高くて負けていました。
+   曜日 2.35:1 ／ 今日の丸は白文字 on 薄ピンクで 2.03:1 */
+.cal-wk-head .h small {
+    font-size: 11px;
+    color: var(--ink-2);
+}
+
+.cal-wk-head .h.today b {
+    background: var(--accent);
+    color: #fff;
+}
+
+/* 薄いピンクのグラデーションに白文字を置いている箇所を、
+   まとめて濃いピンクにします（白 on #ff9a9e は 2.03:1）。
+   検査で見つからなかったのは、グラデーションの上の文字は
+   背景色を1つに決められず、機械的に測れないためです。 */
+.cal-list-date.today b,
+.cal-cd-badge,
+.cal-btn-main,
+.cal-cmt .av {
+    background: var(--accent) !important;
+    color: #fff !important;
+}
