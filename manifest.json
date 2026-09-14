@@ -1,20 +1,28 @@
 {
-    "name": "Our Memories",
-    "short_name": "Memories",
-    "start_url": "/loveeeee/",
-    "display": "standalone",
-    "background_color": "#ff9a9e",
-    "theme_color": "#ff9a9e",
-    "icons": [
-        {
-            "src": "/loveeeee/icon.png",
-            "sizes": "192x192",
-            "type": "image/png"
-        },
-        {
-            "src": "/loveeeee/icon.png",
-            "sizes": "512x512",
-            "type": "image/png"
-        }
-    ]
+  "name": "Our Memories",
+  "short_name": "Memories",
+  "description": "ふたりの写真・メッセージ・予定をひとつにまとめる場所",
+  "lang": "ja",
+  "dir": "ltr",
+  "start_url": "/loveeeee/",
+  "scope": "/loveeeee/",
+  "id": "/loveeeee/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#ff9a9e",
+  "theme_color": "#ff9a9e",
+  "icons": [
+    {
+      "src": "/loveeeee/icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/loveeeee/icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
 }
