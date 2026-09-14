@@ -3899,3 +3899,845 @@ body.chat-open.keyboard-up .chat-input {
 .shop-manage button.danger {
     color: #9c3f52;
 }
+
+/* ============================================================
+   ここから下が新しい配色。
+   これまでのピンク一色をやめ、地を温かいクリームにして、
+   ピンクは「大事なもの」だけに使います。
+   写真とメッセージの吹き出しが主役になります。
+
+   色はすべてコントラスト比を実測して選んでいます。
+     本文 #2F2A2C on クリーム = 13.5:1
+     補足 #6B5D61 on 白       = 6.24:1
+     白文字 on ピンク #C2185B = 5.87:1
+   ============================================================ */
+:root {
+    --bg: #fbf7f4;
+    /* 温かいクリーム。ここが地 */
+    --surface: #ffffff;
+    /* カード */
+    --surface-2: #f6f1ec;
+    /* 一段沈んだ面 */
+    --line: #ece3db;
+    /* 区切り線 */
+    --ink: #2f2a2c;
+    /* 本文 */
+    --ink-2: #6b5d61;
+    /* 補足 */
+    --ink-3: #8a7d80;
+    /* さらに弱い。大きい字にだけ */
+    --accent: #c2185b;
+    /* ピンク。大事なものだけ */
+    --accent-soft: #fdf0f5;
+    --accent-line: #f6d9e6;
+    --danger: #9c3f52;
+    --radius: 16px;
+}
+
+/* ---------- 地 ---------- */
+body {
+    background: var(--bg) !important;
+    animation: none !important;
+    color: var(--ink);
+}
+
+#sakura {
+    opacity: .5;
+}
+
+/* ---------- ヘッダー ---------- */
+/* ピンクの帯に白文字（1.00:1）をやめ、地になじむ白い帯に */
+header {
+    background: rgba(255, 255, 255, .88) !important;
+    animation: none !important;
+    color: var(--ink) !important;
+    box-shadow: 0 1px 0 var(--line) !important;
+    border-radius: 0 !important;
+    padding: 14px 16px !important;
+    font-size: 16px !important;
+    letter-spacing: .02em !important;
+    position: sticky !important;
+    top: 0;
+    z-index: 50;
+    backdrop-filter: blur(10px);
+}
+
+.header-title {
+    font-size: 15px;
+    font-weight: 800;
+    color: var(--ink);
+    letter-spacing: .04em;
+}
+
+.header-btn {
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    color: var(--ink-2);
+    border-radius: 10px;
+    backdrop-filter: none;
+}
+
+/* ---------- カード ---------- */
+.card {
+    background: var(--surface);
+    backdrop-filter: none;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    box-shadow: 0 1px 2px rgba(47, 42, 44, .04), 0 8px 24px rgba(47, 42, 44, .05);
+    padding: 18px 16px;
+    margin-bottom: 14px;
+}
+
+.container {
+    padding: 16px 14px 40px;
+}
+
+/* ---------- 文字の段 ---------- */
+h2 {
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--ink);
+    letter-spacing: .01em;
+}
+
+.card-header-actions {
+    margin-bottom: 14px;
+}
+
+.section-note {
+    font-size: 12.5px;
+    color: var(--ink-2);
+}
+
+/* ---------- 丸ボタン（＋ / 🔄）---------- */
+/* 淡いピンクに白文字で 1.00:1 だったものを、濃いピンクに */
+.btn-round {
+    background: var(--accent);
+    color: #fff;
+    box-shadow: none;
+    width: 34px;
+    height: 34px;
+    font-size: 16px;
+    line-height: 1;
+}
+
+.btn-round:disabled {
+    background: #d9cfc8;
+}
+
+/* ---------- ボタンの統一 ---------- */
+.btn-primary,
+.btn-save,
+.btn-wide.primary,
+.gallery-main-btn,
+.record-btn {
+    background: var(--accent) !important;
+    color: #fff !important;
+    box-shadow: none !important;
+}
+
+.btn-secondary,
+.gallery-sub-btn,
+.btn-wide {
+    background: var(--surface) !important;
+    color: var(--accent) !important;
+    border: 1px solid var(--accent-line) !important;
+    box-shadow: none !important;
+}
+
+.btn {
+    background: var(--surface-2);
+    color: var(--ink-2);
+    font-weight: 700;
+    font-size: 13px;
+}
+
+.btn-chip {
+    background: var(--surface-2);
+    color: var(--ink-2);
+}
+
+.btn-chip.like {
+    background: var(--accent-soft);
+    color: var(--accent);
+}
+
+/* いいね済みは 2.03:1 しかなかった */
+.btn-chip.like.on {
+    background: var(--accent);
+    color: #fff;
+}
+
+.btn-chip.danger {
+    background: #fbeef0;
+    color: var(--danger);
+}
+
+.btn-chip.primary {
+    background: var(--accent);
+    color: #fff;
+}
+
+/* ---------- 入力まわり ---------- */
+.input-group label {
+    color: var(--ink-2);
+    font-size: 12px;
+}
+
+.input-group input,
+.input-group textarea,
+.auth-card input,
+#annivTypeInput,
+input[type="date"],
+select {
+    border: 1px solid var(--line);
+    background: var(--surface);
+    color: var(--ink);
+    border-radius: 10px;
+}
+
+.modal-content {
+    border-radius: 18px;
+}
+
+/* ---------- 読み込み中・空っぽ ---------- */
+.loading-pulse {
+    color: var(--ink-3);
+    font-weight: 700;
+}
+
+.empty-state {
+    color: var(--ink-3);
+}
+
+/* ---------- 起動画面・ログイン ---------- */
+.splash-screen {
+    background: var(--bg);
+    animation: none;
+    color: var(--ink);
+}
+
+.splash-content h1 {
+    color: var(--accent);
+    text-shadow: none;
+    font-size: 32px;
+}
+
+.splash-content p {
+    color: var(--ink-2);
+}
+
+.auth-screen {
+    background: var(--bg);
+}
+
+.auth-card {
+    border: 1px solid var(--line);
+    box-shadow: 0 10px 40px rgba(47, 42, 44, .08);
+}
+
+.auth-sub {
+    color: var(--ink-2);
+    font-size: 13px;
+}
+
+/* ---------- 天気 ---------- */
+.weather-box {
+    padding: 4px;
+}
+
+.weather-icon {
+    font-size: 44px;
+}
+
+.weather-label {
+    color: var(--ink-2);
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.weather-temp {
+    font-size: 34px;
+    color: var(--ink);
+    margin: 2px 0 10px;
+}
+
+.weather-sub {
+    color: var(--ink-2);
+    font-size: 12px;
+}
+
+.weather-advice {
+    background: var(--accent-soft);
+    border: 1px solid var(--accent-line);
+    color: var(--accent);
+    font-size: 12.5px;
+}
+
+.weather-loc {
+    color: var(--ink-3);
+    font-size: 11.5px;
+}
+
+/* ---------- 記念日 ---------- */
+.countdown-container {
+    background: var(--surface) !important;
+    border: 1px solid var(--line) !important;
+    box-shadow: 0 1px 2px rgba(47, 42, 44, .04), 0 8px 24px rgba(47, 42, 44, .05) !important;
+}
+
+.countdown-item {
+    color: var(--ink-2);
+    font-size: 13px;
+}
+
+.countdown-number {
+    color: var(--accent);
+}
+
+.anniv-row {
+    background: var(--surface-2);
+}
+
+.anniv-row.today {
+    background: var(--accent-soft);
+    border: 1px solid var(--accent-line);
+}
+
+.anniv-title {
+    color: var(--ink);
+    font-size: 13.5px;
+}
+
+.anniv-date {
+    color: var(--ink-2);
+    font-size: 11px;
+}
+
+.anniv-count {
+    color: var(--accent);
+    font-size: 13px;
+}
+
+.anniv-del {
+    color: var(--ink-2);
+}
+
+.anniv-add {
+    background: var(--surface);
+    border: 1px solid var(--accent-line);
+    color: var(--accent);
+}
+
+/* ---------- お店 ---------- */
+.shop-card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    box-shadow: none;
+}
+
+.shop-card:hover {
+    transform: none;
+    box-shadow: 0 6px 18px rgba(47, 42, 44, .07);
+}
+
+.shop-both {
+    background: var(--accent-soft) !important;
+    border: 1px solid var(--accent) !important;
+}
+
+.shop-both-tag {
+    color: var(--accent);
+    font-size: 11px;
+}
+
+/* ---------- ボイス ---------- */
+.voice-entry {
+    background: var(--surface);
+    border: 1px solid var(--line);
+}
+
+.voice-author {
+    color: var(--ink);
+    font-size: 13px;
+}
+
+/* 10.5px で 2.25:1 しかなかった */
+.voice-meta {
+    color: var(--ink-2);
+    font-size: 12px;
+}
+
+.record-btn {
+    box-shadow: 0 6px 16px rgba(194, 24, 91, .22) !important;
+}
+
+.record-status {
+    color: var(--ink-2);
+    font-size: 12.5px;
+}
+
+/* ---------- メッセージ ---------- */
+/* 吹き出しの色は測って決めたばかりなので、地だけ合わせます */
+.chat-screen {
+    background: var(--bg);
+}
+
+.chat-head {
+    background: rgba(255, 255, 255, .92);
+    border-bottom: 1px solid var(--line);
+}
+
+.chat-head-title {
+    color: var(--ink);
+}
+
+.chat-head-sub {
+    color: var(--ink-2);
+    font-size: 11.5px;
+}
+
+.chat-input {
+    background: var(--surface);
+    border-top: 1px solid var(--line);
+}
+
+.chat-input textarea {
+    border: 1px solid var(--line);
+    color: var(--ink);
+}
+
+.chat-send,
+.chat-group.me .chat-bubble {
+    background: var(--accent);
+}
+
+.chat-back {
+    color: var(--accent);
+}
+
+.chat-group.them .chat-bubble {
+    border: 1px solid var(--line);
+    color: var(--ink);
+}
+
+.chat-day {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    color: var(--ink-2);
+}
+
+.chat-name {
+    color: var(--ink-2);
+}
+
+/* 10px で 2.25:1 しかなかった */
+.chat-time {
+    color: var(--ink-2);
+    font-size: 11px;
+}
+
+.chat-more {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    color: var(--accent);
+}
+
+.chat-preview .chat-bubble {
+    font-size: 13.5px;
+}
+
+.chat-open-btn {
+    background: var(--surface);
+    border: 1px solid var(--accent-line);
+    color: var(--accent);
+}
+
+/* ---------- 通知・ダイアログ・トースト ---------- */
+.dlg-card {
+    border-radius: 18px;
+}
+
+.dlg-msg {
+    color: var(--ink);
+}
+
+.dlg-btn {
+    background: var(--surface-2);
+    color: var(--ink-2);
+}
+
+.dlg-btn.primary {
+    background: var(--accent);
+    color: #fff;
+}
+
+.dlg-btn.danger {
+    background: var(--danger);
+    color: #fff;
+}
+
+.new-badge {
+    background: var(--accent-soft);
+    color: var(--accent);
+}
+
+/* ---------- ハートのボタン ---------- */
+.love-float-btn {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    box-shadow: 0 4px 16px rgba(47, 42, 44, .1);
+}
+
+.love-count-badge {
+    color: var(--accent);
+}
+
+/* ---------- カレンダー ----------
+   ここは元のコードで作り込まれているので、色だけ地に合わせます */
+.cal-toolbar,
+.cal-title {
+    color: var(--ink);
+}
+
+.cal-title small {
+    color: var(--ink-2);
+}
+
+.cal-nav button {
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    color: var(--ink-2);
+}
+
+/* 白文字を淡いピンクに置いていて 1.00:1 だった */
+.cal-today-btn,
+.cal-quick-add,
+.cal-fab,
+.cal-cmt-input button {
+    background: var(--accent) !important;
+    color: #fff !important;
+    box-shadow: none !important;
+}
+
+.cal-icon-btn {
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    color: var(--ink-2);
+}
+
+.cal-icon-btn.on {
+    background: var(--accent);
+    color: #fff;
+}
+
+.cal-seg {
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+}
+
+.cal-seg button {
+    color: var(--ink-2);
+}
+
+.cal-seg button.on {
+    background: var(--surface);
+    color: var(--accent);
+}
+
+/* 曜日は 2.35:1 しかなかった */
+.cal-dow div {
+    color: var(--ink-2);
+    font-size: 11px;
+}
+
+.cal-dow div.sun {
+    color: #c0392b;
+}
+
+.cal-dow div.sat {
+    color: #2471a3;
+}
+
+/* 日付は 1.09:1 しかなかった */
+.cal-daynum {
+    color: var(--ink);
+    font-size: 12.5px;
+}
+
+.cal-daycell.out .cal-daynum {
+    color: #bdb2ae;
+}
+
+.cal-daycell.today .cal-daynum {
+    background: var(--accent);
+    color: #fff;
+}
+
+.cal-daycell.sel {
+    background: var(--accent-soft);
+}
+
+.cal-holname {
+    color: #c0392b;
+}
+
+.cal-empty {
+    color: var(--ink-3);
+    font-size: 12.5px;
+}
+
+.cal-daypanel,
+.cal-list-items {
+    color: var(--ink);
+}
+
+.cal-daypanel-head b {
+    color: var(--ink);
+}
+
+.cal-daypanel-head span,
+.cal-ev .time,
+.cal-ev .body .meta,
+.cal-list-date small {
+    color: var(--ink-2);
+}
+
+.cal-ev {
+    background: var(--surface);
+    border: 1px solid var(--line);
+}
+
+.cal-ev .body b {
+    color: var(--ink);
+}
+
+.cal-chip {
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    color: var(--ink-2);
+}
+
+.cal-chip.on {
+    background: var(--accent);
+    color: #fff;
+}
+
+/* メンバーの丸は、絵文字が地に沈んでいた（1.65:1） */
+.cal-av {
+    color: #fff;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, .35);
+}
+
+.cal-sheet-panel,
+.cal-daysheet-head {
+    background: var(--surface);
+}
+
+.cal-detail-title {
+    color: var(--ink);
+}
+
+.cal-row {
+    color: var(--ink);
+}
+
+.cal-row .ic {
+    color: var(--ink-2);
+}
+
+.cal-next {
+    background: var(--accent-soft);
+    border: 1px solid var(--accent-line);
+}
+
+.cal-next .cd b,
+.cal-next .tx b {
+    color: var(--accent);
+}
+
+.cal-next .cd span,
+.cal-next .tx span {
+    color: var(--ink-2);
+}
+
+.cal-wk-head .h,
+.cal-wk-hours .hr {
+    color: var(--ink-2);
+}
+
+.cal-wk-head .h b {
+    color: var(--ink);
+}
+
+.cal-lbl-hint,
+.cal-monthly-hint {
+    color: var(--ink-2);
+}
+
+.cal-cmt .bub {
+    background: var(--surface-2);
+    color: var(--ink);
+}
+
+.cal-cmt .who {
+    color: var(--ink-2);
+}
+
+/* ---------- ゲーム ---------- */
+.game-canvas {
+    background: var(--surface);
+    border: 1px solid var(--line);
+}
+
+.game-label,
+.guess-hint {
+    color: var(--ink-2);
+}
+
+.game-word strong,
+.game-clock strong {
+    color: var(--ink);
+}
+
+.game-home {
+    background: var(--surface);
+    border: 1px solid var(--line);
+}
+
+.guess-box {
+    background: var(--surface-2);
+}
+
+.guess-line {
+    color: var(--ink);
+}
+
+/* カレンダーの日付の数字。曜日の見出しだけ直して、数字を直し忘れていました。
+   実測  日曜 2.99 → 5.44 ／ 土曜 2.97 → 5.30 ／ 他月 2.07 → 4.56 */
+.cal-daycell.hol .cal-daynum {
+    color: #c0392b;
+}
+
+.cal-daycell.sat .cal-daynum {
+    color: #2471a3;
+}
+
+.cal-daycell.out .cal-daynum {
+    color: #7d7470;
+}
+
+/* 今日は色つきの丸なので、上の指定に負けないようにする */
+.cal-daycell.today .cal-daynum,
+.cal-daycell.today.hol .cal-daynum,
+.cal-daycell.today.sat .cal-daynum {
+    background: var(--accent);
+    color: #fff;
+}
+
+.cal-empty {
+    color: var(--ink-2);
+}
+
+/* 日曜・土曜の色は、カレンダーの7つのビューで同じ淡い色が使われており、
+   どれも白地の上で 3:1 を切っていました。まとめて濃くします。
+   日曜 #e57373 (2.99) → #c0392b (5.44)
+   土曜 #6495ed (2.97) → #2471a3 (5.30) */
+.cal-dow div.sun,
+.cal-daycell.sun .cal-daynum,
+.cal-daycell.hol .cal-daynum,
+.cal-holname,
+.cal-wk-head .h.sun b,
+.cal-wk-head .h.hol b,
+.cal-list-date.sun b,
+.cal-list-date.hol b,
+.cal-daysheet-head .ttl b.sun,
+.cal-dowpick.sun {
+    color: #c0392b;
+}
+
+.cal-dow div.sat,
+.cal-daycell.sat .cal-daynum,
+.cal-wk-head .h.sat b,
+.cal-list-date.sat b,
+.cal-daysheet-head .ttl b.sat,
+.cal-dowpick.sat {
+    color: #2471a3;
+}
+
+/* 今日の丸と、選んだ曜日は色つきの地なので、上に勝たせる */
+.cal-daycell.today .cal-daynum,
+.cal-daycell.today.sun .cal-daynum,
+.cal-daycell.today.hol .cal-daynum,
+.cal-daycell.today.sat .cal-daynum {
+    background: var(--accent);
+    color: #fff;
+}
+
+.cal-dowpick.on,
+.cal-dowpick.sun.on,
+.cal-dowpick.sat.on {
+    background: var(--accent);
+    color: #fff;
+}
+
+/* 「すべて見る」は、そのカードの中では主役でもページの主役ではない。
+   Instagram の帯で直したのと同じ理由で、塗りつぶしをやめます */
+.gallery-main-btn {
+    background: var(--surface) !important;
+    color: var(--accent) !important;
+    border: 1px solid var(--accent-line) !important;
+    font-size: 12.5px;
+}
+
+/* 花びらは背景。主張しすぎない程度に */
+#sakura {
+    opacity: .32;
+}
+
+/* カレンダー上部のツールバー。
+   幅が足りないと文字が縦に割れてしまう（「リ / ス / ト」）ので、
+   折り返しを禁じ、入らないときは行ごと折り返します */
+.cal-toolbar {
+    flex-wrap: wrap;
+    row-gap: 8px;
+}
+
+.cal-nav,
+.cal-seg,
+.cal-today-btn {
+    flex: 0 0 auto;
+}
+
+.cal-nav button,
+.cal-seg button,
+.cal-today-btn,
+.cal-chip,
+.cal-icon-btn {
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.cal-seg button {
+    padding: 5px 9px;
+}
+
+.cal-title {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+/* 他月の日付は opacity:.3 で薄められていて、実際に見えている濃さは
+   1.46:1 しかありませんでした。薄さは残したいので、透明度を上げつつ
+   文字自体を濃くして、合成後にちょうど読める濃さに着地させます。
+   土日の色指定に負けないよう、まとめて指定します。 */
+.cal-daycell.out {
+    opacity: .55;
+}
+
+.cal-daycell.out .cal-daynum,
+.cal-daycell.out.sun .cal-daynum,
+.cal-daycell.out.sat .cal-daynum,
+.cal-daycell.out.hol .cal-daynum {
+    color: #060606;
+}
