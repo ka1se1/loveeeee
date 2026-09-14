@@ -14,15 +14,9 @@
   "icons": [
     {
       "src": "/loveeeee/icon.png",
-      "sizes": "512x512",
+      "sizes": "1080x1080",
       "type": "image/png",
       "purpose": "any"
-    },
-    {
-      "src": "/loveeeee/icon.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "maskable"
     }
   ]
 }
