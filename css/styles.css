@@ -3602,3 +3602,144 @@ button {
     font-weight: 700;
     cursor: pointer;
 }
+
+/* ============================================================
+   会話の専用画面
+   カードの中に会話を押し込むのをやめ、画面いっぱいを与えます。
+   最新が下に見える状態で開き、上へスクロールすれば過去が読めます。
+   ============================================================ */
+.chat-screen {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    display: none;
+    flex-direction: column;
+    background: linear-gradient(160deg, #fff5f7 0%, #ffe9ee 100%);
+}
+
+.chat-screen.open {
+    display: flex;
+}
+
+body.chat-open {
+    overflow: hidden;
+}
+
+.chat-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+    padding: calc(env(safe-area-inset-top, 0px) + 12px) 14px 12px;
+    background: rgba(255, 255, 255, .92);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid #ffe3e6;
+}
+
+.chat-back {
+    background: none;
+    border: none;
+    font-size: 22px;
+    line-height: 1;
+    color: #d81b60;
+    cursor: pointer;
+    padding: 4px 8px;
+    min-height: 40px;
+}
+
+.chat-head-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #333;
+}
+
+.chat-head-sub {
+    margin-left: auto;
+    font-size: 11px;
+    color: #b9a9ad;
+}
+
+/* 会話が流れる部分。ここだけがスクロールします */
+.chat-scroll {
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    padding: 6px 14px 16px;
+}
+
+/* 画面下の入力欄。モーダルを開かずに送れます */
+.chat-input {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    flex-shrink: 0;
+    padding: 10px 12px calc(env(safe-area-inset-bottom, 0px) + 10px);
+    background: rgba(255, 255, 255, .96);
+    border-top: 1px solid #ffe3e6;
+}
+
+.chat-input textarea {
+    flex: 1;
+    resize: none;
+    max-height: 120px;
+    border: 1px solid #ffe3e6;
+    border-radius: 20px;
+    padding: 10px 15px;
+    font-size: 16px;
+    line-height: 1.5;
+    font-family: inherit;
+    outline: none;
+    background: #fff;
+    color: #333;
+}
+
+.chat-send {
+    flex-shrink: 0;
+    background: #d81b60;
+    color: #fff;
+    border: none;
+    border-radius: 20px;
+    padding: 0 18px;
+    height: 42px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.chat-send:disabled {
+    opacity: .35;
+    cursor: default;
+}
+
+/* ホームに置く、直近だけの抜粋 */
+.chat-preview .chat-bubble {
+    font-size: 13.5px;
+    cursor: default;
+}
+
+.chat-open-btn {
+    display: block;
+    width: 100%;
+    margin-top: 12px;
+    background: #fff;
+    border: 1px solid #ffe3e6;
+    color: #d81b60;
+    border-radius: 14px;
+    padding: 11px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    min-height: 44px;
+}
+
+/* 会話画面を開いているあいだの重なり順。
+   モーダルとハートのボタンが会話の下に潜らないようにする */
+body.chat-open .modal-overlay {
+    z-index: 2100;
+}
+
+body.chat-open .love-float-btn,
+body.chat-open .cal-fab {
+    display: none;
+}

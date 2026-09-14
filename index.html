@@ -128,7 +128,7 @@
                     <h2>💌 メッセージ
                         <button id="diaryNewBadge" class="new-badge" hidden data-action="badge:dismiss">新着</button>
                     </h2>
-                    <button class="btn-round" data-action="diary:open" aria-label="メッセージを書く">＋</button>
+                    <button class="btn-round" data-action="chat:open" aria-label="メッセージを書く">＋</button>
                 </div>
                 <div id="diaryListContainer" class="chat">
                     <div class="loading-pulse">読み込み中…</div>
@@ -233,6 +233,25 @@
         </div>
     </div>
 
+    <!-- ===================== 会話の専用画面 ===================== -->
+    <div id="chatScreen" class="chat-screen" role="dialog" aria-modal="true" aria-labelledby="chatHeadTitle">
+        <div class="chat-head">
+            <button class="chat-back" data-action="chat:close" aria-label="ホームにもどる">←</button>
+            <span class="chat-head-title" id="chatHeadTitle">メッセージ</span>
+            <span class="chat-head-sub" id="chatHeadCount"></span>
+        </div>
+
+        <div class="chat-scroll" id="chatScroll">
+            <div class="chat" id="chatList"></div>
+        </div>
+
+        <div class="chat-input">
+            <label class="sr-only" for="chatInput">メッセージ</label>
+            <textarea id="chatInput" rows="1" placeholder="メッセージを書く"></textarea>
+            <button class="chat-send" id="chatSend" data-action="chat:send">送信</button>
+        </div>
+    </div>
+
     <!-- ===================== モーダル ===================== -->
     <div id="shopModal" class="modal-overlay">
         <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="shopModalTitle">
@@ -243,17 +262,6 @@
             <div class="modal-actions">
                 <button class="btn" data-action="shop:close">やめる</button>
                 <button class="btn btn-save" data-action="shop:save">保存</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="diaryModal" class="modal-overlay">
-        <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="diaryModalTitle">
-            <h3 id="diaryModalTitle">メッセージを書く</h3>
-            <div class="input-group"><label class="sr-only" for="diaryContentInput">内容</label><textarea id="diaryContentInput" rows="5" placeholder="今日のことや、いま思っていること"></textarea></div>
-            <div class="modal-actions">
-                <button class="btn" data-action="diary:close">やめる</button>
-                <button class="btn btn-save" data-action="diary:save">保存</button>
             </div>
         </div>
     </div>

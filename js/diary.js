@@ -23,9 +23,6 @@ import { notifyPartner } from './push.js';
    ここでは古い順に積み、自分は右・相手は左に寄せます。
    ------------------------------------------------------------ */
 
-const PAGE = 20;          // 最初に見せる件数
-let showing = PAGE;
-
 /** 表示名で自分かどうかを見る。
  *  移行してきた古いメッセージは created_by が全部おなじ（移行した人）なので、
  *  created_by だけで判断すると全部が片側に寄ってしまいます。
@@ -72,7 +69,7 @@ function timeline() {
 }
 
 /** 吹き出し1つ。押すと操作が出る */
-function lineNode(item) {
+function lineNode(item, tools = true) {
   const { kind, row, parent } = item;
   const bubble = el('div', {
     class: 'chat-bubble',
@@ -89,7 +86,20 @@ function lineNode(item) {
   }
   bubble.appendChild(document.createTextNode(row.content || ''));
 
-  const tools = el('div', { class: 'chat-tools' }, [
+  // ホームの抜粋では操作を出さない（読むだけの場所なので）
+  if (!tools) {
+    bubble.removeAttribute('data-action');
+    bubble.removeAttribute('role');
+    bubble.removeAttribute('tabindex');
+    return el('div', { class: 'chat-line-wrap' }, [
+      el('div', { class: 'chat-line' }, [
+        bubble,
+        el('time', { class: 'chat-time', datetime: row.created_at, text: clockLabel(row.created_at) })
+      ])
+    ]);
+  }
+
+  const toolRow = el('div', { class: 'chat-tools' }, [
     el('button', {
       class: 'btn-chip', text: '返信',
       'data-action': 'reply:open',
@@ -107,48 +117,23 @@ function lineNode(item) {
       bubble,
       el('time', { class: 'chat-time', datetime: row.created_at, text: clockLabel(row.created_at) })
     ]),
-    tools
+    toolRow
   ]);
 }
 
-export function renderDiaries() {
-  const box = $('diaryListContainer');
-  if (!box) return;
-  clear(box);
-  box.className = 'chat';
+/** 吹き出しの並びを、指定の入れ物に組み立てる。
+ *  ホームの抜粋（tools なし）と、専用画面の本体（tools あり）で共用します。 */
+function buildInto(box, items, { tools, days }) {
+  let lastDay = null, group = null, lastSide = null, lastAuthor = null;
 
-  const all = timeline();
-  if (!all.length) {
-    box.appendChild(emptyState('まだメッセージがありません。\n右上の＋から書いてみてください'));
-    return;
-  }
-
-  // 多いときは新しいほうだけ。ページ全体が長くなりすぎないように。
-  // showing そのものを減らしてはいけません。件数が少ないときに書きかえてしまうと、
-  // あとからメッセージが増えても増えたぶんが出なくなります。
-  const take = Math.min(showing, all.length);
-  const shown = all.slice(all.length - take);
-  const hidden = all.length - shown.length;
-
-  if (hidden > 0) {
-    box.appendChild(el('button', {
-      class: 'chat-more',
-      text: `以前のメッセージを見る（残り${hidden}件）`,
-      onclick: () => { showing += PAGE; renderDiaries(); }
-    }));
-  }
-
-  let lastDay = null;
-  let group = null;
-  let lastSide = null;
-  let lastAuthor = null;
-
-  for (const item of shown) {
-    const day = dayKey(item.at);
-    if (day !== lastDay) {
-      box.appendChild(el('div', { class: 'chat-day', text: dayLabel(item.at) }));
-      lastDay = day;
-      group = null;
+  for (const item of items) {
+    if (days) {
+      const day = dayKey(item.at);
+      if (day !== lastDay) {
+        box.appendChild(el('div', { class: 'chat-day', text: dayLabel(item.at) }));
+        lastDay = day;
+        group = null;
+      }
     }
 
     const mine = isMine(item.row);
@@ -163,38 +148,153 @@ export function renderDiaries() {
       lastSide = side;
       lastAuthor = author;
     }
-    group.appendChild(lineNode(item));
+    group.appendChild(lineNode(item, tools));
   }
 }
 
-/* ------------------------------------------------------------
-   メッセージを書く
-   ------------------------------------------------------------ */
-function openDiary() {
-  // 名前は聞きません。ログインしているのだから、誰が書いたかは分かっています。
-  setVal('diaryContentInput', '');
-  openModal('diaryModal');
+/** ホームのカード。直近ぶんだけの抜粋で、操作は付けません */
+const PREVIEW = 3;
+
+export function renderDiaries() {
+  const box = $('diaryListContainer');
+  const all = timeline();
+
+  if (box) {
+    clear(box);
+    box.className = 'chat chat-preview';
+    if (!all.length) {
+      box.appendChild(emptyState('まだメッセージがありません。\n右上の＋から書いてみてください'));
+    } else {
+      buildInto(box, all.slice(-PREVIEW), { tools: false, days: false });
+      box.appendChild(el('button', {
+        class: 'chat-open-btn',
+        text: all.length > PREVIEW ? `すべて見る（${all.length}件）` : '会話を開く',
+        'data-action': 'chat:open'
+      }));
+    }
+  }
+
+  // 専用画面を開いているあいだは、そちらも合わせて描き直す
+  if (isChatOpen()) renderChat({ keepScroll: true });
 }
 
-async function saveDiary(_arg, _event, button) {
-  const author = userName || 'わたし';
-  const content = val('diaryContentInput');
-  if (!content) { showToast('内容を書いてね'); return; }
+/* ------------------------------------------------------------
+   会話の専用画面
+   ------------------------------------------------------------ */
+const PAGE = 30;          // 遡るときの1回ぶん
+let showing = PAGE;
 
-  await withBusy(button, '保存中…', async () => {
-    let row;
-    try {
-      row = await addDiary({ author, content, created_by: userId });
-    } catch (e) {
-      showError('メッセージを保存できませんでした', e);
-      return;
-    }
-    if (!state.diaries.some(d => d.id === row.id)) state.diaries.unshift(row);
-    closeModal('diaryModal');
-    renderDiaries();
-    showToast('メッセージを送りました💌');
-    notifyPartner('メッセージが届きました💌', `${author}: ${content.slice(0, 60)}`);
-  });
+function isChatOpen() {
+  const screen = $('chatScreen');
+  return !!screen && screen.classList.contains('open');
+}
+
+function renderChat({ keepScroll } = {}) {
+  const list = $('chatList');
+  const scroller = $('chatScroll');
+  if (!list || !scroller) return;
+
+  const before = scroller.scrollHeight;
+  const atBottom = scroller.scrollHeight - scroller.scrollTop - scroller.clientHeight < 60;
+
+  clear(list);
+  const all = timeline();
+
+  const count = $('chatHeadCount');
+  if (count) count.textContent = all.length ? `${all.length}件` : '';
+
+  if (!all.length) {
+    list.appendChild(emptyState('まだメッセージがありません。\n下の欄に書いて送ってみてください'));
+    return;
+  }
+
+  const take = Math.min(showing, all.length);
+  const shown = all.slice(all.length - take);
+  const hidden = all.length - shown.length;
+
+  if (hidden > 0) {
+    list.appendChild(el('button', {
+      class: 'chat-more',
+      text: `以前のメッセージを見る（残り${hidden}件）`,
+      onclick: () => {
+        // 遡ったとき、いま読んでいた位置がずれないようにする
+        const keep = scroller.scrollHeight - scroller.scrollTop;
+        showing += PAGE;
+        renderChat({ keepScroll: true });
+        scroller.scrollTop = scroller.scrollHeight - keep;
+      }
+    }));
+  }
+
+  buildInto(list, shown, { tools: true, days: true });
+
+  // 開いたとき・新しい発言が来たときは、いちばん下を見せる
+  if (!keepScroll || atBottom) scroller.scrollTop = scroller.scrollHeight;
+  else scroller.scrollTop += scroller.scrollHeight - before;
+}
+
+function openChat() {
+  const screen = $('chatScreen');
+  if (!screen) return;
+  showing = PAGE;
+  screen.classList.add('open');
+  document.body.classList.add('chat-open');
+  renderChat();
+  const badge = $('diaryNewBadge');
+  if (badge) badge.hidden = true;
+  const input = $('chatInput');
+  if (input) input.focus();
+}
+
+function closeChat() {
+  const screen = $('chatScreen');
+  if (screen) screen.classList.remove('open');
+  document.body.classList.remove('chat-open');
+}
+
+/** 入力欄の高さを中身に合わせる */
+function growInput() {
+  const input = $('chatInput');
+  if (!input) return;
+  const scroller = $('chatScroll');
+  // 入力欄が伸びるとスクロール領域が縮み、見ていた最新の発言が隠れてしまう。
+  // 下を見ていたなら、伸ばしたあとも下に留める。
+  const atBottom = scroller &&
+    scroller.scrollHeight - scroller.scrollTop - scroller.clientHeight < 60;
+
+  input.style.height = 'auto';
+  input.style.height = Math.min(input.scrollHeight, 120) + 'px';
+
+  const send = $('chatSend');
+  if (send) send.disabled = !input.value.trim();
+  if (atBottom) scroller.scrollTop = scroller.scrollHeight;
+}
+
+async function sendFromChat() {
+  const input = $('chatInput');
+  if (!input) return;
+  const content = input.value.trim();
+  if (!content) return;
+
+  const author = userName || 'わたし';
+  const send = $('chatSend');
+  if (send) send.disabled = true;
+
+  let row;
+  try {
+    row = await addDiary({ author, content, created_by: userId });
+  } catch (e) {
+    showError('メッセージを送れませんでした', e);
+    if (send) send.disabled = false;
+    return;
+  }
+
+  if (!state.diaries.some(d => d.id === row.id)) state.diaries.unshift(row);
+  input.value = '';
+  growInput();
+  renderDiaries();
+  renderChat();
+  notifyPartner('メッセージが届きました💌', `${author}: ${content.slice(0, 60)}`);
 }
 
 async function deleteDiary(id) {
@@ -269,9 +369,9 @@ async function deleteReply(id) {
    ------------------------------------------------------------ */
 export function initDiary() {
   registerActions({
-    'diary:open': openDiary,
-    'diary:close': () => closeModal('diaryModal'),
-    'diary:save': saveDiary,
+    'chat:open': openChat,
+    'chat:close': closeChat,
+    'chat:send': sendFromChat,
     'diary:delete': deleteDiary,
     'reply:open': openReply,
     'reply:close': closeReply,
@@ -286,6 +386,32 @@ export function initDiary() {
       document.querySelectorAll('.chat-line-wrap.open').forEach(n => n.classList.remove('open'));
       if (!open) wrap.classList.add('open');
     }
+  });
+
+  const input = $('chatInput');
+  if (input) {
+    input.addEventListener('input', growInput);
+    // スマホでは Enter は改行。送信は右のボタンか Ctrl/⌘+Enter で。
+    input.addEventListener('keydown', e => {
+      if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); sendFromChat(); }
+    });
+    growInput();
+  }
+
+  // キーボードが出ると iOS では画面が縮む。入力欄が隠れないよう高さを合わせる
+  if (window.visualViewport) {
+    const fit = () => {
+      const screen = $('chatScreen');
+      if (screen && screen.classList.contains('open')) {
+        screen.style.height = window.visualViewport.height + 'px';
+      }
+    };
+    window.visualViewport.addEventListener('resize', fit);
+    window.visualViewport.addEventListener('scroll', fit);
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && isChatOpen()) closeChat();
   });
 
   on('diaries', renderDiaries);
