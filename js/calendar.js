@@ -772,18 +772,45 @@ function calScrollWeek() {
 }
 
 /* ---------- リストビュー ---------- */
+/* ---------- リストビュー ----------
+   以前は1年先まで（検索時は前後1年）を一度に展開していました。
+   週3回のくり返しが1件あるだけで156件になり、予定4件のときに
+   高さ 20,538px・DOM 3,059要素・描画 514ms でした。
+   ここでは3か月ぶんだけ出し、「もっと見る」で延ばします。
+   ---------------------------------------------------------- */
+// 日数だけで区切ると、くり返しの多さ次第で件数が読めません。
+// 展開する範囲（日数）と、実際に出す件数の両方で抑えます。
+const CAL_LIST_STEP_DAYS = 90;
+const CAL_LIST_STEP_ROWS = 50;
+let calListDays = CAL_LIST_STEP_DAYS;
+let calListRows = CAL_LIST_STEP_ROWS;
+
+function calResetList() {
+    calListDays = CAL_LIST_STEP_DAYS;
+    calListRows = CAL_LIST_STEP_ROWS;
+}
+
 function calRenderList() {
     const from = calSearch ? calYmd(calAdd(new Date(), -365)) : calToday();
-    const to = calYmd(calAdd(new Date(), 365));
-    const occs = calOccurrences(from, to).sort((a, b) =>
+    const to = calYmd(calAdd(new Date(), calListDays));
+    const all = calOccurrences(from, to).sort((a, b) =>
         a.sYmd < b.sYmd ? -1 : a.sYmd > b.sYmd ? 1 : calMin(a.ev.start) - calMin(b.ev.start));
-    if (!occs.length) {
-        return '<div class="cal-empty">' + (calSearch ? '見つからなかったよ 🔍' : 'これからの予定はまだないよ 🌸') + '</div>';
+
+    if (!all.length) {
+        // まだ先に予定があるかもしれないので、そのときは延ばせるようにする
+        const more = calListDays < 365
+            ? '<button class="cal-list-more" data-act="listmore">もっと先まで見る</button>'
+            : '';
+        return '<div class="cal-empty">' +
+            (calSearch ? '見つからなかったよ 🔍' : 'これからの予定はまだないよ 🌸') + '</div>' + more;
     }
+
+    const occs = all.slice(0, calListRows);
     const byDate = {};
     occs.forEach(o => { (byDate[o.sYmd] = byDate[o.sYmd] || []).push(o); });
     const today = calToday();
     let h = '', lastMonth = '';
+
     Object.keys(byDate).sort().forEach(ds => {
         const mon = ds.slice(0, 7);
         if (mon !== lastMonth) {
@@ -802,6 +829,15 @@ function calRenderList() {
         byDate[ds].sort(calOccSort).forEach(o => { h += calEventRow(o); });
         h += '</div></div>';
     });
+
+    // まだ先があるか、件数で打ち切ったなら、続きを見られるようにする
+    const more = all.length > occs.length || calListDays < 365;
+    if (more) {
+        h += '<button class="cal-list-more" data-act="listmore">' +
+            'もっと見る（いま' + occs.length + '件）</button>';
+    } else {
+        h += '<div class="cal-list-note">これで全部です（' + occs.length + '件）</div>';
+    }
     return h;
 }
 
@@ -811,6 +847,7 @@ function calHandleAct(t) {
     if (act === 'prev') calStep(-1);
     else if (act === 'next') calStep(1);
     else if (act === 'today') calGoToday();
+    else if (act === 'listmore') calListMore();
     else if (act === 'view') calSetView(arg);
     else if (act === 'label') calToggleLabel(arg);
     else if (act === 'closesearch') { calSearchOpen = false; calSearch = ''; renderCalendar(); }
@@ -885,7 +922,12 @@ function calGoToday() {
     selectedDate = calToday();
     renderCalendar();
 }
-function calSetView(v) { calView = v; renderCalendar(); }
+function calSetView(v) { calResetList(); calView = v; renderCalendar(); }
+function calListMore() {
+    calListRows += CAL_LIST_STEP_ROWS;
+    calListDays = Math.min(365, calListDays + CAL_LIST_STEP_DAYS);
+    renderCalendar();
+}
 function calToggleMemberFilter(id) {
     if (id === '__all') calMemberFilter = [];
     else {
@@ -904,6 +946,7 @@ function calToggleLabel(k) {
 }
 let calSearchTimer = null;
 function calOnSearch(v) {
+    calResetList();
     calSearch = v;
     clearTimeout(calSearchTimer);
     calSearchTimer = setTimeout(calRenderBody, 180);
