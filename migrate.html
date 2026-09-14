@@ -158,12 +158,30 @@
             document.getElementById('dryBtn').disabled = false;
             document.getElementById('runBtn').disabled = false;
 
+            await checkMember();
+        }
+
+        /**
+         * 名簿に載っているか確かめる。
+         * ここを通っていないと、RLS が全部の書き込みを弾きます。
+         * 「row-level security policy」という分かりにくいエラーになる前に、
+         * ここで止めて、やることを具体的に出します。
+         */
+        async function checkMember() {
             const { data: member } = await db.from('space_members')
                 .select('user_id').eq('user_id', me.id).maybeSingle();
-            if (!member) {
-                log('⚠️ あなたは space_members に入っていません。先に次のSQLを実行してください:');
-                log(`   insert into space_members (user_id, name) values ('${me.id}', 'あなたの名前');`);
-            }
+            if (member) return true;
+
+            log('⚠️ あなた（' + me.email + '）は space_members に入っていません。');
+            log('   このままでは、どのデータも書き込めません（RLSが弾きます）。');
+            log('   Supabase の SQL Editor で次を実行してから、もう一度押してください:');
+            log('');
+            log(`   insert into space_members (user_id, name)`);
+            log(`   values ('${me.id}', 'あなたの名前')`);
+            log(`   on conflict (user_id) do nothing;`);
+            log('');
+            log('   ※ 相手のぶんも同じように入れてください（ふたり必要です）。');
+            return false;
         }
 
         document.getElementById('loginBtn').onclick = async () => {
@@ -239,6 +257,8 @@
             lines = [];
             try { summarize(await loadOld()); log('\n下見はここまで。書き込みはしていません。'); }
             catch (e) { log('✗', e.message); }
+            log('');
+            await checkMember();   // 実行前に名簿の状態も見せておく
         };
 
         /* ---------- 本番 ---------- */
@@ -256,6 +276,10 @@
             lines = [];
             document.getElementById('runBtn').disabled = true;
             try {
+                // 名簿に入っていないなら、ここで止める。
+                // 先に進んでも RLS に全部弾かれるだけです。
+                if (!await checkMember()) return;
+
                 const old = await loadOld();
                 const photos = summarize(old);
                 log('\n--- 移行をはじめます ---');
