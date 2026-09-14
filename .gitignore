@@ -1,0 +1,7 @@
+# supabase CLI が作る作業用ファイル。公開もバックアップも不要です。
+supabase/.temp/
+
+# OS が勝手に作るもの
+Thumbs.db
+desktop.ini
+.DS_Store

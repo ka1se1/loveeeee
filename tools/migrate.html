@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>データ移行ツール — Our Memories</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Segoe UI", Roboto, sans-serif;
+            max-width: 720px;
+            margin: 0 auto;
+            padding: 28px 20px 80px;
+            line-height: 1.8;
+            color: #2f2a2c;
+            background: #fdf8f9;
+        }
+
+        h1 {
+            font-size: 22px;
+            margin-bottom: 4px;
+        }
+
+        .sub {
+            color: #8a7d80;
+            font-size: 13.5px;
+            margin-top: 0;
+        }
+
+        .box {
+            background: #fff;
+            border: 1px solid #f0e2e5;
+            border-radius: 14px;
+            padding: 18px;
+            margin: 18px 0;
+        }
+
+        button {
+            border: none;
+            border-radius: 12px;
+            padding: 13px 20px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            background: #ff6b8a;
+            color: #fff;
+            min-height: 46px;
+        }
+
+        button.secondary {
+            background: #f1eaec;
+            color: #6b5d61;
+        }
+
+        button:disabled {
+            opacity: .5;
+            cursor: default;
+        }
+
+        input {
+            width: 100%;
+            padding: 11px 13px;
+            border: 1px solid #e6dcde;
+            border-radius: 10px;
+            font-size: 16px;
+            box-sizing: border-box;
+            margin-bottom: 10px;
+        }
+
+        pre {
+            background: #241e20;
+            color: #e8dfe2;
+            padding: 14px;
+            border-radius: 12px;
+            font-size: 12.5px;
+            line-height: 1.7;
+            white-space: pre-wrap;
+            word-break: break-all;
+            max-height: 420px;
+            overflow: auto;
+        }
+
+        .warn {
+            background: #fff6e5;
+            border: 1px solid #f5dfae;
+            border-radius: 12px;
+            padding: 14px;
+            font-size: 13px;
+        }
+
+        code {
+            background: #f4eef0;
+            padding: 2px 6px;
+            border-radius: 5px;
+            font-size: 12.5px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>データ移行ツール</h1>
+    <p class="sub">旧 <code>memories</code> テーブルの1行JSONを、新しいテーブル群へ移します。</p>
+
+    <div class="warn">
+        <b>先にやっておくこと</b><br>
+        1. <code>sql/01_schema.sql</code> を Supabase の SQL Editor で実行<br>
+        2. ふたりの <code>auth.users</code> の id を <code>space_members</code> に手で入れる<br>
+        3. このページを本番と同じドメインで開く<br><br>
+        このツールは<b>何度実行しても二重登録されません</b>（移行済みの印を見ます）。
+        旧 <code>memories</code> テーブルは消さないので、失敗してもやり直せます。
+    </div>
+
+    <div class="box">
+        <h3 style="margin-top:0;">1. ログイン</h3>
+        <div id="loginBox">
+            <input id="email" type="email" placeholder="メールアドレス">
+            <input id="password" type="password" placeholder="パスワード">
+            <button id="loginBtn">ログイン</button>
+        </div>
+        <p id="who" style="display:none;font-size:13px;"></p>
+    </div>
+
+    <div class="box">
+        <h3 style="margin-top:0;">2. 中身を確認する（書き込みません）</h3>
+        <button id="dryBtn" class="secondary" disabled>下見だけする</button>
+    </div>
+
+    <div class="box">
+        <h3 style="margin-top:0;">3. 移行を実行する</h3>
+        <button id="runBtn" disabled>移行を実行</button>
+    </div>
+
+    <pre id="log">ログはここに出ます。</pre>
+
+    <script type="module">
+        import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+        import { SUPABASE_URL, SUPABASE_ANON_KEY } from './js/config.js';
+
+        const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const logEl = document.getElementById('log');
+        let lines = [];
+        const log = (...a) => {
+            lines.push(a.join(' '));
+            logEl.textContent = lines.join('\n');
+            logEl.scrollTop = logEl.scrollHeight;
+        };
+
+        let me = null;
+
+        async function refreshSession() {
+            const { data: { session } } = await db.auth.getSession();
+            if (!session) return;
+            me = session.user;
+            document.getElementById('loginBox').style.display = 'none';
+            const who = document.getElementById('who');
+            who.style.display = 'block';
+            who.textContent = `ログイン中: ${me.email}（id: ${me.id}）`;
+            document.getElementById('dryBtn').disabled = false;
+            document.getElementById('runBtn').disabled = false;
+
+            await checkMember();
+        }
+
+        /**
+         * 名簿に載っているか確かめる。
+         * ここを通っていないと、RLS が全部の書き込みを弾きます。
+         * 「row-level security policy」という分かりにくいエラーになる前に、
+         * ここで止めて、やることを具体的に出します。
+         */
+        async function checkMember() {
+            const { data: member } = await db.from('space_members')
+                .select('user_id').eq('user_id', me.id).maybeSingle();
+            if (member) return true;
+
+            log('⚠️ あなた（' + me.email + '）は space_members に入っていません。');
+            log('   このままでは、どのデータも書き込めません（RLSが弾きます）。');
+            log('   Supabase の SQL Editor で次を実行してから、もう一度押してください:');
+            log('');
+            log(`   insert into space_members (user_id, name)`);
+            log(`   values ('${me.id}', 'あなたの名前')`);
+            log(`   on conflict (user_id) do nothing;`);
+            log('');
+            log('   ※ 相手のぶんも同じように入れてください（ふたり必要です）。');
+            return false;
+        }
+
+        document.getElementById('loginBtn').onclick = async () => {
+            const { error } = await db.auth.signInWithPassword({
+                email: document.getElementById('email').value.trim(),
+                password: document.getElementById('password').value
+            });
+            if (error) { log('✗ ログインできませんでした:', error.message); return; }
+            await refreshSession();
+        };
+
+        /* ---------- 旧データの読み込み ---------- */
+        async function loadOld() {
+            const { data, error } = await db.from('memories').select('*').eq('id', 'main').maybeSingle();
+            if (error) throw error;
+            if (!data) throw new Error('旧データ（memories の id=main）が見つかりませんでした');
+            return data;
+        }
+
+        /* Supabase Storage の公開URLからパスだけ取り出す。
+           外部URL（移行前のImgBBなど）はそのまま残す。 */
+        function toPath(url) {
+            if (!url) return null;
+            const marker = '/storage/v1/object/public/photos/';
+            const i = url.indexOf(marker);
+            return i === -1 ? url : decodeURIComponent(url.slice(i + marker.length));
+        }
+
+        function photoRows(photos) {
+            return (photos || []).map(p => {
+                if (typeof p === 'string') {
+                    return { full_path: toPath(p), thumb_path: null, orig_url: null, w: null, h: null, author_name: null, created_at: null };
+                }
+                return {
+                    full_path: toPath(p.full),
+                    thumb_path: p.thumb ? toPath(p.thumb) : null,
+                    orig_url: p.orig || null,
+                    w: p.w || null,
+                    h: p.h || null,
+                    author_name: p.by || null,
+                    created_at: p.at || null
+                };
+            }).filter(r => r.full_path);
+        }
+
+        /* 旧データの日付文字列 "2026/1/5 19:30" を ISO に直す */
+        function toIso(s, fallbackIndex) {
+            if (!s) return new Date(Date.now() - (1000 - fallbackIndex) * 60000).toISOString();
+            const m = String(s).match(/(\d{4})\/(\d{1,2})\/(\d{1,2})[ 　]+(\d{1,2}):(\d{2})/);
+            if (!m) return new Date(Date.now() - (1000 - fallbackIndex) * 60000).toISOString();
+            const [, y, mo, d, h, mi] = m.map(Number);
+            return new Date(y, mo - 1, d, h, mi).toISOString();
+        }
+
+        function summarize(old) {
+            const photos = photoRows(old.photos);
+            log('--- 旧データの中身 ---');
+            log(`写真:        ${(old.photos || []).length} 件（移せるもの ${photos.length} 件）`);
+            log(`メッセージ:  ${(old.diaries || []).length} 件`);
+            log(`　うち返信:  ${(old.diaries || []).reduce((a, d) => a + (d.replies || []).length, 0)} 件`);
+            log(`お店:        ${(old.shops || []).length} 件`);
+            log(`　うちいいね:${(old.shops || []).reduce((a, s) => a + (Array.isArray(s.likes) ? s.likes.length : 0), 0)} 件`);
+            log(`ボイス:      ${(old.voices || []).length} 件`);
+            log(`予定:        ${(old.events || []).length} 件`);
+            log(`記念日:      ${(old.anniversaries || []).length} 件`);
+            log(`ハート:      ${old.love_count || 0}`);
+            log(`ラベル:      ${(old.labels || []).length} 件`);
+            log(`メンバー:    ${(old.members || []).length} 件`);
+            return photos;
+        }
+
+        document.getElementById('dryBtn').onclick = async () => {
+            lines = [];
+            try { summarize(await loadOld()); log('\n下見はここまで。書き込みはしていません。'); }
+            catch (e) { log('✗', e.message); }
+            log('');
+            await checkMember();   // 実行前に名簿の状態も見せておく
+        };
+
+        /* ---------- 本番 ---------- */
+        async function insertIfEmpty(table, rows, label) {
+            if (!rows.length) { log(`${label}: 移すものがありません`); return []; }
+            const { count } = await db.from(table).select('id', { count: 'exact', head: true });
+            if (count > 0) { log(`${label}: すでに ${count} 件あるので飛ばします`); return []; }
+            const { data, error } = await db.from(table).insert(rows).select();
+            if (error) throw new Error(`${label} の挿入に失敗: ${error.message}`);
+            log(`${label}: ${data.length} 件を移しました`);
+            return data;
+        }
+
+        document.getElementById('runBtn').onclick = async () => {
+            lines = [];
+            document.getElementById('runBtn').disabled = true;
+            try {
+                // 名簿に入っていないなら、ここで止める。
+                // 先に進んでも RLS に全部弾かれるだけです。
+                if (!await checkMember()) return;
+
+                const old = await loadOld();
+                const photos = summarize(old);
+                log('\n--- 移行をはじめます ---');
+
+                // 写真
+                await insertIfEmpty('photos',
+                    photos.map((p, i) => ({ ...p, created_at: p.created_at || toIso(null, i), created_by: me.id })),
+                    '写真');
+
+                // メッセージ（返信は親のidが要るので、入れてから紐づける）
+                const diaries = (old.diaries || []);
+                const inserted = await insertIfEmpty('diaries',
+                    diaries.map((d, i) => ({
+                        author: d.author || '?', content: d.content || '',
+                        created_at: toIso(d.date, i), created_by: me.id
+                    })), 'メッセージ');
+
+                if (inserted.length === diaries.length && inserted.length) {
+                    // insert は渡した順で返るので、添字で対応づけできる
+                    const byOldest = [...inserted].sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+                    const order = diaries.map((_, i) => inserted[i] || byOldest[i]);
+                    const replies = [];
+                    diaries.forEach((d, i) => {
+                        (d.replies || []).forEach((r, j) => {
+                            replies.push({
+                                diary_id: order[i].id, author: r.author || '?',
+                                content: r.content || '', created_at: toIso(r.date, j), created_by: me.id
+                            });
+                        });
+                    });
+                    await insertIfEmpty('replies', replies, '返信');
+                }
+
+                // お店といいね
+                const shops = (old.shops || []);
+                const newShops = await insertIfEmpty('shops',
+                    shops.map(s => ({
+                        name: s.name || '名称未設定', note: s.note || '', insta: s.insta || '', created_by: me.id
+                    })), 'お店');
+
+                if (newShops.length === shops.length && newShops.length) {
+                    const likes = [];
+                    shops.forEach((s, i) => {
+                        (Array.isArray(s.likes) ? s.likes : []).forEach(uid => {
+                            likes.push({ shop_id: newShops[i].id, user_id: uid });
+                        });
+                    });
+                    if (likes.length) {
+                        const { error } = await db.from('shop_likes').upsert(likes);
+                        if (error) log('いいね: 一部移せませんでした（' + error.message + '）');
+                        else log(`いいね: ${likes.length} 件を移しました`);
+                    }
+                }
+
+                // ボイス（URL から Storage のパスを取り出す）
+                await insertIfEmpty('voices',
+                    (old.voices || []).map((v, i) => ({
+                        author: v.author || '?',
+                        path: v.fileName || (v.url || '').split('/').pop(),
+                        created_at: toIso(v.date, i), created_by: me.id
+                    })).filter(v => v.path), 'ボイス');
+
+                // 予定（1予定1行）
+                const events = (old.events || []);
+                if (events.length) {
+                    const { count } = await db.from('events').select('id', { count: 'exact', head: true });
+                    if (count > 0) log(`予定: すでに ${count} 件あるので飛ばします`);
+                    else {
+                        const rows = events.map(ev => ({
+                            id: ev.id || ('e' + Math.random().toString(36).slice(2, 10)),
+                            data: ev, updated_by: me.id
+                        }));
+                        const { error } = await db.from('events').upsert(rows);
+                        if (error) throw new Error('予定の挿入に失敗: ' + error.message);
+                        log(`予定: ${rows.length} 件を移しました`);
+                    }
+                }
+
+                // 記念日
+                await insertIfEmpty('anniversaries',
+                    (old.anniversaries || []).map(a => ({
+                        title: a.title || '記念日',
+                        date: (a.date || '').slice(0, 10),
+                        type: a.type || 'anniversary',
+                        created_by: me.id
+                    })).filter(a => a.date), '記念日');
+
+                // 設定
+                const settings = [];
+                if ((old.labels || []).length) settings.push({ key: 'labels', value: old.labels });
+                if ((old.members || []).length) settings.push({ key: 'members', value: old.members });
+                if (settings.length) {
+                    const { error } = await db.from('settings').upsert(settings);
+                    if (error) log('設定: 移せませんでした（' + error.message + '）');
+                    else log(`設定: ${settings.map(s => s.key).join(' / ')} を移しました`);
+                }
+
+                // ハート
+                if (old.love_count) {
+                    const { data: cur } = await db.from('counters').select('value').eq('key', 'love').maybeSingle();
+                    if (cur && Number(cur.value) > 0) log(`ハート: すでに ${cur.value} なので飛ばします`);
+                    else {
+                        const { error } = await db.from('counters').upsert({ key: 'love', value: old.love_count });
+                        if (error) log('ハート: 移せませんでした（' + error.message + '）');
+                        else log(`ハート: ${old.love_count} を移しました`);
+                    }
+                }
+
+                log('\n✅ 移行が終わりました。アプリを開いて中身を確かめてください。');
+                log('　 問題がなければ、しばらく経ってから memories テーブルを消して大丈夫です。');
+            } catch (e) {
+                log('\n✗ 途中で止まりました:', e.message);
+                log('　 もう一度このボタンを押せば、まだ移っていないものだけ続きから移します。');
+            } finally {
+                document.getElementById('runBtn').disabled = false;
+            }
+        };
+
+        refreshSession();
+    </script>
+</body>
+
+</html>
