@@ -6,13 +6,11 @@
 //  作り直した理由:
 //   ・今日1日ぶんしか取っておらず、「明日のデート、雨？」に答えられなかった
 //   ・1日1個の値だけで、「夕方から降る」が言えなかった
-//   ・同じアプリの中にカレンダーの予定があるのに、繋がっていなかった
 //   ・体感温度を取りに行っているのに、表示していなかった
 // ============================================================
 import { WEATHER_FALLBACK } from './config.js';
 import { $, el, clear, showToast } from './util.js';
 import { registerActions } from './actions.js';
-import { calUpcoming } from './calendar.js';
 
 /* WMO の天気コード → 見た目と呼び名 */
 const CODES = {
@@ -29,7 +27,6 @@ const CODES = {
 };
 
 function look(code) { return CODES[code] || ['🌈', '天気']; }
-const isWet = code => (code >= 51 && code <= 86) || code >= 95;
 
 /* 一日を4つに分ける */
 const BUCKETS = [
@@ -39,7 +36,6 @@ const BUCKETS = [
   { name: '夜', from: 21, to: 23 }
 ];
 
-const WD = ['日', '月', '火', '水', '木', '金', '土'];
 const round = n => (n === null || n === undefined) ? '–' : Math.round(n) + '°';
 const pct = n => (n === null || n === undefined) ? '–' : Math.round(n) + '%';
 const ymdOf = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -198,54 +194,6 @@ function renderDays(box) {
   box.appendChild(el('div', { class: 'wx-row' }, cells));
 }
 
-/** カレンダーの予定に、その日時の天気を添える */
-function renderPlans(box) {
-  let plans = [];
-  try { plans = calUpcoming(7); } catch (e) { return; }
-  if (!plans.length) return;
-
-  const now = new Date();
-  const todayYmd = ymdOf(now);
-  const rows = [];
-
-  for (const plan of plans) {
-    if (rows.length >= 3) break;
-
-    let got, when;
-    if (plan.allDay || !plan.start) {
-      got = dayAt(plan.ymd);
-      when = '終日';
-    } else {
-      const hour = Number(plan.start.slice(0, 2));
-      // 今日の、もう過ぎた予定は出さない
-      if (plan.ymd === todayYmd && hour < now.getHours()) continue;
-      got = hourAt(plan.ymd, hour);
-      when = plan.start;
-    }
-    if (!got) continue;
-
-    const d = new Date(plan.ymd + 'T00:00');
-    const day = plan.ymd === todayYmd ? '今日' : `${d.getMonth() + 1}/${d.getDate()}（${WD[d.getDay()]}）`;
-    const wet = got.rain >= 50 && isWet(got.code);
-
-    rows.push(el('div', { class: 'wx-plan' }, [
-      el('span', { class: 'wx-plan-icon', text: look(got.code)[0], 'aria-hidden': 'true' }),
-      el('div', { class: 'wx-plan-body' }, [
-        el('div', { class: 'wx-plan-title', text: plan.title }),
-        el('div', { class: 'wx-plan-when', text: day + ' ' + when + (wet ? ' ・ 傘があると安心' : '') })
-      ]),
-      el('div', { class: 'wx-plan-wx' }, [
-        el('div', { class: 'wx-plan-temp', text: round(got.temp) }),
-        rainNode(got.rain)
-      ])
-    ]));
-  }
-
-  if (!rows.length) return;
-  box.appendChild(el('div', { class: 'wx-head', text: '予定の天気' }));
-  box.appendChild(el('div', { class: 'wx-plans' }, rows));
-}
-
 function render(spot) {
   const box = $('weatherContainer');
   if (!box || !data) return;
@@ -253,7 +201,6 @@ function render(spot) {
   renderNow(box, spot);
   renderBuckets(box);
   renderDays(box);
-  renderPlans(box);
 }
 
 /* ------------------------------------------------------------
@@ -289,11 +236,6 @@ export async function fetchWeather(fromButton = false) {
   } finally {
     loading = false;
   }
-}
-
-/** 予定が増減したときに、予定の天気だけ描き直す */
-export function refreshPlanWeather() {
-  if (data) render(lastSpot || { ...WEATHER_FALLBACK, exact: false });
 }
 
 export function initWeather() {

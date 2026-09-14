@@ -1719,27 +1719,6 @@ async function calPersist() {
 }
 
 /* ============================================================
-   直近の予定を外へ渡す（天気と突き合わせるため）
-   くり返しも展開した「実際に起きる日」を返します。
-   画面上の絞り込み（ラベル・メンバー）は無視して、全部返します。
-   ============================================================ */
-export function calUpcoming(days = 7) {
-    const from = calToday();
-    const to = calYmd(calAdd(calParse(from), days));
-    return calOccurrences(from, to, true)
-        .filter(o => o.sYmd >= from)
-        .sort((a, b) => a.sYmd < b.sYmd ? -1 : a.sYmd > b.sYmd ? 1 : calMin(a.ev.start) - calMin(b.ev.start))
-        .map(o => ({
-            id: o.ev.id,
-            title: o.ev.title || '（名前のない予定）',
-            ymd: o.sYmd,
-            start: o.ev.allDay ? '' : (o.ev.start || ''),
-            allDay: !!o.ev.allDay,
-            location: o.ev.location || ''
-        }));
-}
-
-/* ============================================================
    相手の変更を受け取る（1件ずつ差分で当てる）
    ============================================================ */
 export function calApplyRemote(type, row) {
