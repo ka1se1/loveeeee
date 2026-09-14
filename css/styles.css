@@ -3746,3 +3746,20 @@ body.chat-open .love-float-btn,
 body.chat-open .cal-fab {
     display: none;
 }
+
+/* 会話画面を開いているあいだは、後ろのホーム画面そのものを消す。
+   これまでは「会話画面が画面全体を覆っているはず」という前提で
+   隙間を防いでいましたが、iOS はキーボードの出し入れでレイアウトを
+   作り替えるため、その前提が崩れることがありました。
+   後ろに何も無ければ、隙間ができても見えるものがありません。 */
+body.chat-open>header,
+body.chat-open #homeScreen,
+body.chat-open #gameScreen,
+body.chat-open .countdown-container {
+    display: none !important;
+}
+
+/* キーボードが出ているあいだは、下端の余白（ホームバー用）が不要になる */
+body.chat-open.keyboard-up .chat-input {
+    padding-bottom: 10px;
+}

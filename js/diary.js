@@ -266,10 +266,10 @@ function openChat() {
   const screen = $('chatScreen');
   if (!screen) return;
   showing = PAGE;
-  screen.style.height = '';        // 過去の指定が残っていても打ち消す
-  screen.style.paddingBottom = '';
+  resetScreenBox();
   screen.classList.add('open');
   lockPage();
+  fitKeyboard();
   renderChat();
   const badge = $('diaryNewBadge');
   if (badge) badge.hidden = true;
@@ -279,12 +279,8 @@ function openChat() {
 
 function closeChat() {
   const screen = $('chatScreen');
-  if (screen) {
-    screen.classList.remove('open');
-    screen.style.height = '';
-    screen.style.paddingBottom = '';
-    screen.style.transform = '';
-  }
+  if (screen) screen.classList.remove('open');
+  resetScreenBox();
   unlockPage();
 }
 
@@ -300,15 +296,37 @@ function fitKeyboard() {
   const vv = window.visualViewport;
   if (!vv) return;
 
-  const keyboard = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
-  screen.style.paddingBottom = keyboard + 'px';
-  // 見えている範囲が下にずれていたら、そのぶん会話画面も下げて追従する
-  screen.style.transform = vv.offsetTop > 1 ? 'translateY(' + vv.offsetTop + 'px)' : '';
+  // いま実際に見えている範囲を測って、そこにぴったり重ねる。
+  // 「画面全体を覆っているはず」と決めつけるのをやめ、測った値に従います。
+  // top と height を出すので、bottom は必ず auto にします。
+  // （top・bottom・height が揃うと bottom が無視され、要素が途中で
+  //   終わってしまいます。最初の不具合はこれが原因でした）
+  screen.style.top = vv.offsetTop + 'px';
+  screen.style.left = vv.offsetLeft + 'px';
+  screen.style.width = vv.width + 'px';
+  screen.style.height = vv.height + 'px';
+  screen.style.bottom = 'auto';
+  screen.style.right = 'auto';
+  screen.style.paddingBottom = '';
+  screen.style.transform = '';
 
-  if (keyboard > 0) {
+  const keyboardUp = vv.height < window.innerHeight - 80;
+  document.body.classList.toggle('keyboard-up', keyboardUp);
+
+  if (keyboardUp) {
     const scroller = $('chatScroll');
     if (scroller) scroller.scrollTop = scroller.scrollHeight;
   }
+}
+
+/** 会話画面に付けた位置の指定を、すべて元に戻す */
+function resetScreenBox() {
+  const screen = $('chatScreen');
+  if (!screen) return;
+  for (const p of ['top', 'left', 'right', 'bottom', 'width', 'height', 'paddingBottom', 'transform']) {
+    screen.style[p] = '';
+  }
+  document.body.classList.remove('keyboard-up');
 }
 
 /** 入力欄の高さを中身に合わせる */
