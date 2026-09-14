@@ -175,7 +175,6 @@ let calSheetOcc = null;
 let calSheetMode = 'event'; // 'event' = 予定の詳細 / 'day' = その日の一覧
 let calSheetDate = null;
 let calSheetFrom = null;    // 日別シートから開いたときの戻り先
-let calReminderTimers = [];
 
 /* ---------- 小道具 ---------- */
 const calPad = n => String(n).padStart(2, '0');
@@ -1646,41 +1645,79 @@ async function calAddComment() {
 }
 
 /* ---------- リマインダー通知 ---------- */
+/** リマインダーを設定したのに通知がオフなら、そのままでは届かないと伝える */
 function calAskNotifyPermission() {
-    if (!('Notification' in window)) return;
-    if (Notification.permission === 'default') Notification.requestPermission().then(() => calScheduleReminders());
+    if (!('Notification' in window) || Notification.permission !== 'granted') {
+        showToast('通知がオフです。ホームの「🔔 通知」からオンにすると、この知らせが届きます', 6000);
+    }
 }
-function calScheduleReminders() {
-    calReminderTimers.forEach(clearTimeout);
-    calReminderTimers = [];
-    if (!('Notification' in window) || Notification.permission !== 'granted') return;
+/* ------------------------------------------------------------
+   リマインダー
+
+   以前はここで setTimeout を仕掛けていました。つまりアプリを
+   開きっぱなしにしていないと発火しません。「1週間前に知らせて」と
+   設定しても、1週間ずっと開いていないと来ませんでした。
+
+   くり返しの展開（毎週の複数曜日・隔週・第◯曜日・除外日など）の
+   正しい実装はこのファイルにあります。サーバーにもう一度書くと
+   2つがずれるので、ここで展開した結果だけを共有の設定に置き、
+   送るのはサーバー側（notify-reminders）に任せます。
+   ------------------------------------------------------------ */
+const CAL_REMINDER_DAYS = 60;    // 何日先まで用意しておくか
+let calLastReminders = '';
+
+function calBuildReminders() {
+    const out = [];
     const now = Date.now();
-    // 一番長い通知が1週間前なので、9日先まで見る
-    const occs = calOccurrences(calToday(), calYmd(calAdd(new Date(), 9)), true);
+    const occs = calOccurrences(calToday(), calYmd(calAdd(new Date(), CAL_REMINDER_DAYS)), true);
+
     occs.forEach(o => {
         const ev = o.ev;
         if (!ev.reminder) return;
         const d = calParse(o.sYmd);
+        // 終日の予定は、その日の朝9時を基準にする
         const at = ev.allDay
-            ? new Date(d.getFullYear(), d.getMonth(), d.getDate(), 9, 0).getTime()
+            ? new Date(d.getFullYear(), d.getMonth(), d.getDate(), 9, 0)
             : new Date(d.getFullYear(), d.getMonth(), d.getDate(),
-                Math.floor(calMin(ev.start) / 60), calMin(ev.start) % 60).getTime();
-        const fire = at - ev.reminder * 60000;
-        const delay = fire - now;
-        if (delay > 0 && delay < 172800000) {
-            calReminderTimers.push(setTimeout(() => calNotify(ev, o.sYmd), delay));
-        }
+                Math.floor(calMin(ev.start) / 60), calMin(ev.start) % 60);
+        const fire = at.getTime() - ev.reminder * 60000;
+        if (fire <= now) return;
+
+        out.push({
+            id: ev.id + ':' + o.sYmd,
+            at: new Date(fire).toISOString(),
+            title: ev.title || '予定',
+            date: o.sYmd,
+            when: ev.allDay ? '終日' : (ev.start || ''),
+            before: ev.reminder,
+            location: ev.location || ''
+        });
     });
+
+    return out.sort((a, b) => a.at < b.at ? -1 : a.at > b.at ? 1 : 0).slice(0, 300);
 }
-function calNotify(ev, ds) {
-    const body = (ev.allDay ? '終日' : ev.start || '') + (ev.location ? ' @' + ev.location : '');
-    try {
-        if (navigator.serviceWorker && navigator.serviceWorker.ready) {
-            navigator.serviceWorker.ready.then(reg => {
-                reg.showNotification('📅 ' + ev.title, { body: body, icon: '/loveeeee/icon.png', tag: ev.id + ds });
-            }).catch(() => new Notification('📅 ' + ev.title, { body: body }));
-        } else new Notification('📅 ' + ev.title, { body: body });
-    } catch (e) { }
+
+let calReminderTimer = null;
+
+/** 何度呼ばれてもまとめて1回だけ実行する（描画のたびに走らせない） */
+function calScheduleReminders() {
+    clearTimeout(calReminderTimer);
+    calReminderTimer = setTimeout(calPushReminders, 800);
+}
+
+async function calPushReminders() {
+    let list;
+    try { list = calBuildReminders(); }
+    catch (e) { console.warn('リマインダーを組み立てられませんでした', e); return; }
+
+    // 中身が変わっていなければ書かない（ふたりの端末が同じ内容を
+    // 書き合うので、無駄な通信を減らします）
+    const now = JSON.stringify(list);
+    if (now === calLastReminders) return;
+    calLastReminders = now;
+
+    try { await saveSetting('reminders', list); }
+    catch (e) { console.warn('リマインダーを保存できませんでした', e); }
 }
 
 /* ============================================================
