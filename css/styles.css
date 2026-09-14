@@ -4748,3 +4748,179 @@ select {
 .empty-state {
     box-sizing: border-box;
 }
+
+/* ============================================================
+   天気（作り直し）
+   いま／今日の時間帯／これから3日／予定の天気 の4段。
+   1枚のカードに詰めるので、1段ずつは小さくまとめます。
+   ============================================================ */
+.weather-box {
+    padding: 0;
+    text-align: left;
+}
+
+/* --- いま --- */
+.wx-now {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.wx-now-icon {
+    font-size: 38px;
+    line-height: 1;
+    flex-shrink: 0;
+}
+
+.wx-now-main {
+    flex: 1;
+    min-width: 0;
+}
+
+.wx-now-temp {
+    font-size: 30px;
+    font-weight: 800;
+    color: var(--ink);
+    line-height: 1.1;
+}
+
+.wx-now-label {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--ink-2);
+    margin-top: 1px;
+}
+
+.wx-now-sub {
+    font-size: 12px;
+    color: var(--ink-2);
+    margin-top: 3px;
+}
+
+.wx-loc {
+    font-size: 11px;
+    color: var(--ink-2);
+    align-self: flex-start;
+    background: var(--surface-2);
+    border-radius: 20px;
+    padding: 3px 9px;
+    white-space: nowrap;
+}
+
+/* --- 段の見出し --- */
+.wx-head {
+    font-size: 11.5px;
+    font-weight: 700;
+    color: var(--ink-2);
+    margin: 16px 0 8px;
+    padding-top: 12px;
+    border-top: 1px solid var(--line);
+}
+
+/* --- 時間帯 / 3日 の横並び --- */
+.wx-row {
+    display: flex;
+    gap: 6px;
+}
+
+.wx-cell {
+    flex: 1;
+    min-width: 0;
+    text-align: center;
+    background: var(--surface-2);
+    border-radius: 12px;
+    padding: 8px 4px;
+}
+
+/* もう過ぎた時間帯は、あることは分かる程度に */
+.wx-cell.past {
+    opacity: .45;
+}
+
+.wx-cell-head {
+    font-size: 11px;
+    color: var(--ink-2);
+    font-weight: 700;
+}
+
+.wx-cell-icon {
+    font-size: 20px;
+    line-height: 1.4;
+}
+
+.wx-cell-temp {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--ink);
+    white-space: nowrap;
+}
+
+.wx-min {
+    color: var(--ink-2);
+    font-weight: 400;
+}
+
+.wx-rain {
+    font-size: 11px;
+    color: var(--ink-2);
+    margin-top: 1px;
+}
+
+/* 降りそうなときだけ色を変える */
+.wx-rain.wet {
+    color: #1f6aa5;
+    font-weight: 700;
+}
+
+/* --- 予定の天気 --- */
+.wx-plans {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.wx-plan {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--surface-2);
+    border-radius: 12px;
+    padding: 9px 11px;
+}
+
+.wx-plan-icon {
+    font-size: 20px;
+    line-height: 1;
+    flex-shrink: 0;
+}
+
+.wx-plan-body {
+    flex: 1;
+    min-width: 0;
+}
+
+.wx-plan-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--ink);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.wx-plan-when {
+    font-size: 11.5px;
+    color: var(--ink-2);
+    margin-top: 2px;
+}
+
+.wx-plan-wx {
+    text-align: right;
+    flex-shrink: 0;
+}
+
+.wx-plan-temp {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--ink);
+}

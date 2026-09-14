@@ -11,7 +11,7 @@ import { initPhotos, renderGallery } from './photos.js';
 import { initDiary, renderDiaries } from './diary.js';
 import { initShops, renderShops } from './shops.js';
 import { initVoice, renderVoices } from './voice.js';
-import { initWeather, fetchWeather } from './weather.js';
+import { initWeather, fetchWeather, refreshPlanWeather } from './weather.js';
 import { initAnniversary, renderAnniversaries } from './anniversary.js';
 import { initLove, renderLove } from './love.js';
 import { initGame } from './game.js';
@@ -85,7 +85,11 @@ async function boot() {
   on('settings', row => calApplySettings(row.key, row.value));
 
   startRealtime({
-    onEvents: (type, row) => { calApplyRemote(type, row); showBadge('events'); }
+    onEvents: (type, row) => {
+      calApplyRemote(type, row);
+      showBadge('events');
+      refreshPlanWeather();   // 予定が変われば「予定の天気」も合わせ直す
+    }
   });
 
   fetchWeather();
