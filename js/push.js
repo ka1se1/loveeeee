@@ -71,6 +71,23 @@ function urlBase64ToUint8Array(base64String) {
   return Uint8Array.from([...raw].map(c => c.charCodeAt(0)));
 }
 
+/* ------------------------------------------------------------
+   アプリアイコンの数字（バッジ）
+   増やすのは Service Worker 側（閉じていても増やせるように）。
+   ここでは「開いて見た」ときに消します。
+   ------------------------------------------------------------ */
+async function clearBadge() {
+  try {
+    if ('clearAppBadge' in navigator) await navigator.clearAppBadge();
+  } catch (e) { }   // 許可がない端末では例外が出るが、気にしない
+
+  // Service Worker が持っている数も0に戻してもらう
+  try {
+    const reg = registration || (navigator.serviceWorker && await navigator.serviceWorker.ready);
+    if (reg && reg.active) reg.active.postMessage({ type: 'clear-badge' });
+  } catch (e) { }
+}
+
 /** 起動時。許可を求めず、Service Worker の登録だけしておく */
 export async function initPush() {
   // 何よりも先に受け手を登録する。
@@ -93,6 +110,12 @@ export async function initPush() {
     await subscribe({ silent: true });
   }
   updateButton();
+
+  // 開いた時点で見たことになるので、数字を消す
+  clearBadge();
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) clearBadge();
+  });
 }
 
 function updateButton(state) {

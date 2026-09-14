@@ -71,6 +71,52 @@ Deno.serve(async (req) => {
     Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
   );
 
+  // ---- 動作確認用 ----
+  // body に {"test":true} を付けて呼ぶと、時刻に関係なく
+  // 登録されている全部の端末へテスト通知を送ります。
+  // どの端末が登録されているかも返すので、「通知をオンにしたのに
+  // 来ない」ときの切り分けに使えます。
+  const body = await req.json().catch(() => ({}));
+  if (body && body.test) {
+    const { data: subs, error: e1 } = await admin.from('push_subscriptions').select('*');
+    if (e1) return json({ error: e1.message }, 500);
+    if (!subs || !subs.length) {
+      return json({ mode: 'test', 登録されている端末: 0, sent: 0,
+        note: 'まだどの端末も通知をオンにしていません。アプリの「🔔 通知」からオンにしてください' });
+    }
+
+    const payload = JSON.stringify({
+      title: '🔔 テスト通知',
+      body: 'これが見えていれば、通知はちゃんと届きます',
+      url: '/loveeeee/', tag: 'test-' + Date.now()
+    });
+
+    let sent = 0;
+    const dead: string[] = [];
+    const failed: string[] = [];
+    await Promise.all(subs.map(async (s) => {
+      try {
+        await webpush.sendNotification(
+          { endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } }, payload);
+        sent++;
+      } catch (e) {
+        const code = (e as { statusCode?: number }).statusCode;
+        if (code === 404 || code === 410) dead.push(s.endpoint);
+        else failed.push(String(code) + ' ' + String((e as Error).message).slice(0, 80));
+      }
+    }));
+    if (dead.length) await admin.from('push_subscriptions').delete().in('endpoint', dead);
+
+    return json({
+      mode: 'test',
+      登録されている端末: subs.length,
+      送れた: sent,
+      期限切れで消した: dead.length,
+      失敗: failed,
+      端末: subs.map(s => String(s.user_agent || '').slice(0, 60))
+    });
+  }
+
   const { data: row, error } = await admin
     .from('settings').select('value').eq('key', 'reminders').maybeSingle();
   if (error) return json({ error: error.message }, 500);
