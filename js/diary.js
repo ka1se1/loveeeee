@@ -184,6 +184,35 @@ export function renderDiaries() {
 const PAGE = 30;          // 遡るときの1回ぶん
 let showing = PAGE;
 
+/* 裏のページを本当に止める。
+   iOS の Safari は body の overflow:hidden ではスクロールを止められません。
+   止まっていないと、キーボードを開いた拍子に裏のページが動き、
+   固定したはずの会話画面がずれて、その隙間から後ろが見えます。
+   body 自体を position:fixed にして、いた位置を top で保持します。 */
+let savedScroll = 0;
+
+function lockPage() {
+  savedScroll = window.scrollY || document.documentElement.scrollTop || 0;
+  const b = document.body;
+  b.style.position = 'fixed';
+  b.style.top = -savedScroll + 'px';
+  b.style.left = '0';
+  b.style.right = '0';
+  b.style.width = '100%';
+  b.classList.add('chat-open');
+}
+
+function unlockPage() {
+  const b = document.body;
+  b.classList.remove('chat-open');
+  b.style.position = '';
+  b.style.top = '';
+  b.style.left = '';
+  b.style.right = '';
+  b.style.width = '';
+  window.scrollTo(0, savedScroll);   // 元いた場所に戻す
+}
+
 function isChatOpen() {
   const screen = $('chatScreen');
   return !!screen && screen.classList.contains('open');
@@ -240,12 +269,12 @@ function openChat() {
   screen.style.height = '';        // 過去の指定が残っていても打ち消す
   screen.style.paddingBottom = '';
   screen.classList.add('open');
-  document.body.classList.add('chat-open');
+  lockPage();
   renderChat();
   const badge = $('diaryNewBadge');
   if (badge) badge.hidden = true;
-  const input = $('chatInput');
-  if (input) input.focus();
+  // 自動でフォーカスはしません。iOS ではキーボードが勝手に出たり
+  // 出なかったりして、画面の高さが安定しないためです。
 }
 
 function closeChat() {
@@ -254,8 +283,32 @@ function closeChat() {
     screen.classList.remove('open');
     screen.style.height = '';
     screen.style.paddingBottom = '';
+    screen.style.transform = '';
   }
-  document.body.classList.remove('chat-open');
+  unlockPage();
+}
+
+/** キーボードのぶんだけ、会話画面の内側に余白を作る。
+ *
+ *  ここで height を書きかえてはいけません。.chat-screen は inset:0 で
+ *  画面全体を覆っており、height を足すと bottom が無視されて要素が
+ *  画面の途中で終わり、その下から後ろのホーム画面が見えてしまいます。
+ *  覆うのはやめず、内側に余白を作るのが正解です。 */
+function fitKeyboard() {
+  const screen = $('chatScreen');
+  if (!screen || !screen.classList.contains('open')) return;
+  const vv = window.visualViewport;
+  if (!vv) return;
+
+  const keyboard = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
+  screen.style.paddingBottom = keyboard + 'px';
+  // 見えている範囲が下にずれていたら、そのぶん会話画面も下げて追従する
+  screen.style.transform = vv.offsetTop > 1 ? 'translateY(' + vv.offsetTop + 'px)' : '';
+
+  if (keyboard > 0) {
+    const scroller = $('chatScroll');
+    if (scroller) scroller.scrollTop = scroller.scrollHeight;
+  }
 }
 
 /** 入力欄の高さを中身に合わせる */
@@ -397,6 +450,15 @@ export function initDiary() {
   const input = $('chatInput');
   if (input) {
     input.addEventListener('input', growInput);
+    // iOS は2回目以降のキーボード表示で resize を出さないことがあるので、
+    // 触られたタイミングでも合わせ直す（少し遅らせるのは、キーボードが
+    // 出きってからでないと高さが取れないため）
+    input.addEventListener('focus', () => {
+      fitKeyboard();
+      setTimeout(fitKeyboard, 120);
+      setTimeout(fitKeyboard, 400);
+    });
+    input.addEventListener('blur', () => setTimeout(fitKeyboard, 120));
     // スマホでは Enter は改行。送信は右のボタンか Ctrl/⌘+Enter で。
     input.addEventListener('keydown', e => {
       if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); sendFromChat(); }
@@ -404,30 +466,9 @@ export function initDiary() {
     growInput();
   }
 
-  // キーボードが出たときの対処。
-  //
-  // 以前はここで画面の height を書きかえていましたが、これは誤りでした。
-  // .chat-screen は inset:0（上下とも0）で画面全体を覆っています。
-  // そこへ height を足すと bottom が無視され、要素が画面の途中で終わり、
-  // その下から後ろのホーム画面が見えてしまいます。
-  //
-  // 正しくは、覆うのはやめずに「下側に内側の余白」を作ります。
-  // 余白のぶん入力欄が持ち上がり、余白自体はキーボードに隠れるので、
-  // 後ろが見えることは構造上ありえません。
   if (window.visualViewport) {
-    const vv = window.visualViewport;
-    const fit = () => {
-      const screen = $('chatScreen');
-      if (!screen || !screen.classList.contains('open')) return;
-      const keyboard = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
-      screen.style.paddingBottom = keyboard + 'px';
-      if (keyboard > 0) {
-        const scroller = $('chatScroll');
-        if (scroller) scroller.scrollTop = scroller.scrollHeight;
-      }
-    };
-    vv.addEventListener('resize', fit);
-    vv.addEventListener('scroll', fit);
+    window.visualViewport.addEventListener('resize', fitKeyboard);
+    window.visualViewport.addEventListener('scroll', fitKeyboard);
   }
 
   document.addEventListener('keydown', e => {
