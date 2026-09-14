@@ -3777,17 +3777,8 @@ body.chat-open.keyboard-up .chat-input {
    実測値: 「＋記念日を追加」白 on 薄ピンク = 1.17:1（不可）
            削除の ✕                        = 1.08:1（不可）
    直したあと: 追加ボタン 4.95:1 ／ ✕ 5.91:1（どちらも AA 合格） */
-.countdown-container {
-    margin-top: 0;
-}
-
 .countdown-container .countdown-item {
-    font-size: 13px;
-    margin-bottom: 12px;
-}
-
-.countdown-container .countdown-number {
-    font-size: 30px;
+    margin-bottom: 10px;
 }
 
 .anniv-row {

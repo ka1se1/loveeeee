@@ -68,12 +68,6 @@
     <main id="homeScreen">
         <div class="container">
 
-            <section class="card countdown-container">
-                <div class="countdown-item">いっしょに <span id="anniversaryDays" class="countdown-number">-</span> 日目</div>
-                <div id="anniversaryList"></div>
-                <button class="anniv-add" data-action="anniv:open">＋ 記念日を追加</button>
-            </section>
-
             <section class="card" id="weatherCard">
                 <div class="card-header-actions">
                     <h2>🌤️ 今日の天気</h2>
@@ -163,6 +157,12 @@
                     オンにすると、相手が写真やメッセージを追加したときにお知らせが届きます。
                 </p>
                 <button id="pushBtn" class="btn-wide" data-action="push:enable">🔔 通知をオンにする</button>
+            </section>
+
+            <section class="card countdown-container">
+                <div class="countdown-item">いっしょに <span id="anniversaryDays" class="countdown-number">-</span> 日目</div>
+                <div id="anniversaryList"></div>
+                <button class="anniv-add" data-action="anniv:open">＋ 記念日を追加</button>
             </section>
 
         </div>
