@@ -113,7 +113,13 @@ Deno.serve(async (req) => {
       送れた: sent,
       期限切れで消した: dead.length,
       失敗: failed,
-      端末: subs.map(s => String(s.user_agent || '').slice(0, 60))
+      端末: subs.map(s => ({
+        誰: String(s.user_id || '').slice(0, 8),
+        登録日時: s.created_at,
+        送り先: (() => { try { return new URL(s.endpoint).host; } catch { return '?'; } })(),
+        目印: String(s.endpoint).slice(-12),
+        ブラウザ: String(s.user_agent || '').slice(0, 48)
+      }))
     });
   }
 
