@@ -5221,3 +5221,53 @@ a.dance-place {
     color: var(--danger);
     line-height: 1.5;
 }
+
+/* ============================================================
+   カレンダーの月送り
+   ‹ › が 28×32px、年が 9px と小さすぎて押しにくく読みにくかった
+   ので、広げます。見た目は 36×36、押せる範囲は外側まで 44×44
+   （Apple の目安）。同じ行の「月・週・リスト」「今日」も揃えます。
+   375px 幅の iPhone で、いちばん長い「12月」でも1行に収まるよう
+   測って決めています（それ以上広げると「今日」が次の行に落ちます）。
+   iPhone の文字は Windows の Chrome と幅が少し違うので、8px ほど余らせています。
+   ============================================================ */
+.cal-nav {
+    gap: 2px;
+    align-items: center;
+}
+.cal-nav button {
+    position: relative;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    font-size: 20px;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+/* 見た目は変えずに、押せる範囲だけ 44×44 に広げる */
+.cal-nav button::after {
+    content: '';
+    position: absolute;
+    inset: -4px;
+}
+.cal-title {
+    font-size: 18px;
+    line-height: 1.1;
+    padding: 0 4px;
+    text-align: center;
+}
+.cal-title small {
+    font-size: 11px;
+}
+.cal-seg button {
+    font-size: 13px;
+    padding: 0 7px;
+    height: 34px;
+}
+.cal-today-btn {
+    font-size: 13px;
+    height: 36px;
+    padding: 0 10px;
+}
