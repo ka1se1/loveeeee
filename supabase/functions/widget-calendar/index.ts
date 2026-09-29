@@ -30,6 +30,7 @@ type Item = {
   ymd: string; endYmd?: string; start: string; allDay: boolean;
   title: string; color: string; location?: string;
   who?: string; whoNames?: string;
+  回数?: number;
 };
 
 /** YYYY-MM-DD に日数を足す */
@@ -79,7 +80,17 @@ Deno.serve(async (req) => {
     });
   }
 
-  const all: Item[] = Array.isArray(row?.value) ? row!.value : [];
+  // 以前は配列をそのまま置いていました。いまは
+  // { 総数, 予定 } で、予定は上限で切ってあり、総数は切る前の数です。
+  // アプリを開き直すまでは古い形のままなので、両方読めるようにします。
+  const v = row.value as unknown;
+  const all: Item[] = Array.isArray(v) ? v
+    : Array.isArray((v as { 予定?: Item[] })?.予定) ? (v as { 予定: Item[] }).予定 : [];
+  const storedTotal = Array.isArray(v) ? v.length
+    : Number((v as { 総数?: number })?.総数 ?? all.length);
+  // 上限で切られて、ここに来ていない予定の数。どれも一覧の最後より先の予定です
+  const cut = Math.max(0, storedTotal - all.length);
+
   const today = todayInTokyo();
   const nowMin = minutesNowInTokyo();
 
@@ -97,19 +108,38 @@ Deno.serve(async (req) => {
   const limit = Math.min(10, Math.max(1, Number(url.searchParams.get('limit') || 5)));
 
   // 30日ぶんの合計だと、くり返しの予定でふくらんで実感と合いません。
-  // 直近7日ぶんも数えて返します。
+  // 今日から7日ぶんも数えて返します。
+  // 「今週」と呼ぶと日曜（土曜）で切ると読めてしまうので、名前も
+  // 中身どおり「この先7日」にしています。
   const weekEnd = addDays(today, 6);
   const weekCount = items.filter(it => it.ymd <= weekEnd).length;
 
+  // 同じ予定のくり返しで一覧が埋まらないよう、同じ名前・同じ人の
+  // 予定は最初の1回だけ残し、何回あるかを添えます。
+  // 件数（混み具合）は間引く前の数のままです。
+  const seen = new Map<string, Item>();
+  const distinct: Item[] = [];
+  for (const it of items) {
+    const key = JSON.stringify([it.title, it.who || it.whoNames || '']);
+    const first = seen.get(key);
+    if (first) { first.回数 = (first.回数 || 1) + 1; continue; }
+    const copy = { ...it, 回数: 1 };
+    seen.set(key, copy);
+    distinct.push(copy);
+  }
+
   return json({
     today,
-    件数: items.length,
-    今週: weekCount,
-    予定: items.slice(0, limit),
+    件数: items.length + cut,
+    この先7日: weekCount,
+    今週: weekCount,         // 古いウィジェット用。貼りかえたら使いません
+    予定: distinct.slice(0, limit),
     診断: {
       保存されている件数: all.length,
+      上限で切られた件数: cut,
       これから: items.length,
-      今週の終わり: weekEnd,
+      まとめたあと: distinct.length,
+      七日目: weekEnd,
       最終更新: row.updated_at
     }
   });

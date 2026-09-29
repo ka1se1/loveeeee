@@ -29,50 +29,118 @@ const APP = 'https://ka1se1.github.io/loveeeee/';
 // 空なら Safari で開きます。名前が合っていないと何も起きないので注意。
 const SHORTCUT = '';
 
-/* ---------- 配色（アプリと同じ） ---------- */
-const INK = new Color('#2f2a2c');   // 本文
-const INK2 = new Color('#7a6e71');  // 補足
-const INK3 = new Color('#a89a9e');  // さらに弱い
-const ACCENT = new Color('#c2185b'); // ピンク
-const LINE = new Color('#ebe1da');  // 区切り線
+/* ---------- 配色（アプリと同じ） ----------
+   Color.dynamic で明るい・暗いの両方を持たせると、iOS が外観に
+   合わせて切りかえます（スクリプトを走らせ直さなくても変わります）。
+   どれも背景に対して 4.5:1 以上あることを測って決めています。 */
+const C = (light, dark) => Color.dynamic(new Color(light), new Color(dark));
+const INK = C('#2f2a2c', '#f4eeeb');     // 本文
+const INK2 = C('#685e61', '#c4b6ba');    // 時刻・日付
+const INK3 = C('#756b6e', '#a3959a');    // 場所・件数（以前は 2.45:1 で読めませんでした）
+const ACCENT = C('#c2185b', '#ff8fb4');  // 今日
+const LINE = C('#ebe1da', '#3d3437');    // 区切り線
+const CHIP_BG = C('#fdeef4', '#4a2231');
+const CHIP_FG = C('#c2185b', '#ffb3cc');
+const BG_TOP = C('#fffbf8', '#1f1a1c');
+const BG_BOTTOM = C('#fdf1f4', '#2a2024');
 
 const WD = ['日', '月', '火', '水', '木', '金', '土'];
 const family = (typeof config !== 'undefined' && config.widgetFamily) || 'medium';
+const CACHE_KEY = 'our-memories-widget';
 
 /* ---------- 日付まわり ---------- */
 
-/** 2026-09-29 → { 相対: '今日'|'明日'|'', 表記: '9/29(火)' } */
-function whenOf(ymd, todayYmd) {
+/** 端末の今日。前回の内容を出すときも、今日を基準に言い直すため */
+function todayYmd() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+function shortDate(ymd) {
   const [y, m, d] = ymd.split('-').map(Number);
-  const [ty, tm, td] = todayYmd.split('-').map(Number);
-  const diff = Math.round((Date.UTC(y, m - 1, d) - Date.UTC(ty, tm - 1, td)) / 86400000);
-  const wd = WD[new Date(y, m - 1, d).getDay()];
-  return {
-    差: diff,
-    相対: diff === 0 ? '今日' : diff === 1 ? '明日' : diff === 2 ? '明後日' : '',
-    表記: `${m}/${d}(${wd})`
-  };
+  return `${m}/${d}(${WD[new Date(y, m - 1, d).getDay()]})`;
 }
 
-/** 一覧の行に出す文字。今日・明日は日付より相対を優先する */
-function whenLabel(item, todayYmd) {
-  const w = whenOf(item.ymd, todayYmd);
-  const day = w.相対 || w.表記;
-  if (item.allDay || !item.start) return day + ' 終日';
-  return day + ' ' + item.start;
+/** 今日から何日後か。複数日にまたがって続いている予定は負になる */
+function daysFrom(ymd, today) {
+  const [y, m, d] = ymd.split('-').map(Number);
+  const [ty, tm, td] = today.split('-').map(Number);
+  return Math.round((Date.UTC(y, m - 1, d) - Date.UTC(ty, tm - 1, td)) / 86400000);
 }
 
-function headerDate(todayYmd) {
-  const [y, m, d] = todayYmd.split('-').map(Number);
+/** 今日（または今日も続いている）予定か */
+function isToday(item, today) {
+  return daysFrom(item.ymd, today) <= 0;
+}
+
+/** 行に出す日時。
+ *  今日の予定には「今日」を付けません。見出しに今日の日付があるので、
+ *  付けると同じことを何度も言うことになります（色で今日だと分かります）。 */
+function whenLabel(item, today) {
+  const diff = daysFrom(item.ymd, today);
+  const time = (item.allDay || !item.start) ? '終日' : item.start;
+  if (diff < 0) return '〜' + shortDate(item.endYmd || item.ymd);
+  if (diff === 0) return time;
+  const day = diff === 1 ? '明日' : diff === 2 ? '明後日' : shortDate(item.ymd);
+  return day + ' ' + time;
+}
+
+function headerDate(today) {
+  const [y, m, d] = today.split('-').map(Number);
   return `${m}月${d}日(${WD[new Date(y, m - 1, d).getDay()]})`;
 }
 
-/* ---------- 取得 ---------- */
+/** 窓口と同じ基準で、もう終わった予定を落とす（前回の内容を出すとき用） */
+function stillUpcoming(item, today) {
+  const end = item.endYmd || item.ymd;
+  if (end < today) return false;
+  if (item.ymd !== today || item.allDay || !item.start) return true;
+  const [h, m] = item.start.split(':').map(Number);
+  const now = new Date();
+  return h * 60 + m >= now.getHours() * 60 + now.getMinutes() - 60;
+}
+
+/** 次に描き直してほしい時刻。
+ *  指定しないと iOS 任せになり、終わった予定が何時間も残っていました。
+ *  iOS は目安として扱うので、きっかりには来ません。 */
+function nextRefresh(items, today) {
+  const now = Date.now();
+  const cands = [now + 30 * 60000];                // 少なくとも30分に一度
+  const midnight = new Date();
+  midnight.setHours(24, 0, 30, 0);                 // 日付が変わると「明日」が今日になる
+  cands.push(midnight.getTime());
+  const first = items[0];
+  if (first && first.ymd === today && first.start && !first.allDay) {
+    // 窓口は始まって1時間で一覧から外すので、その直後
+    const [h, m] = first.start.split(':').map(Number);
+    const t = new Date();
+    t.setHours(h, m, 0, 0);
+    cands.push(t.getTime() + 61 * 60000);
+  }
+  const next = Math.min(...cands.filter(t => t > now + 60000));
+  return new Date(Number.isFinite(next) ? next : now + 30 * 60000);
+}
+
+/* ---------- 取得と、前回の内容 ---------- */
 async function load() {
   const req = new Request(`${API}?limit=8`);
   req.headers = { 'x-widget-token': TOKEN };
   req.timeoutInterval = 15;
-  return await req.loadJSON();
+  const data = await req.loadJSON();
+  if (!data || data.error) throw new Error((data && data.error) || '空の応答');
+  return data;
+}
+
+// 通信できないときに白紙にしないよう、うまく取れた内容を取っておきます
+function saveCache(data) {
+  try { Keychain.set(CACHE_KEY, JSON.stringify({ at: Date.now(), data })); } catch (e) { }
+}
+
+function loadCache() {
+  try {
+    if (!Keychain.contains(CACHE_KEY)) return null;
+    return JSON.parse(Keychain.get(CACHE_KEY));
+  } catch (e) { return null; }
 }
 
 /* ---------- 部品 ---------- */
@@ -86,11 +154,34 @@ function dot(stack, color, size) {
 }
 
 /** 誰の予定か。絵文字があればそれ、無ければ名前の頭文字 */
-function who(stack, item, size) {
-  const mark = item.who || (item.whoNames ? item.whoNames.slice(0, 1) : '');
-  if (!mark) return;
-  const t = stack.addText(mark);
-  t.font = Font.systemFont(size);
+function whoMark(item) {
+  return item.who || (item.whoNames ? item.whoNames.slice(0, 1) : '');
+}
+
+/** 誰の予定かを、色の丸のすぐ右に置く。
+ *  以前は右端にあって、1行読むのに目線が左端→中央→右端と
+ *  横断していました。幅を決めておくので、いない行でも時刻が揃います。 */
+function whoSlot(stack, item, size, width) {
+  const slot = stack.addStack();
+  slot.size = new Size(width, 0);
+  slot.centerAlignContent();
+  const mark = whoMark(item);
+  if (mark) {
+    const t = slot.addText(mark);
+    t.font = Font.systemFont(size);
+    t.lineLimit = 1;
+    t.minimumScaleFactor = 0.6;   // ふたりの予定は絵文字が2つになるので
+  }
+  slot.addSpacer();
+}
+
+/** くり返しの回数。同じ予定は1行にまとめてあるので、何回あるかを添える */
+function times(stack, item, size) {
+  if (!item.回数 || item.回数 < 2) return;
+  stack.addSpacer(4);
+  const t = stack.addText('×' + item.回数);
+  t.font = Font.mediumSystemFont(size);
+  t.textColor = INK3;
   t.lineLimit = 1;
 }
 
@@ -104,46 +195,54 @@ function divider(stack) {
   line.addSpacer();
 }
 
-/** 見出し：今日の日付と、これからの件数 */
-function header(w, data) {
+/** 見出し：今日の日付と、この先7日の件数 */
+function header(w, data, today, stale) {
   const head = w.addStack();
   head.centerAlignContent();
 
-  const d = head.addText(headerDate(data.today));
+  const d = head.addText(headerDate(today));
   d.font = Font.semiboldSystemFont(11);
   d.textColor = INK2;
 
   head.addSpacer();
 
-  // 30日ぶんの合計だと、くり返しの予定でふくらんで実感と合いません。
-  // 直近7日ぶんを出します。
-  const n = data.今週;
+  // 前回の内容を出しているときは、件数がもう合っていないので出しません
+  const n = stale ? 0 : (data.この先7日 ?? data.今週);
   if (n) {
     const chip = head.addStack();
     chip.setPadding(2, 8, 2, 8);
     chip.cornerRadius = 9;
-    chip.backgroundColor = new Color('#fdeef4');
-    const c = chip.addText('今週 ' + n + '件');
+    chip.backgroundColor = CHIP_BG;
+    // 「今週」と書くと日曜（土曜）までと読めますが、中身は今日から7日です
+    const c = chip.addText('この先7日 ' + n + '件');
     c.font = Font.boldSystemFont(10);
-    c.textColor = ACCENT;
+    c.textColor = CHIP_FG;
   }
 }
 
 /** 次の予定。いちばん大きく出す */
-function hero(w, item, todayYmd) {
-  const when = whenOf(item.ymd, todayYmd);
-
+function hero(w, item, today) {
   const top = w.addStack();
   top.centerAlignContent();
   dot(top, item.color, 7);
-  top.addSpacer(6);
+  top.addSpacer(5);
+  // ここは1件だけなので、揃える枠は要りません。
+  // 枠（中に伸びるスペーサー）を使うと、行末のスペーサーと余白を
+  // 分け合って、時刻が真ん中へ押し出されます。
+  const mark = whoMark(item);
+  if (mark) {
+    const m = top.addText(mark);
+    m.font = Font.systemFont(13);
+    m.lineLimit = 1;
+    top.addSpacer(4);
+  }
 
-  const t = top.addText(whenLabel(item, todayYmd));
+  const t = top.addText(whenLabel(item, today));
   t.font = Font.boldSystemFont(12);
-  // 今日と明日は色を変えて、ひと目で分かるようにする
-  t.textColor = when.差 <= 1 ? ACCENT : INK2;
+  // 色の意味はひとつだけ：今日
+  t.textColor = isToday(item, today) ? ACCENT : INK2;
+  times(top, item, 10);
   top.addSpacer();
-  who(top, item, 13);
 
   w.addSpacer(4);
 
@@ -163,16 +262,18 @@ function hero(w, item, todayYmd) {
 }
 
 /** 2件目以降。小さく並べる */
-function row(stack, item, todayYmd) {
+function row(stack, item, today) {
   const line = stack.addStack();
   line.centerAlignContent();
 
   dot(line, item.color, 5);
-  line.addSpacer(6);
+  line.addSpacer(5);
+  whoSlot(line, item, 11, 24);
+  line.addSpacer(3);
 
-  const when = line.addText(whenLabel(item, todayYmd));
+  const when = line.addText(whenLabel(item, today));
   when.font = Font.mediumSystemFont(10);
-  when.textColor = INK2;
+  when.textColor = isToday(item, today) ? ACCENT : INK2;
   when.lineLimit = 1;
 
   line.addSpacer(7);
@@ -183,12 +284,21 @@ function row(stack, item, todayYmd) {
   title.lineLimit = 1;
   title.minimumScaleFactor = 0.8;
 
+  times(line, item, 9);
   line.addSpacer();
-  who(line, item, 11);
 }
 
-/* ---------- 組み立て ---------- */
-function build(data, error) {
+function small(stack, text, color) {
+  const t = stack.addText(text);
+  t.font = Font.systemFont(9);
+  t.textColor = color || INK3;
+  t.lineLimit = 1;
+  return t;
+}
+
+/* ---------- 組み立て ----------
+   cachedAt があるときは、通信できずに前回の内容を出しています */
+function build(data, today, cachedAt) {
   const w = new ListWidget();
   w.url = SHORTCUT
     ? 'shortcuts://run-shortcut?name=' + encodeURIComponent(SHORTCUT)
@@ -196,7 +306,7 @@ function build(data, error) {
 
   // 平らな一色より、わずかに階調があるほうが落ち着きます
   const g = new LinearGradient();
-  g.colors = [new Color('#fffbf8'), new Color('#fdf1f4')];
+  g.colors = [BG_TOP, BG_BOTTOM];
   g.locations = [0, 1];
   g.startPoint = new Point(0, 0);
   g.endPoint = new Point(1, 1);
@@ -204,74 +314,92 @@ function build(data, error) {
 
   w.setPadding(14, 15, 12, 15);
 
-  if (error) {
+  // 通信できず、前回の内容も無い
+  if (!data) {
+    header(w, {}, today, true);
+    w.addSpacer();
     const t = w.addText('読み込めませんでした');
     t.font = Font.semiboldSystemFont(13);
     t.textColor = INK;
-    w.addSpacer(4);
-    const s = w.addText('通信を確かめてください');
-    s.font = Font.systemFont(10);
-    s.textColor = INK3;
+    w.addSpacer(2);
+    small(w, '通信を確かめてください');
     w.addSpacer();
+    w.refreshAfterDate = new Date(Date.now() + 10 * 60000);
     return w;
   }
 
-  const items = (data && data.予定) || [];
+  const stale = !!cachedAt;
+  let items = data.予定 || [];
+  if (stale) items = items.filter(it => stillUpcoming(it, today));
+
+  header(w, data, today, stale);
 
   if (!items.length) {
-    header(w, data);
     w.addSpacer();
     const t = w.addText('予定はありません');
     t.font = Font.semiboldSystemFont(13);
     t.textColor = INK2;
     w.addSpacer(2);
-    const s = w.addText('ゆっくりしましょう');
-    s.font = Font.systemFont(10);
-    s.textColor = INK3;
+    small(w, 'ゆっくりしましょう');
     w.addSpacer();
-    return w;
-  }
-
-  header(w, data);
-  w.addSpacer(11);
-  hero(w, items[0], data.today);
-
-  // 小さいサイズは次の1件だけ。残りは件数で伝える
-  const rest = items.slice(1);
-  const room = family === 'small' ? 0 : family === 'large' ? 6 : 3;
-
-  if (room && rest.length) {
+  } else {
     w.addSpacer(11);
-    divider(w);
-    w.addSpacer(9);
-    const body = w.addStack();
-    body.layoutVertically();
-    body.spacing = 7;
-    rest.slice(0, room).forEach(it => row(body, it, data.today));
+    hero(w, items[0], today);
+
+    // 小さいサイズは次の1件だけ。残りは件数で伝える
+    const rest = items.slice(1);
+    const room = family === 'small' ? 0 : family === 'large' ? 6 : 3;
+    const shown = rest.slice(0, room);
+
+    if (shown.length) {
+      w.addSpacer(11);
+      divider(w);
+      w.addSpacer(9);
+      const body = w.addStack();
+      body.layoutVertically();
+      body.spacing = 7;
+      shown.forEach(it => row(body, it, today));
+    }
+
+    w.addSpacer();
+
+    const foot = w.addStack();
+    foot.centerAlignContent();
+
+    // 出している行が何回ぶんの予定かを足して、全体から引きます。
+    // こうすると「見えている」「×N にまとめた」「ほか」の合計が
+    // ちょうど全体の件数になります。
+    // 見出しの数（7日）と取り違えないよう、期間も書きます。
+    if (!stale) {
+      const total = data.件数 || 0;
+      const covered = [items[0], ...shown].reduce((s, it) => s + (it.回数 || 1), 0);
+      const hidden = total - covered;
+      if (hidden > 0) small(foot, 'この先30日で ほか ' + hidden + ' 件');
+    }
+    foot.addSpacer();
+    if (stale) {
+      const at = new Date(cachedAt);
+      small(foot, 'オフライン・' + (at.getMonth() + 1) + '/' + at.getDate() + ' '
+        + String(at.getHours()).padStart(2, '0') + ':' + String(at.getMinutes()).padStart(2, '0') + ' 時点');
+    }
   }
 
-  w.addSpacer();
-
-  // 窓口は上限を付けて返すので、rest の長さで数えると実際より
-  // 少なくなります（上の「19件」と食い違っていました）。
-  // 全体の件数から、いま出している件数を引きます。
-  const total = data.件数 || (rest.length + 1);
-  const hidden = total - 1 - Math.min(room, rest.length);
-  if (hidden > 0) {
-    const more = w.addText('ほか ' + hidden + ' 件');
-    more.font = Font.systemFont(9);
-    more.textColor = INK3;
-  }
-
+  w.refreshAfterDate = stale
+    ? new Date(Date.now() + 10 * 60000)   // 通信が戻ったらすぐ直したい
+    : nextRefresh(items, today);
   return w;
 }
 
 /* ---------- 実行 ---------- */
+const today = todayYmd();
 let widget;
 try {
-  widget = build(await load(), null);
+  const data = await load();
+  saveCache(data);
+  widget = build(data, today, null);
 } catch (e) {
-  widget = build(null, e);
+  const cache = loadCache();
+  widget = cache ? build(cache.data, today, cache.at) : build(null, today, null);
 }
 
 if (typeof config !== 'undefined' && config.runsInWidget) {

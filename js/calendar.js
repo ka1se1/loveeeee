@@ -1747,13 +1747,16 @@ let calLastReminders = '';
    アプリから読ませます。くり返しの展開はここにしか正しい実装が
    ないので、リマインダーと同じく結果だけを置きます。 */
 const CAL_UPCOMING_DAYS = 30;
-const CAL_UPCOMING_MAX = 20;
+// 置いておく件数。以前は20件で切っていて、くり返しの予定が多いと
+// 30日ぶんに届かず、ウィジェットの「ほか N 件」が実際より少なく
+// 出ていました。件数は切る前に数えて、別に渡します。
+const CAL_UPCOMING_MAX = 60;
 let calLastUpcoming = '';
 
 function calBuildUpcoming() {
     const today = calToday();
     const occs = calOccurrences(today, calYmd(calAdd(new Date(), CAL_UPCOMING_DAYS)), true);
-    return occs
+    const list = occs
         .sort((a, b) => a.sYmd < b.sYmd ? -1 : a.sYmd > b.sYmd ? 1 : calMin(a.ev.start) - calMin(b.ev.start))
         .map(o => ({
             ymd: o.sYmd,
@@ -1773,8 +1776,8 @@ function calBuildUpcoming() {
                 const m = calMember(id);
                 return m ? m.name : null;
             }).filter(Boolean).join('・')
-        }))
-        .slice(0, CAL_UPCOMING_MAX);
+        }));
+    return { 総数: list.length, 予定: list.slice(0, CAL_UPCOMING_MAX) };
 }
 
 function calBuildReminders() {
