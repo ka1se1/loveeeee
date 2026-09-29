@@ -158,30 +158,12 @@ function whoMark(item) {
   return item.who || (item.whoNames ? item.whoNames.slice(0, 1) : '');
 }
 
-/** 誰の予定かを、色の丸のすぐ右に置く。
- *  以前は右端にあって、1行読むのに目線が左端→中央→右端と
- *  横断していました。幅を決めておくので、いない行でも時刻が揃います。 */
-function whoSlot(stack, item, size, width) {
-  const slot = stack.addStack();
-  slot.size = new Size(width, 0);
-  slot.centerAlignContent();
+/** 誰の予定か。行の右端に置く */
+function who(stack, item, size) {
   const mark = whoMark(item);
-  if (mark) {
-    const t = slot.addText(mark);
-    t.font = Font.systemFont(size);
-    t.lineLimit = 1;
-    t.minimumScaleFactor = 0.6;   // ふたりの予定は絵文字が2つになるので
-  }
-  slot.addSpacer();
-}
-
-/** くり返しの回数。同じ予定は1行にまとめてあるので、何回あるかを添える */
-function times(stack, item, size) {
-  if (!item.回数 || item.回数 < 2) return;
-  stack.addSpacer(4);
-  const t = stack.addText('×' + item.回数);
-  t.font = Font.mediumSystemFont(size);
-  t.textColor = INK3;
+  if (!mark) return;
+  const t = stack.addText(mark);
+  t.font = Font.systemFont(size);
   t.lineLimit = 1;
 }
 
@@ -225,24 +207,14 @@ function hero(w, item, today) {
   const top = w.addStack();
   top.centerAlignContent();
   dot(top, item.color, 7);
-  top.addSpacer(5);
-  // ここは1件だけなので、揃える枠は要りません。
-  // 枠（中に伸びるスペーサー）を使うと、行末のスペーサーと余白を
-  // 分け合って、時刻が真ん中へ押し出されます。
-  const mark = whoMark(item);
-  if (mark) {
-    const m = top.addText(mark);
-    m.font = Font.systemFont(13);
-    m.lineLimit = 1;
-    top.addSpacer(4);
-  }
+  top.addSpacer(6);
 
   const t = top.addText(whenLabel(item, today));
   t.font = Font.boldSystemFont(12);
   // 色の意味はひとつだけ：今日
   t.textColor = isToday(item, today) ? ACCENT : INK2;
-  times(top, item, 10);
   top.addSpacer();
+  who(top, item, 13);
 
   w.addSpacer(4);
 
@@ -267,9 +239,7 @@ function row(stack, item, today) {
   line.centerAlignContent();
 
   dot(line, item.color, 5);
-  line.addSpacer(5);
-  whoSlot(line, item, 11, 24);
-  line.addSpacer(3);
+  line.addSpacer(6);
 
   const when = line.addText(whenLabel(item, today));
   when.font = Font.mediumSystemFont(10);
@@ -284,8 +254,8 @@ function row(stack, item, today) {
   title.lineLimit = 1;
   title.minimumScaleFactor = 0.8;
 
-  times(line, item, 9);
   line.addSpacer();
+  who(line, item, 11);
 }
 
 function small(stack, text, color) {
@@ -366,14 +336,12 @@ function build(data, today, cachedAt) {
     const foot = w.addStack();
     foot.centerAlignContent();
 
-    // 出している行が何回ぶんの予定かを足して、全体から引きます。
-    // こうすると「見えている」「×N にまとめた」「ほか」の合計が
-    // ちょうど全体の件数になります。
+    // 窓口は上限を付けて返すので、items の長さではなく全体の件数から、
+    // いま出している件数を引きます。
     // 見出しの数（7日）と取り違えないよう、期間も書きます。
     if (!stale) {
       const total = data.件数 || 0;
-      const covered = [items[0], ...shown].reduce((s, it) => s + (it.回数 || 1), 0);
-      const hidden = total - covered;
+      const hidden = total - 1 - shown.length;
       if (hidden > 0) small(foot, 'この先30日で ほか ' + hidden + ' 件');
     }
     foot.addSpacer();

@@ -30,7 +30,6 @@ type Item = {
   ymd: string; endYmd?: string; start: string; allDay: boolean;
   title: string; color: string; location?: string;
   who?: string; whoNames?: string;
-  回数?: number;
 };
 
 /** YYYY-MM-DD に日数を足す */
@@ -114,31 +113,16 @@ Deno.serve(async (req) => {
   const weekEnd = addDays(today, 6);
   const weekCount = items.filter(it => it.ymd <= weekEnd).length;
 
-  // 同じ予定のくり返しで一覧が埋まらないよう、同じ名前・同じ人の
-  // 予定は最初の1回だけ残し、何回あるかを添えます。
-  // 件数（混み具合）は間引く前の数のままです。
-  const seen = new Map<string, Item>();
-  const distinct: Item[] = [];
-  for (const it of items) {
-    const key = JSON.stringify([it.title, it.who || it.whoNames || '']);
-    const first = seen.get(key);
-    if (first) { first.回数 = (first.回数 || 1) + 1; continue; }
-    const copy = { ...it, 回数: 1 };
-    seen.set(key, copy);
-    distinct.push(copy);
-  }
-
   return json({
     today,
     件数: items.length + cut,
     この先7日: weekCount,
     今週: weekCount,         // 古いウィジェット用。貼りかえたら使いません
-    予定: distinct.slice(0, limit),
+    予定: items.slice(0, limit),
     診断: {
       保存されている件数: all.length,
       上限で切られた件数: cut,
       これから: items.length,
-      まとめたあと: distinct.length,
       七日目: weekEnd,
       最終更新: row.updated_at
     }
