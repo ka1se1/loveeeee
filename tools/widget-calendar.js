@@ -85,11 +85,14 @@ function dot(stack, color, size) {
   d.backgroundColor = new Color(color || '#c2185b');
 }
 
-/** 区切り線 */
+/** 区切り線。
+ *  幅を 0 のままにすると中身ぶんに潰れて見えないので、
+ *  中にスペーサーを入れて横いっぱいに広げます。 */
 function divider(stack) {
   const line = stack.addStack();
   line.size = new Size(0, 1);
   line.backgroundColor = LINE;
+  line.addSpacer();
 }
 
 /** 見出し：今日の日付と、これからの件数 */
@@ -236,7 +239,11 @@ function build(data, error) {
 
   w.addSpacer();
 
-  const hidden = rest.length - room;
+  // 窓口は上限を付けて返すので、rest の長さで数えると実際より
+  // 少なくなります（上の「19件」と食い違っていました）。
+  // 全体の件数から、いま出している件数を引きます。
+  const total = data.件数 || (rest.length + 1);
+  const hidden = total - 1 - Math.min(room, rest.length);
   if (hidden > 0) {
     const more = w.addText('ほか ' + hidden + ' 件');
     more.font = Font.systemFont(9);
