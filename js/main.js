@@ -18,7 +18,7 @@ import { initGame } from './game.js';
 import { initPush } from './push.js';
 import { initSakura } from './sakura.js';
 import { initCalendar, calApplyRemote, calApplySettings, calReload, calSetDance } from './calendar.js';
-import { loadDance, primeDance } from './dance.js';
+import { loadDance, primeDance, onDance } from './dance.js';
 
 const BADGE = {
   photos: 'galleryNewBadge',
@@ -83,20 +83,25 @@ async function boot() {
   await initCalendar();
 
   // ダンスの練習。前回の内容をすぐ出してから、読み直す
+  // 読み直したら（カードから登録・削除したときも）カレンダーにも出す
+  onDance(calSetDance);
   const cachedDance = primeDance();
   if (cachedDance) calSetDance(cachedDance);
-  const refreshDance = () => loadDance().then(d => { if (d) calSetDance(d); });
-  refreshDance();
+  loadDance();
 
   on('remote-insert', ({ table }) => showBadge(table));
-  on('settings', row => calApplySettings(row.key, row.value));
+  on('settings', row => {
+    calApplySettings(row.key, row.value);
+    // 相手がスプレッドシートを登録・削除したら、こちらも読み直す
+    if (row.key === 'dance_sheets') loadDance();
+  });
 
   startRealtime({
     onEvents: (type, row) => { calApplyRemote(type, row); showBadge('events'); }
   });
 
   // 取り直したら、全部描き直す
-  on('resync', () => { renderAll(); calReload(); refreshDance(); });
+  on('resync', () => { renderAll(); calReload(); loadDance(); });
 
   // スマホはアプリを閉じるたびに接続が切れます。繋ぎ直しても
   // 切れているあいだの変更は届かないので、戻ってきたときに

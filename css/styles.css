@@ -5038,12 +5038,6 @@ select {
    補足の文字は --ink-2（白の上で 6.24:1）。--ink-3 は 3.94:1 で
    基準に届かないので使っていません。
    ============================================================ */
-.dance-sheet-link {
-    font-size: 12px;
-    color: var(--ink-2);
-    text-decoration: none;
-    white-space: nowrap;
-}
 .dance-head {
     display: flex;
     align-items: baseline;
@@ -5127,4 +5121,103 @@ a.dance-place {
     text-align: center;
     text-decoration: none;
     box-sizing: border-box;
+}
+
+/* スプレッドシートの登録（月ごとに新しく作られるので、何枚でも） */
+.dance-toggle {
+    display: block;
+    margin: 12px 0 0;
+    padding: 6px 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink-2);
+    cursor: pointer;
+}
+.dance-panel {
+    margin-top: 6px;
+    padding: 12px;
+    border-radius: 12px;
+    background: var(--surface-2);
+}
+.dance-panel-title {
+    margin: 0 0 8px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--ink-2);
+}
+.dance-sheet {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--line);
+}
+.dance-sheet-main {
+    flex: 1;
+    min-width: 0;
+    display: grid;
+    gap: 2px;
+}
+.dance-sheet-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink);
+    overflow-wrap: anywhere;
+}
+.dance-sheet-sub {
+    font-size: 12px;
+    color: var(--ink-2);
+}
+.dance-sheet.is-error .dance-sheet-sub { color: var(--danger); }
+.dance-sheet-del {
+    flex: 0 0 auto;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    color: var(--ink-2);
+    border-radius: 999px;
+    padding: 5px 12px;
+    font: inherit;
+    font-size: 12px;
+    cursor: pointer;
+}
+.dance-add-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+}
+.dance-url {
+    flex: 1;
+    min-width: 0;
+    box-sizing: border-box;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 9px 10px;
+    font: inherit;
+    font-size: 16px;   /* 16px 未満だと iPhone が入力のたびに拡大します */
+    background: var(--surface);
+    color: var(--ink);
+}
+.dance-add {
+    flex: 0 0 auto;
+    border: 0;
+    border-radius: 10px;
+    padding: 0 16px;
+    font: inherit;
+    font-size: 14px;
+    font-weight: 700;
+    background: var(--accent);
+    color: #fff;
+    cursor: pointer;
+}
+/* 「確かめています…」は読めないと困るので、追加ボタンは薄くしない */
+.dance-add:disabled { cursor: progress; }
+.dance-sheet-del:disabled { opacity: .6; cursor: default; }
+.dance-panel-msg {
+    margin: 8px 0 0;
+    font-size: 13px;
+    color: var(--danger);
+    line-height: 1.5;
 }

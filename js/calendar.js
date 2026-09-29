@@ -64,7 +64,6 @@ let calLabels = CAL_DEFAULT_LABELS.map(l => ({ key: l.key, name: l.name, color: 
    名前を変えられたりしても練習の色が変わらないように）。 */
 const CAL_DANCE_LABEL = { key: 'dance', name: 'ダンス練習', color: '#00b8a9' };
 let calExternal = [];
-let calDanceSheetUrl = '';
 
 function calLabel(key) {
     if (key === CAL_DANCE_LABEL.key) return CAL_DANCE_LABEL;
@@ -1433,8 +1432,9 @@ function calRenderDanceSheet(ev, box) {
     h += '</div>';
 
     h += '<p class="dance-note">スプレッドシートから自動で出しています。場所や時間が変わったら、スプレッドシートのほうが直ると、ここも変わります。</p>';
-    if (calDanceSheetUrl) {
-        h += '<div class="cal-sheet-actions"><a class="cal-btn-main" href="' + esc(calDanceSheetUrl) +
+    // 月ごとに別のスプレッドシートなので、その日を読んだシートを開く
+    if (ev.sheetUrl) {
+        h += '<div class="cal-sheet-actions"><a class="cal-btn-main" href="' + esc(ev.sheetUrl) +
             '" target="_blank" rel="noopener">📄 スプレッドシートを開く</a></div>';
     }
     box.innerHTML = h;
@@ -1442,12 +1442,12 @@ function calRenderDanceSheet(ev, box) {
 
 /** スプレッドシートの練習を、読むだけの予定にして混ぜる */
 export function calSetDance(data) {
-    calDanceSheetUrl = (data && data.sheetUrl) || '';
     calExternal = ((data && data.days) || []).map(day => {
         const t = danceMainTime(day);
         return {
             id: 'dance:' + day.date,
             dance: day.genres,
+            sheetUrl: day.sheetUrl || (data && data.sheetUrl) || '',
             title: 'ダンス練習',
             date: day.date, endDate: day.date,
             allDay: !t, start: t ? t.start : '', end: t ? t.end : '',

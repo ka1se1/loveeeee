@@ -97,12 +97,19 @@ npx supabase functions deploy send-push
 ホームの「次の練習」カードとカレンダーに出します。読むのは日付・ジャンル・場所・時間だけです
 （ジャンル別のタブにある値段や名前は読みません）。
 
-スプレッドシートの共有は「リンクを知っている全員が閲覧可」である必要があります。
-アドレスは公開リポジトリに載せないよう、Secrets に置きます。
+スプレッドシートは月ごとに新しく作られるので、**「次の練習」カードの「📄 スプレッドシート」から、
+URL を貼って何枚でも登録できます**（来月のぶんも先に登録できます）。登録すると、読めるかどうかを
+先に確かめます。一覧は `settings['dance_sheets']` に置かれ、ふたりで同じものを見ます。
+
+- 共有は「リンクを知っている全員が閲覧可」である必要があります
+- タブの番号はシートごとに違うので、「まとめ」という名前のタブを探して読みます。
+  見つからないときは、読みたいタブを開いた状態の URL を貼ってください
+- 同じ日付が2つのシートにあるときは、あとから登録したほうを使います
+
+`DANCE_SHEET_ID` は、一覧がまだ無いときだけ使う最初の1枚です。
 
 ```bash
-npx supabase secrets set   DANCE_SHEET_ID=URL の /d/ と /edit のあいだ   DANCE_SHEET_GID=「まとめ」タブの gid
-
+npx supabase secrets set DANCE_SHEET_ID=URL の /d/ と /edit のあいだ
 npx supabase functions deploy dance-schedule
 ```
 
