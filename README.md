@@ -91,6 +91,21 @@ npx supabase functions deploy send-push
 
 秘密鍵は Supabase の Secrets にだけ置きます。**`config.js` には絶対に書かないでください。**
 
+### ダンスの練習場所（スプレッドシート）
+
+サークルで共有されているスプレッドシートの「まとめ」タブを、`dance-schedule` が読んで、
+ホームの「次の練習」カードとカレンダーに出します。読むのは日付・ジャンル・場所・時間だけです
+（ジャンル別のタブにある値段や名前は読みません）。
+
+スプレッドシートの共有は「リンクを知っている全員が閲覧可」である必要があります。
+アドレスは公開リポジトリに載せないよう、Secrets に置きます。
+
+```bash
+npx supabase secrets set   DANCE_SHEET_ID=URL の /d/ と /edit のあいだ   DANCE_SHEET_GID=「まとめ」タブの gid
+
+npx supabase functions deploy dance-schedule
+```
+
 ### 使いかた
 
 アプリの「🔔 通知」カードにあるボタンを押すと、その端末で通知が有効になります。

@@ -5032,3 +5032,99 @@ select {
 .cal-month .cal-chipev {
     pointer-events: none;
 }
+
+/* ============================================================
+   ダンスの練習（ホームの「次の練習」と、カレンダーの詳細）
+   補足の文字は --ink-2（白の上で 6.24:1）。--ink-3 は 3.94:1 で
+   基準に届かないので使っていません。
+   ============================================================ */
+.dance-sheet-link {
+    font-size: 12px;
+    color: var(--ink-2);
+    text-decoration: none;
+    white-space: nowrap;
+}
+.dance-head {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 4px 10px;
+    margin-bottom: 10px;
+}
+.dance-date {
+    font-size: 17px;
+    color: var(--ink);
+}
+.dance-until {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--ink-2);
+    background: var(--surface-2);
+    border-radius: 999px;
+    padding: 2px 9px;
+}
+.dance-until.is-today {
+    color: var(--accent);
+    background: var(--accent-soft);
+}
+.dance-time {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink);
+}
+.dance-list,
+.cal-dance-list {
+    display: grid;
+    gap: 2px;
+}
+.cal-dance-list { margin: 8px 0 12px; }
+.dance-row {
+    display: grid;
+    grid-template-columns: 62px minmax(0, 1fr) auto;
+    align-items: baseline;
+    gap: 10px;
+    padding: 7px 0;
+    border-bottom: 1px solid var(--line);
+    font-size: 14px;
+}
+.dance-row:last-child { border-bottom: 0; }
+.dance-genre {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--ink-2);
+}
+.dance-place {
+    color: var(--ink);
+    text-decoration: none;
+    overflow-wrap: anywhere;
+}
+a.dance-place {
+    text-decoration: underline;
+    text-decoration-color: var(--line);
+    text-underline-offset: 3px;
+}
+.dance-place.is-empty { color: var(--ink-2); }
+.dance-own {
+    font-size: 12px;
+    color: var(--ink-2);
+    white-space: nowrap;
+}
+.dance-note {
+    font-size: 12px;
+    color: var(--ink-2);
+    margin: 10px 0 0;
+    line-height: 1.6;
+}
+/* 詳細シートのボタンの形は button にしか付いていないので、
+   リンク（スプレッドシートを開く）にも同じ形を付けます */
+.cal-sheet-actions a.cal-btn-main {
+    flex: 1;
+    display: block;
+    border-radius: 14px;
+    padding: 12px;
+    font-size: 13px;
+    font-weight: 700;
+    text-align: center;
+    text-decoration: none;
+    box-sizing: border-box;
+}

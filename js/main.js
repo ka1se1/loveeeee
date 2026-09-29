@@ -17,7 +17,8 @@ import { initLove, renderLove } from './love.js';
 import { initGame } from './game.js';
 import { initPush } from './push.js';
 import { initSakura } from './sakura.js';
-import { initCalendar, calApplyRemote, calApplySettings, calReload } from './calendar.js';
+import { initCalendar, calApplyRemote, calApplySettings, calReload, calSetDance } from './calendar.js';
+import { loadDance, primeDance } from './dance.js';
 
 const BADGE = {
   photos: 'galleryNewBadge',
@@ -81,6 +82,12 @@ async function boot() {
 
   await initCalendar();
 
+  // ダンスの練習。前回の内容をすぐ出してから、読み直す
+  const cachedDance = primeDance();
+  if (cachedDance) calSetDance(cachedDance);
+  const refreshDance = () => loadDance().then(d => { if (d) calSetDance(d); });
+  refreshDance();
+
   on('remote-insert', ({ table }) => showBadge(table));
   on('settings', row => calApplySettings(row.key, row.value));
 
@@ -89,7 +96,7 @@ async function boot() {
   });
 
   // 取り直したら、全部描き直す
-  on('resync', () => { renderAll(); calReload(); });
+  on('resync', () => { renderAll(); calReload(); refreshDance(); });
 
   // スマホはアプリを閉じるたびに接続が切れます。繋ぎ直しても
   // 切れているあいだの変更は届かないので、戻ってきたときに

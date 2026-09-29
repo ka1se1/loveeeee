@@ -11,6 +11,7 @@ import { state, upsertEvent, deleteEventRow, loadEvents, saveSetting, addPhotos 
 import { uploadOnePhoto, photoUrl, renderGallery } from './photos.js';
 import { showToast, showError, confirmDialog } from './util.js';
 import { registerActions } from './actions.js';
+import { danceMainTime } from './dance.js';
 
 /* 予定の写真は新旧どちらの形でも開けるようにしておく */
 function calPhotoFull(p) {
@@ -56,7 +57,17 @@ const CAL_PALETTE = ['#ff6b8a', '#ff4d6d', '#ff9248', '#f6b93b', '#ffd43b', '#a3
     '#e056a0', '#b08968', '#8d99ae', '#5a6472'];
 let calLabels = CAL_DEFAULT_LABELS.map(l => ({ key: l.key, name: l.name, color: l.color }));
 
+/* スプレッドシートから読んだダンスの練習。
+   読むだけの予定なので events とは別に持ち、展開のときだけ混ぜます。
+   events に入れないので、保存（calPersist）されることはありません。
+   ラベルも編集できるラベルとは別にしておきます（消されたり、
+   名前を変えられたりしても練習の色が変わらないように）。 */
+const CAL_DANCE_LABEL = { key: 'dance', name: 'ダンス練習', color: '#00b8a9' };
+let calExternal = [];
+let calDanceSheetUrl = '';
+
 function calLabel(key) {
+    if (key === CAL_DANCE_LABEL.key) return CAL_DANCE_LABEL;
     return calLabels.find(l => l.key === key) || calLabels[0] ||
         { key: 'rose', name: 'ラベル', color: '#ff6b8a' };
 }
@@ -326,7 +337,9 @@ function calMatches(ev) {
     if (calSearch) {
         const q = calSearch.toLowerCase();
         const hay = (ev.title + ' ' + (ev.note || '') + ' ' + (ev.location || '') + ' ' +
-            (ev.author || '') + ' ' + calMemberNames(ev)).toLowerCase();
+            (ev.author || '') + ' ' + calMemberNames(ev) + ' ' +
+            // 練習は、ジャンルや場所でも探せるように
+            (ev.dance || []).map(g => g.genre + ' ' + g.place).join(' ')).toLowerCase();
         if (hay.indexOf(q) === -1) return false;
     }
     return true;
@@ -342,7 +355,7 @@ function calOccurrences(fromStr, toStr, ignoreFilter) {
     calNormalizeAll();
     const out = [];
     const from = calParse(fromStr), to = calParse(toStr);
-    events.forEach(ev => {
+    events.concat(calExternal).forEach(ev => {
         if (!ignoreFilter && !calMatches(ev)) return;
         const span = Math.max(0, calDiff(ev.date, ev.endDate));
         const base = calParse(ev.date);
@@ -700,6 +713,7 @@ function calEventRow(o) {
     if (ev.photos && ev.photos.length) meta.push('📷' + ev.photos.length);
     if (ev.comments.length) meta.push('💬' + ev.comments.length);
     if (ev.reminder) meta.push('🔔' + CAL_REMINDERS[ev.reminder]);
+    if (ev.dance) meta.push('💃' + ev.dance.length + 'ジャンル');
     const avatars = calMemberAvatars(ev);
     const strip = (ev.photos && ev.photos.length)
         ? '<div class="cal-ev-photos">' + ev.photos.slice(0, 4).map(p =>
@@ -1273,8 +1287,12 @@ function calDayStep(n) {
     calCursor = calParse(calSheetDate);
     renderCalendar();
 }
+/** 予定を id で探す。スプレッドシートの練習も含めて */
+function calFindEvent(id) {
+    return events.find(x => x.id === id) || calExternal.find(x => x.id === id) || null;
+}
 function openEventDetail(id, dateStr) {
-    const ev = events.find(x => x.id === id);
+    const ev = calFindEvent(id);
     if (!ev) return;
     calSheetFrom = calSheetMode === 'day' ? calSheetDate : null;
     calSheetMode = 'event';
@@ -1296,9 +1314,10 @@ function closeCalSheet() {
 }
 function calRenderSheet() {
     if (calSheetMode === 'day') return calRenderDaySheet();
-    const ev = events.find(x => x.id === calSheetEvId);
+    const ev = calFindEvent(calSheetEvId);
     const box = document.getElementById('calSheetBody');
     if (!ev || !box) return;
+    if (ev.dance) return calRenderDanceSheet(ev, box);
     const ds = calSheetOcc;
     const span = calDiff(ev.date, ev.endDate);
     const sD = calParse(ds), eD = calAdd(sD, span);
@@ -1377,6 +1396,72 @@ function calRenderSheet() {
         '><button data-act="addcomment">送信</button></div>';
     box.innerHTML = h;
 }
+/* ---------- 練習の詳細 ----------
+   スプレッドシートから読んだものなので、編集・削除・写真・コメントは
+   出しません（ここで変えても、次に読み直すと元に戻ってしまうため）。 */
+function calRenderDanceSheet(ev, box) {
+    const ds = ev.date;
+    const d = calParse(ds);
+    const diff = calDiff(calToday(), ds);
+    const cd = diff === 0 ? '今日！' : diff === 1 ? '明日！' : diff > 0 ? 'あと' + diff + '日' : Math.abs(diff) + '日前';
+    let when = (d.getMonth() + 1) + '月' + d.getDate() + '日(' + CAL_DOW[d.getDay()] + ')';
+    if (!ev.allDay) when += '　' + ev.start + ' 〜 ' + ev.end;
+    const main = ev.allDay ? '' : ev.start + '〜' + ev.end;
+
+    let h = '';
+    if (calSheetFrom) {
+        const bd = calParse(calSheetFrom);
+        h += '<div class="cal-sheet-back" data-act="backtoday">‹ ' +
+            (bd.getMonth() + 1) + '月' + bd.getDate() + '日の予定にもどる</div>';
+    }
+    h += '<div class="cal-detail-label" style="background:' + calTint(calColor(ev), .22) + ';border-left:3px solid ' + calColor(ev) + '">● ' + esc(CAL_DANCE_LABEL.name) + '</div>';
+    h += '<div class="cal-detail-title">' + esc(ev.title) + '<span class="cal-cd-badge">' + cd + '</span></div>';
+    h += '<div style="height:10px"></div>';
+    h += '<div class="cal-row"><span class="ic">🕒</span><div>' + esc(when) + '</div></div>';
+
+    h += '<div class="cal-dance-list">';
+    ev.dance.forEach(g => {
+        const own = g.start ? g.start + '〜' + g.end : g.time;
+        const differs = own && own !== main;
+        h += '<div class="dance-row"><span class="dance-genre">' + esc(g.genre) + '</span>' +
+            (g.place
+                ? '<a class="dance-place" href="https://www.google.com/maps/search/?api=1&query=' +
+                  encodeURIComponent(g.place) + '" target="_blank" rel="noopener">' + esc(g.place) + '</a>'
+                : '<span class="dance-place is-empty">場所未定</span>') +
+            (differs ? '<span class="dance-own">' + esc(own) + '</span>' : '') + '</div>';
+    });
+    h += '</div>';
+
+    h += '<p class="dance-note">スプレッドシートから自動で出しています。場所や時間が変わったら、スプレッドシートのほうが直ると、ここも変わります。</p>';
+    if (calDanceSheetUrl) {
+        h += '<div class="cal-sheet-actions"><a class="cal-btn-main" href="' + esc(calDanceSheetUrl) +
+            '" target="_blank" rel="noopener">📄 スプレッドシートを開く</a></div>';
+    }
+    box.innerHTML = h;
+}
+
+/** スプレッドシートの練習を、読むだけの予定にして混ぜる */
+export function calSetDance(data) {
+    calDanceSheetUrl = (data && data.sheetUrl) || '';
+    calExternal = ((data && data.days) || []).map(day => {
+        const t = danceMainTime(day);
+        return {
+            id: 'dance:' + day.date,
+            dance: day.genres,
+            title: 'ダンス練習',
+            date: day.date, endDate: day.date,
+            allDay: !t, start: t ? t.start : '', end: t ? t.end : '',
+            label: CAL_DANCE_LABEL.key,
+            repeat: 'none', repeatDows: [], repeatUntil: '', monthlyMode: 'date', exdates: [],
+            members: [], photos: [], comments: [], reminder: 0,
+            location: '', note: '', author: ''
+        };
+    });
+    if (document.getElementById('calendarContainer')) renderCalendar();
+    if (calSheetEvId && String(calSheetEvId).startsWith('dance:')) calRenderSheet();
+    calScheduleReminders();   // ウィジェット用の一覧にも入れる
+}
+
 /* ---------- 日別シート（その日の予定をぜんぶ） ---------- */
 function calRenderDaySheet() {
     const box = document.getElementById('calSheetBody');
