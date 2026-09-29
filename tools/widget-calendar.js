@@ -13,6 +13,9 @@
 //   5. ホーム画面を長押し → ＋ → Scriptable → 中サイズを選ぶ
 //   6. ウィジェットを長押し → 「ウィジェットを編集」→
 //      Script に「Our Memories」を選ぶ
+//   7. 押したときにアプリを開きたいなら、ショートカットApp で
+//      「App を開く → Our Memories」を作り、名前を下の SHORTCUT と
+//      同じにする（作らなければ Safari で開きます）
 //
 //  ※ このファイルは公開リポジトリに入るので、合言葉は
 //    書き込んでいません。
@@ -21,6 +24,27 @@
 const TOKEN = 'ここに合言葉';
 const API = 'https://aelvmpvgzvaiomqimzgo.supabase.co/functions/v1/widget-calendar';
 const APP = 'https://ka1se1.github.io/loveeeee/';
+
+// ウィジェットを押したときに、ホーム画面のアプリのほうを開くための設定。
+//
+// iOS はウィジェットから渡された https:// を必ず既定のブラウザに送るので、
+// そのままだと Safari が開きます。Web アプリを直接開く URL はありません。
+// ただしショートカットの「App を開く」は、ホーム画面に追加した Web アプリを
+// 選べます（iOS 16.4以降）。そこを経由すればアプリのほうが開きます。
+//
+// 作りかた:
+//   ショートカットApp → ＋ → 「App を開く」を追加 → App に
+//   「Our Memories」を選ぶ → 名前を下の SHORTCUT と同じにする
+//
+// 空にすると、これまでどおり Safari で開きます。
+const SHORTCUT = 'OpenOurMemories';
+
+/** 押したときに開く先 */
+function openUrl() {
+    return SHORTCUT
+        ? 'shortcuts://run-shortcut?name=' + encodeURIComponent(SHORTCUT)
+        : APP;
+}
 
 // アプリと同じ配色
 const BG = new Color('#fbf7f4');
@@ -87,7 +111,7 @@ function row(stack, item, todayYmd) {
 function build(data, error) {
   const w = new ListWidget();
   w.backgroundColor = BG;
-  w.url = APP;                       // 押すとアプリが開く
+  w.url = openUrl();                 // 押すとアプリが開く（上の SHORTCUT 参照）
   w.setPadding(12, 13, 12, 13);
 
   const head = w.addStack();

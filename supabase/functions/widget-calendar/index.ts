@@ -59,8 +59,17 @@ Deno.serve(async (req) => {
   );
 
   const { data: row, error } = await admin
-    .from('settings').select('value').eq('key', 'upcoming').maybeSingle();
+    .from('settings').select('value, updated_at').eq('key', 'upcoming').maybeSingle();
   if (error) return json({ error: error.message }, 500);
+
+  // 0件のとき、原因が「アプリがまだ書いていない」のか
+  // 「ここで落としている」のか分かるようにしておきます
+  if (!row) {
+    return json({
+      today: todayInTokyo(), 件数: 0, 予定: [],
+      診断: 'アプリがまだ予定の一覧を書き出していません。アプリを一度開いてください'
+    });
+  }
 
   const all: Item[] = Array.isArray(row?.value) ? row!.value : [];
   const today = todayInTokyo();
@@ -82,6 +91,11 @@ Deno.serve(async (req) => {
   return json({
     today,
     件数: items.length,
-    予定: items.slice(0, limit)
+    予定: items.slice(0, limit),
+    診断: {
+      保存されている件数: all.length,
+      これから: items.length,
+      最終更新: row.updated_at
+    }
   });
 });
