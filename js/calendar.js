@@ -62,7 +62,7 @@ let calLabels = CAL_DEFAULT_LABELS.map(l => ({ key: l.key, name: l.name, color: 
    events に入れないので、保存（calPersist）されることはありません。
    ラベルも編集できるラベルとは別にしておきます（消されたり、
    名前を変えられたりしても練習の色が変わらないように）。 */
-const CAL_DANCE_LABEL = { key: 'dance', name: 'ダンス練習', color: '#00b8a9' };
+const CAL_DANCE_LABEL = { key: 'dance', name: 'eagle', color: '#00b8a9' };
 let calExternal = [];
 
 function calLabel(key) {
@@ -1311,6 +1311,17 @@ function closeCalSheet() {
     calSheetMode = 'event';
     calSheetFrom = null;
 }
+/** 詳細の「👥 誰の予定か」の行 */
+function calWhoRow(ev) {
+    if (!(ev.members || []).length) return '';
+    return '<div class="cal-row"><span class="ic">👥</span><div class="cal-who">' +
+        (ev.members || []).map(id => {
+            const m = calMember(id);
+            return m ? '<span class="cal-who-tag" style="background:' + m.color + '22;color:' + m.color + '">' +
+                '<span class="cal-av" style="background:' + m.color + '">' + esc(m.emoji) + '</span>' +
+                esc(m.name) + '</span>' : '';
+        }).join('') + '</div></div>';
+}
 function calRenderSheet() {
     if (calSheetMode === 'day') return calRenderDaySheet();
     const ev = calFindEvent(calSheetEvId);
@@ -1339,15 +1350,7 @@ function calRenderSheet() {
         '<span class="cal-cd-badge">' + cd + '</span></div>';
     h += '<div style="height:10px"></div>';
     h += '<div class="cal-row"><span class="ic">🕒</span><div>' + esc(when) + '</div></div>';
-    if ((ev.members || []).length) {
-        h += '<div class="cal-row"><span class="ic">👥</span><div class="cal-who">' +
-            (ev.members || []).map(id => {
-                const m = calMember(id);
-                return m ? '<span class="cal-who-tag" style="background:' + m.color + '22;color:' + m.color + '">' +
-                    '<span class="cal-av" style="background:' + m.color + '">' + esc(m.emoji) + '</span>' +
-                    esc(m.name) + '</span>' : '';
-            }).join('') + '</div></div>';
-    }
+    h += calWhoRow(ev);
     if (ev.repeat !== 'none') {
         h += '<div class="cal-row"><span class="ic">🔁</span><div>' + esc(calRepeatText(ev)) +
             (ev.repeatUntil ? '（' + esc(ev.repeatUntil) + 'まで）' : '') + '</div></div>';
@@ -1417,6 +1420,7 @@ function calRenderDanceSheet(ev, box) {
     h += '<div class="cal-detail-title">' + esc(ev.title) + '<span class="cal-cd-badge">' + cd + '</span></div>';
     h += '<div style="height:10px"></div>';
     h += '<div class="cal-row"><span class="ic">🕒</span><div>' + esc(when) + '</div></div>';
+    h += calWhoRow(ev);
 
     h += '<div class="cal-dance-list">';
     ev.dance.forEach(g => {
@@ -1448,12 +1452,15 @@ export function calSetDance(data) {
             id: 'dance:' + day.date,
             dance: day.genres,
             sheetUrl: day.sheetUrl || (data && data.sheetUrl) || '',
-            title: 'ダンス練習',
+            title: 'eagle',
             date: day.date, endDate: day.date,
             allDay: !t, start: t ? t.start : '', end: t ? t.end : '',
             label: CAL_DANCE_LABEL.key,
             repeat: 'none', repeatDows: [], repeatUntil: '', monthlyMode: 'date', exdates: [],
-            members: [], photos: [], comments: [], reminder: 0,
+            // ふたりの予定。メンバーは名前や絵文字を変えることがあるので、
+            // 決め打ちにせず、そのときのメンバー全員を返します
+            get members() { return calMembers.map(m => m.id); },
+            photos: [], comments: [], reminder: 0,
             location: '', note: '', author: ''
         };
     });
