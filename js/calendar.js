@@ -1742,6 +1742,31 @@ function calAskNotifyPermission() {
 const CAL_REMINDER_DAYS = 60;    // 何日先まで用意しておくか
 let calLastReminders = '';
 
+/* ホーム画面のウィジェットが読むための、これからの予定。
+   iOS のウィジェットは Web アプリからは作れないので、Scriptable という
+   アプリから読ませます。くり返しの展開はここにしか正しい実装が
+   ないので、リマインダーと同じく結果だけを置きます。 */
+const CAL_UPCOMING_DAYS = 30;
+const CAL_UPCOMING_MAX = 20;
+let calLastUpcoming = '';
+
+function calBuildUpcoming() {
+    const today = calToday();
+    const occs = calOccurrences(today, calYmd(calAdd(new Date(), CAL_UPCOMING_DAYS)), true);
+    return occs
+        .sort((a, b) => a.sYmd < b.sYmd ? -1 : a.sYmd > b.sYmd ? 1 : calMin(a.ev.start) - calMin(b.ev.start))
+        .map(o => ({
+            ymd: o.sYmd,
+            endYmd: o.eYmd,
+            start: o.ev.allDay ? '' : (o.ev.start || ''),
+            allDay: !!o.ev.allDay,
+            title: o.ev.title || '（名前のない予定）',
+            color: calLabel(o.ev.label).color,
+            location: o.ev.location || ''
+        }))
+        .slice(0, CAL_UPCOMING_MAX);
+}
+
 function calBuildReminders() {
     const out = [];
     const now = Date.now();
@@ -1778,7 +1803,10 @@ let calReminderTimer = null;
 /** 何度呼ばれてもまとめて1回だけ実行する（描画のたびに走らせない） */
 function calScheduleReminders() {
     clearTimeout(calReminderTimer);
-    calReminderTimer = setTimeout(calPushReminders, 800);
+    calReminderTimer = setTimeout(() => {
+        calPushReminders();
+        calPushUpcoming();
+    }, 800);
 }
 
 async function calPushReminders() {
@@ -1794,6 +1822,20 @@ async function calPushReminders() {
 
     try { await saveSetting('reminders', list); }
     catch (e) { console.warn('リマインダーを保存できませんでした', e); }
+}
+
+/** ウィジェット用の予定一覧を置く。中身が変わったときだけ書きます */
+async function calPushUpcoming() {
+    let list;
+    try { list = calBuildUpcoming(); }
+    catch (e) { console.warn('予定の一覧を組み立てられませんでした', e); return; }
+
+    const now = JSON.stringify(list);
+    if (now === calLastUpcoming) return;
+    calLastUpcoming = now;
+
+    try { await saveSetting('upcoming', list); }
+    catch (e) { console.warn('予定の一覧を保存できませんでした', e); }
 }
 
 /* ============================================================
