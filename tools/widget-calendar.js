@@ -85,6 +85,15 @@ function dot(stack, color, size) {
   d.backgroundColor = new Color(color || '#c2185b');
 }
 
+/** 誰の予定か。絵文字があればそれ、無ければ名前の頭文字 */
+function who(stack, item, size) {
+  const mark = item.who || (item.whoNames ? item.whoNames.slice(0, 1) : '');
+  if (!mark) return;
+  const t = stack.addText(mark);
+  t.font = Font.systemFont(size);
+  t.lineLimit = 1;
+}
+
 /** 区切り線。
  *  幅を 0 のままにすると中身ぶんに潰れて見えないので、
  *  中にスペーサーを入れて横いっぱいに広げます。 */
@@ -106,13 +115,15 @@ function header(w, data) {
 
   head.addSpacer();
 
-  const n = data.件数 || 0;
+  // 30日ぶんの合計だと、くり返しの予定でふくらんで実感と合いません。
+  // 直近7日ぶんを出します。
+  const n = data.今週;
   if (n) {
     const chip = head.addStack();
-    chip.setPadding(2, 7, 2, 7);
-    chip.cornerRadius = 8;
+    chip.setPadding(2, 8, 2, 8);
+    chip.cornerRadius = 9;
     chip.backgroundColor = new Color('#fdeef4');
-    const c = chip.addText(String(n) + '件');
+    const c = chip.addText('今週 ' + n + '件');
     c.font = Font.boldSystemFont(10);
     c.textColor = ACCENT;
   }
@@ -132,8 +143,9 @@ function hero(w, item, todayYmd) {
   // 今日と明日は色を変えて、ひと目で分かるようにする
   t.textColor = when.差 <= 1 ? ACCENT : INK2;
   top.addSpacer();
+  who(top, item, 13);
 
-  w.addSpacer(3);
+  w.addSpacer(4);
 
   const title = w.addText(item.title);
   title.font = Font.boldSystemFont(17);
@@ -172,6 +184,7 @@ function row(stack, item, todayYmd) {
   title.minimumScaleFactor = 0.8;
 
   line.addSpacer();
+  who(line, item, 11);
 }
 
 /* ---------- 組み立て ---------- */
@@ -189,7 +202,7 @@ function build(data, error) {
   g.endPoint = new Point(1, 1);
   w.backgroundGradient = g;
 
-  w.setPadding(13, 14, 13, 14);
+  w.setPadding(14, 15, 12, 15);
 
   if (error) {
     const t = w.addText('読み込めませんでした');
@@ -220,7 +233,7 @@ function build(data, error) {
   }
 
   header(w, data);
-  w.addSpacer(9);
+  w.addSpacer(11);
   hero(w, items[0], data.today);
 
   // 小さいサイズは次の1件だけ。残りは件数で伝える
@@ -228,12 +241,12 @@ function build(data, error) {
   const room = family === 'small' ? 0 : family === 'large' ? 6 : 3;
 
   if (room && rest.length) {
-    w.addSpacer(9);
+    w.addSpacer(11);
     divider(w);
-    w.addSpacer(8);
+    w.addSpacer(9);
     const body = w.addStack();
     body.layoutVertically();
-    body.spacing = 6;
+    body.spacing = 7;
     rest.slice(0, room).forEach(it => row(body, it, data.today));
   }
 

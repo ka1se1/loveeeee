@@ -1762,7 +1762,17 @@ function calBuildUpcoming() {
             allDay: !!o.ev.allDay,
             title: o.ev.title || '（名前のない予定）',
             color: calLabel(o.ev.label).color,
-            location: o.ev.location || ''
+            location: o.ev.location || '',
+            // 誰の予定か。ウィジェットは絵文字だけ使いますが、
+            // 絵文字を消しているメンバーもいるので名前も渡します
+            who: (o.ev.members || []).map(id => {
+                const m = calMember(id);
+                return m ? (m.emoji || '') : '';
+            }).join(''),
+            whoNames: (o.ev.members || []).map(id => {
+                const m = calMember(id);
+                return m ? m.name : null;
+            }).filter(Boolean).join('・')
         }))
         .slice(0, CAL_UPCOMING_MAX);
 }

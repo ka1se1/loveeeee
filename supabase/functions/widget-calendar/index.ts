@@ -29,7 +29,15 @@ const json = (body: unknown, status = 200) =>
 type Item = {
   ymd: string; endYmd?: string; start: string; allDay: boolean;
   title: string; color: string; location?: string;
+  who?: string; whoNames?: string;
 };
+
+/** YYYY-MM-DD に日数を足す */
+function addDays(ymd: string, n: number) {
+  const [y, m, d] = ymd.split('-').map(Number);
+  const t = new Date(Date.UTC(y, m - 1, d) + n * 86400000);
+  return t.toISOString().slice(0, 10);
+}
 
 function todayInTokyo() {
   return new Intl.DateTimeFormat('en-CA', {
@@ -88,13 +96,20 @@ Deno.serve(async (req) => {
 
   const limit = Math.min(10, Math.max(1, Number(url.searchParams.get('limit') || 5)));
 
+  // 30日ぶんの合計だと、くり返しの予定でふくらんで実感と合いません。
+  // 直近7日ぶんも数えて返します。
+  const weekEnd = addDays(today, 6);
+  const weekCount = items.filter(it => it.ymd <= weekEnd).length;
+
   return json({
     today,
     件数: items.length,
+    今週: weekCount,
     予定: items.slice(0, limit),
     診断: {
       保存されている件数: all.length,
       これから: items.length,
+      今週の終わり: weekEnd,
       最終更新: row.updated_at
     }
   });
