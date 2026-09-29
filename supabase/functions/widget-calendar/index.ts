@@ -27,7 +27,7 @@ const json = (body: unknown, status = 200) =>
   });
 
 type Item = {
-  ymd: string; endYmd?: string; start: string; allDay: boolean;
+  ymd: string; endYmd?: string; start: string; end?: string; allDay: boolean;
   title: string; color: string; location?: string;
   who?: string; whoNames?: string;
 };

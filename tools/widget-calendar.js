@@ -61,6 +61,18 @@ function shortDate(ymd) {
   return `${m}/${d}(${WD[new Date(y, m - 1, d).getDay()]})`;
 }
 
+/** 何時から何時まで。アプリと同じく「〜」でつなぎます（幅が狭いので空白なし）。
+ *  日をまたぐ予定は、終わりの日付も付けます。
+ *  終わりの時刻が無い予定（古いデータを含む）は、始まりだけ。 */
+function timeRange(item) {
+  if (item.allDay || !item.start) return '終日';
+  if (!item.end) return item.start;
+  const endDay = item.endYmd && item.endYmd !== item.ymd
+    ? item.endYmd.split('-').slice(1).map(Number).join('/') + ' '
+    : '';
+  return item.start + '〜' + endDay + item.end;
+}
+
 /** 今日から何日後か。複数日にまたがって続いている予定は負になる */
 function daysFrom(ymd, today) {
   const [y, m, d] = ymd.split('-').map(Number);
@@ -78,8 +90,12 @@ function isToday(item, today) {
  *  付けると同じことを何度も言うことになります（色で今日だと分かります）。 */
 function whenLabel(item, today) {
   const diff = daysFrom(item.ymd, today);
-  const time = (item.allDay || !item.start) ? '終日' : item.start;
-  if (diff < 0) return '〜' + shortDate(item.endYmd || item.ymd);
+  const time = timeRange(item);
+  if (diff < 0) {
+    // 前の日から続いている予定は、いつ終わるかだけを出す
+    const until = '〜' + shortDate(item.endYmd || item.ymd);
+    return (item.allDay || !item.end) ? until : until + ' ' + item.end;
+  }
   if (diff === 0) return time;
   const day = diff === 1 ? '明日' : diff === 2 ? '明後日' : shortDate(item.ymd);
   return day + ' ' + time;

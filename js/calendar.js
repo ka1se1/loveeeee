@@ -1762,6 +1762,7 @@ function calBuildUpcoming() {
             ymd: o.sYmd,
             endYmd: o.eYmd,
             start: o.ev.allDay ? '' : (o.ev.start || ''),
+            end: o.ev.allDay ? '' : (o.ev.end || ''),
             allDay: !!o.ev.allDay,
             title: o.ev.title || '（名前のない予定）',
             color: calLabel(o.ev.label).color,
