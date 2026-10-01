@@ -1868,7 +1868,13 @@ function calBuildUpcoming() {
             whoNames: (o.ev.members || []).map(id => {
                 const m = calMember(id);
                 return m ? m.name : null;
-            }).filter(Boolean).join('・')
+            }).filter(Boolean).join('・'),
+            // スプレッドシートの練習は、ジャンルごとの場所も渡す。
+            // どのジャンルを出すかはウィジェットの側で選びます
+            // （ふたりのスマホで、それぞれ違うジャンルを出せるように）
+            dance: o.ev.dance ? o.ev.dance.map(g => ({
+                genre: g.genre, place: g.place, start: g.start, end: g.end, time: g.time
+            })) : undefined
         }));
     return { 総数: list.length, 予定: list.slice(0, CAL_UPCOMING_MAX) };
 }

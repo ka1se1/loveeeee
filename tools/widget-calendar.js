@@ -29,6 +29,11 @@ const APP = 'https://ka1se1.github.io/loveeeee/';
 // 空なら Safari で開きます。名前が合っていないと何も起きないので注意。
 const SHORTCUT = '';
 
+// eagle（スプレッドシートの練習）で場所を出すジャンル。この順に並べます。
+// ふたりのスマホで違うジャンルを出したいときは、それぞれここを変えてください。
+// 例: ['break']、['hiphop', 'jazz']。空にすると場所は出しません。
+const GENRES = ['break', 'hiphop'];
+
 /* ---------- 配色（アプリと同じ） ----------
    Color.dynamic で明るい・暗いの両方を持たせると、iOS が外観に
    合わせて切りかえます（スクリプトを走らせ直さなくても変わります）。
@@ -240,7 +245,32 @@ function hero(w, item, today) {
   title.lineLimit = 1;
   title.minimumScaleFactor = 0.7;
 
-  if (item.location) {
+  // eagle は、選んだジャンルの場所を1行ずつ
+  const places = placesOf(item);
+  if (places.length) {
+    places.forEach(d => {
+      w.addSpacer(2);
+      const line = w.addStack();
+      line.centerAlignContent();
+      const g = line.addText(d.genre);
+      g.font = Font.semiboldSystemFont(10);
+      g.textColor = INK3;
+      line.addSpacer(5);
+      const p = line.addText(d.place || '場所未定');
+      p.font = Font.mediumSystemFont(11);
+      p.textColor = INK2;
+      p.lineLimit = 1;
+      p.minimumScaleFactor = 0.7;
+      const own = ownTime(d, item);
+      if (own) {
+        line.addSpacer(5);
+        const o = line.addText(own);
+        o.font = Font.systemFont(10);
+        o.textColor = INK3;
+      }
+      line.addSpacer();
+    });
+  } else if (item.location) {
     w.addSpacer(2);
     const loc = w.addText('📍 ' + item.location);
     loc.font = Font.systemFont(10);
@@ -249,9 +279,55 @@ function hero(w, item, today) {
   }
 }
 
+/* ---------- eagle の場所 ---------- */
+
+/** 選んだジャンルの場所。その日にそのジャンルが無ければ飛ばす */
+function placesOf(item) {
+  if (!item.dance || !item.dance.length) return [];
+  return GENRES
+    .map(name => item.dance.find(d => String(d.genre).toLowerCase() === name.toLowerCase()))
+    .filter(Boolean);
+}
+
+/** そのジャンルだけ時間が違うときの時間（同じなら空） */
+function ownTime(d, item) {
+  if (d.start) {
+    return (d.start === item.start && d.end === item.end) ? '' : d.start + '〜' + d.end;
+  }
+  return d.time || '';
+}
+
+/** 一覧の行の下に出す、場所の1行 */
+function placesLine(item) {
+  return placesOf(item).map(d => {
+    const own = ownTime(d, item);
+    return d.genre + ' ' + (d.place || '場所未定') + (own ? '（' + own + '）' : '');
+  }).join('　');
+}
+
+/* 高さの見積もり（行1本 = 1）。
+   ウィジェットは中身が多いと下が切れてしまうので、場所の行が増えた
+   ぶん、一覧に出す件数を減らします。場所の行は字が小さいので 0.9。 */
+const SUB_LINE = 0.9;
+function rowCost(item) { return 1 + (placesOf(item).length ? SUB_LINE : 0); }
+function heroExtra(item) {
+  // 場所（📍）1行までは、もともとの作りに入っている
+  const lines = placesOf(item).length || (item.location ? 1 : 0);
+  return Math.max(0, lines - 1) * SUB_LINE;
+}
+
 /** 2件目以降。小さく並べる */
 function row(stack, item, today) {
-  const line = stack.addStack();
+  const sub = placesLine(item);
+  let line = stack.addStack();
+  let wrap = null;
+  if (sub) {
+    // eagle は、行の下に場所をもう1行
+    wrap = line;
+    wrap.layoutVertically();
+    wrap.spacing = 2;
+    line = wrap.addStack();
+  }
   line.centerAlignContent();
 
   dot(line, item.color, 5);
@@ -272,6 +348,17 @@ function row(stack, item, today) {
 
   line.addSpacer();
   who(line, item, 11);
+
+  if (wrap) {
+    const second = wrap.addStack();
+    second.addSpacer(11);          // 色の丸のぶん下げて、時刻の頭に揃える
+    const p = second.addText(sub);
+    p.font = Font.systemFont(10);
+    p.textColor = INK2;
+    p.lineLimit = 1;
+    p.minimumScaleFactor = 0.7;
+    second.addSpacer();
+  }
 }
 
 function small(stack, text, color) {
@@ -334,8 +421,17 @@ function build(data, today, cachedAt) {
 
     // 小さいサイズは次の1件だけ。残りは件数で伝える
     const rest = items.slice(1);
-    const room = family === 'small' ? 0 : family === 'large' ? 6 : 3;
-    const shown = rest.slice(0, room);
+    // 場所の行が増えたぶんは件数を減らす。日付の順は崩さない
+    // （入らない行が出たら、そこで止める）
+    const room = (family === 'small' ? 0 : family === 'large' ? 6 : 3) - heroExtra(items[0]);
+    const shown = [];
+    let used = 0;
+    for (const it of rest) {
+      const c = rowCost(it);
+      if (used + c > room + 1e-9) break;
+      shown.push(it);
+      used += c;
+    }
 
     if (shown.length) {
       w.addSpacer(11);

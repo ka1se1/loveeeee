@@ -30,6 +30,7 @@ type Item = {
   ymd: string; endYmd?: string; start: string; end?: string; allDay: boolean;
   title: string; color: string; location?: string;
   who?: string; whoNames?: string;
+  dance?: { genre: string; place: string; start: string; end: string; time: string }[];
 };
 
 /** YYYY-MM-DD に日数を足す */
