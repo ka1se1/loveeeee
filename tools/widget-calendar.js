@@ -207,7 +207,7 @@ function header(w, data, today, stale) {
   head.centerAlignContent();
 
   const d = head.addText(headerDate(today));
-  d.font = Font.semiboldSystemFont(11);
+  d.font = Font.semiboldSystemFont(13);
   d.textColor = INK2;
 
   head.addSpacer();
@@ -221,7 +221,7 @@ function header(w, data, today, stale) {
     chip.backgroundColor = CHIP_BG;
     // 「今週」と書くと日曜（土曜）までと読めますが、中身は今日から7日です
     const c = chip.addText('この先7日 ' + n + '件');
-    c.font = Font.boldSystemFont(10);
+    c.font = Font.boldSystemFont(12);
     c.textColor = CHIP_FG;
   }
 }
@@ -234,16 +234,16 @@ function hero(w, item, today) {
   top.addSpacer(6);
 
   const t = top.addText(whenLabel(item, today));
-  t.font = Font.boldSystemFont(12);
+  t.font = Font.boldSystemFont(14);
   // 色の意味はひとつだけ：今日
   t.textColor = isToday(item, today) ? ACCENT : INK2;
   top.addSpacer();
-  who(top, item, 13);
+  who(top, item, 15);
 
   w.addSpacer(4);
 
   const title = w.addText(item.title);
-  title.font = Font.boldSystemFont(17);
+  title.font = Font.boldSystemFont(20);
   title.textColor = INK;
   title.lineLimit = 1;
   title.minimumScaleFactor = 0.7;
@@ -256,11 +256,11 @@ function hero(w, item, today) {
       const line = w.addStack();
       line.centerAlignContent();
       const g = line.addText(d.genre);
-      g.font = Font.semiboldSystemFont(10);
+      g.font = Font.semiboldSystemFont(12);
       g.textColor = INK3;
       line.addSpacer(5);
       const p = line.addText(d.place || '場所未定');
-      p.font = Font.mediumSystemFont(11);
+      p.font = Font.mediumSystemFont(13);
       p.textColor = INK2;
       p.lineLimit = 1;
       p.minimumScaleFactor = 0.7;
@@ -268,7 +268,7 @@ function hero(w, item, today) {
       if (own) {
         line.addSpacer(5);
         const o = line.addText(own);
-        o.font = Font.systemFont(10);
+        o.font = Font.systemFont(12);
         o.textColor = INK3;
       }
       line.addSpacer();
@@ -276,7 +276,7 @@ function hero(w, item, today) {
   } else if (item.location) {
     w.addSpacer(2);
     const loc = w.addText('📍 ' + item.location);
-    loc.font = Font.systemFont(10);
+    loc.font = Font.systemFont(12);
     loc.textColor = INK3;
     loc.lineLimit = 1;
   }
@@ -337,26 +337,27 @@ function row(stack, item, today) {
   line.addSpacer(6);
 
   const when = line.addText(whenLabel(item, today));
-  when.font = Font.mediumSystemFont(10);
+  when.font = Font.mediumSystemFont(12);
   when.textColor = isToday(item, today) ? ACCENT : INK2;
   when.lineLimit = 1;
+  when.minimumScaleFactor = 0.8;
 
   line.addSpacer(7);
 
   const title = line.addText(item.title);
-  title.font = Font.semiboldSystemFont(11);
+  title.font = Font.semiboldSystemFont(13);
   title.textColor = INK;
   title.lineLimit = 1;
   title.minimumScaleFactor = 0.8;
 
   line.addSpacer();
-  who(line, item, 11);
+  who(line, item, 13);
 
   if (wrap) {
     const second = wrap.addStack();
     second.addSpacer(11);          // 色の丸のぶん下げて、時刻の頭に揃える
     const p = second.addText(sub);
-    p.font = Font.systemFont(10);
+    p.font = Font.systemFont(12);
     p.textColor = INK2;
     p.lineLimit = 1;
     p.minimumScaleFactor = 0.7;
@@ -366,7 +367,7 @@ function row(stack, item, today) {
 
 function small(stack, text, color) {
   const t = stack.addText(text);
-  t.font = Font.systemFont(9);
+  t.font = Font.systemFont(11);
   t.textColor = color || INK3;
   t.lineLimit = 1;
   return t;
@@ -395,7 +396,7 @@ function build(data, today, cachedAt) {
     header(w, {}, today, true);
     w.addSpacer();
     const t = w.addText('読み込めませんでした');
-    t.font = Font.semiboldSystemFont(13);
+    t.font = Font.semiboldSystemFont(15);
     t.textColor = INK;
     w.addSpacer(2);
     small(w, '通信を確かめてください');
@@ -413,7 +414,7 @@ function build(data, today, cachedAt) {
   if (!items.length) {
     w.addSpacer();
     const t = w.addText('予定はありません');
-    t.font = Font.semiboldSystemFont(13);
+    t.font = Font.semiboldSystemFont(15);
     t.textColor = INK2;
     w.addSpacer(2);
     small(w, 'ゆっくりしましょう');
@@ -426,7 +427,8 @@ function build(data, today, cachedAt) {
     const rest = items.slice(1);
     // 場所の行が増えたぶんは件数を減らす。日付の順は崩さない
     // （入らない行が出たら、そこで止める）
-    const room = (family === 'small' ? 0 : family === 'large' ? 6 : 3) - heroExtra(items[0]);
+    // 字を大きくしたので、中は2件、大は5件ほど（場所の行があるとさらに減る）
+    const room = (family === 'small' ? 0 : family === 'large' ? 5 : 2.5) - heroExtra(items[0]);
     const shown = [];
     let used = 0;
     for (const it of rest) {
