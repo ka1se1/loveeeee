@@ -32,6 +32,12 @@ const APP = 'https://ka1se1.github.io/loveeeee/';
 // 無い場合は空（''）にしてください。空なら Safari で開きます。
 const SHORTCUT = 'marin';
 
+// ショートカットを通さず、直接ホーム画面のアプリを開く URL（試験中）。
+// これが開ければ「Scriptable → ショートカット → アプリ」が
+// 「Scriptable → アプリ」になります。開かないときは空（''）にすると、
+// 上のショートカットで開きます。
+const OPEN_URL = 'webapp://ka1se1.github.io/loveeeee/';
+
 // eagle（スプレッドシートの練習）で場所を出すジャンル。この順に並べます。
 // ふたりのスマホで違うジャンルを出したいときは、それぞれここを変えてください。
 // 例: ['break']、['hiphop', 'jazz']。空にすると場所は出しません。
@@ -377,9 +383,11 @@ function small(stack, text, color) {
    cachedAt があるときは、通信できずに前回の内容を出しています */
 function build(data, today, cachedAt) {
   const w = new ListWidget();
-  w.url = SHORTCUT
-    ? 'shortcuts://run-shortcut?name=' + encodeURIComponent(SHORTCUT)
-    : APP;
+  w.url = OPEN_URL
+    ? OPEN_URL
+    : SHORTCUT
+      ? 'shortcuts://run-shortcut?name=' + encodeURIComponent(SHORTCUT)
+      : APP;
 
   // 平らな一色より、わずかに階調があるほうが落ち着きます
   const g = new LinearGradient();
