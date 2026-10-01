@@ -23,11 +23,14 @@ const TOKEN = 'ここに合言葉';
 const API = 'https://aelvmpvgzvaiomqimzgo.supabase.co/functions/v1/widget-calendar';
 const APP = 'https://ka1se1.github.io/loveeeee/';
 
-// 押したときに Safari ではなくホーム画面のアプリを開きたい場合のみ、
-// ショートカットApp で「App を開く」を作り、その名前をここに入れます。
-// ただし iOS によっては Web アプリが一覧に出ません。その場合は空のまま。
-// 空なら Safari で開きます。名前が合っていないと何も起きないので注意。
-const SHORTCUT = '';
+// 押したときに Safari ではなくホーム画面のアプリを開くためのショートカット名。
+// ショートカットApp で「URL を開く」を作り、URL を
+//   webapp://ka1se1.github.io/loveeeee/
+// にすると、ホーム画面に追加したアプリが開きます（「App を開く」の
+// 一覧には Web アプリが出ないため、この方法にしています）。
+// そのスマホにこの名前のショートカットが無いと何も起きないので、
+// 無い場合は空（''）にしてください。空なら Safari で開きます。
+const SHORTCUT = 'marin';
 
 // eagle（スプレッドシートの練習）で場所を出すジャンル。この順に並べます。
 // ふたりのスマホで違うジャンルを出したいときは、それぞれここを変えてください。
