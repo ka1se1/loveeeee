@@ -5278,8 +5278,11 @@ a.dance-place {
    引いて名前に1〜2文字しか残りませんでした（測定）。
    色の点をやめ（左の縁と同じ色なので）、余白を詰め、2行まで
    折り返します。高さは calendar.js の LH（28px）と揃えています。
+   スマホは CSS と JS を別々に覚えていて、片方だけ新しくなると
+   予定が重なりました。新しい JS が付ける .cal-month-2l があるときだけ
+   効かせます。
    ============================================================ */
-.cal-month .cal-chipev {
+.cal-month-2l .cal-chipev {
     height: 26px;
     line-height: 12px;
     padding: 1px 2px 1px 3px;
@@ -5292,7 +5295,7 @@ a.dance-place {
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;
 }
-.cal-month .cal-chipev.timed {
+.cal-month-2l .cal-chipev.timed {
     padding-left: 3px;
 }
 /* 誰の予定か。ふたりの予定は絵文字が2つになるので少し小さく詰める */

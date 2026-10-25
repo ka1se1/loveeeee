@@ -600,7 +600,9 @@ function calRenderMonth() {
     CAL_DOW_ORDER.forEach(dw => {
         h += '<div class="' + (dw === 0 ? 'sun' : dw === 6 ? 'sat' : '') + '">' + CAL_DOW[dw] + '</div>';
     });
-    h += '</div><div class="cal-month" id="calMonthGrid">';
+    // cal-month-2l は「予定を2行・28px間隔で並べた」目印。CSS はこれがあるときだけ
+    // 2行にします（JS と CSS のどちらかが古いまま残っても、重ならないように）
+    h += '</div><div class="cal-month cal-month-2l" id="calMonthGrid">';
 
     for (let w = 0; w < weeks; w++) {
         const r = rows[w];
