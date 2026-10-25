@@ -105,7 +105,8 @@ Deno.serve(async (req) => {
     return (h * 60 + m) >= nowMin - 60;     // 始まって1時間は残す
   });
 
-  const limit = Math.min(10, Math.max(1, Number(url.searchParams.get('limit') || 5)));
+  // 数字でないとき（limit=abc）は NaN になり、一覧が空になっていました
+  const limit = Math.min(10, Math.max(1, Number(url.searchParams.get('limit')) || 5));
 
   // 30日ぶんの合計だと、くり返しの予定でふくらんで実感と合いません。
   // 今日から7日ぶんも数えて返します。

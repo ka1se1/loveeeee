@@ -297,19 +297,35 @@
                         created_at: toIso(d.date, i), created_by: me.id
                     })), 'メッセージ');
 
+                // 返信の親を決める。今回メッセージを入れたなら、その順で対応づける。
+                // 前回の実行でメッセージだけ入り、返信が失敗していた場合は、
+                // メッセージを入れずに飛ばすので、すでにある行と中身・日時で
+                // 突き合わせます（以前は、もう一度実行しても返信が入りませんでした）
+                let order = null;
                 if (inserted.length === diaries.length && inserted.length) {
                     // insert は渡した順で返るので、添字で対応づけできる
                     const byOldest = [...inserted].sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
-                    const order = diaries.map((_, i) => inserted[i] || byOldest[i]);
+                    order = diaries.map((_, i) => inserted[i] || byOldest[i]);
+                } else if (!inserted.length && diaries.length) {
+                    const { data: existing, error } = await db.from('diaries').select('id, author, content, created_at');
+                    if (error) throw new Error('メッセージを読めませんでした: ' + error.message);
+                    const key = (a, c, t) => a + '|' + c + '|' + new Date(t).getTime();
+                    const found = new Map((existing || []).map(r => [key(r.author, r.content, r.created_at), r]));
+                    order = diaries.map((d, i) => found.get(key(d.author || '?', d.content || '', toIso(d.date, i))) || null);
+                }
+                if (order) {
                     const replies = [];
+                    let lost = 0;
                     diaries.forEach((d, i) => {
                         (d.replies || []).forEach((r, j) => {
+                            if (!order[i]) { lost++; return; }
                             replies.push({
                                 diary_id: order[i].id, author: r.author || '?',
                                 content: r.content || '', created_at: toIso(r.date, j), created_by: me.id
                             });
                         });
                     });
+                    if (lost) log('返信: 親のメッセージが見つからない ' + lost + ' 件は飛ばします');
                     await insertIfEmpty('replies', replies, '返信');
                 }
 

@@ -8,7 +8,7 @@
 // ============================================================
 import { db } from './supabase.js';
 import { GAME_CANVAS, GAME_ROUND_SEC } from './config.js';
-import { $, el, clear, showToast } from './util.js';
+import { $, el, clear, showToast, isEnter } from './util.js';
 import { registerActions } from './actions.js';
 import { DRAW_WORDS } from './words.js';
 
@@ -75,6 +75,10 @@ function connect() {
     .on('broadcast', { event: 'round_start' }, ({ payload }) => {
       round = payload.round;
       startRound(payload.drawer === myToken ? 'drawer' : 'guesser');
+    })
+    // 当てる番の人が「次のお題へ」を押したときの頼み。描く番がこちらなら始める
+    .on('broadcast', { event: 'next_request' }, ({ payload }) => {
+      if (payload.round > round) startNextRound(payload.round);
     })
     .on('broadcast', { event: 'strokes' }, ({ payload }) => {
       if (role !== 'guesser' || !ctx) return;
@@ -278,11 +282,35 @@ function endRound(correct, word) {
   document.body.appendChild(overlay);
 }
 
-async function goNextRound() {
+/* 何回目のラウンドを、どちらが描くか。ふたりとも同じ規則で決めるので
+   通信しなくても一致します（1回目は beginMatch と同じく、トークンの
+   小さいほう。そこから交互）。
+   以前は「押した人が描く人」で、ふたりがほぼ同時に押すと、ふたりとも
+   当てる側になって止まっていました。 */
+function drawerOf(n) {
+  if (!peerToken) return myToken;
+  const [first, second] = [myToken, peerToken].sort();
+  return n % 2 === 1 ? first : second;
+}
+
+function goNextRound() {
+  startNextRound(round + 1);
+}
+
+async function startNextRound(next) {
+  if (drawerOf(next) !== myToken) {
+    // 描くのは相手。相手に始めてもらう（相手がもう押していれば、何も起きない）。
+    // 終了画面は、相手の round_start が届いたら startRound が閉じます
+    send('next_request', { round: next });
+    const sub = document.querySelector('#roundEndOverlay .round-end-sub');
+    if (sub) sub.textContent = '相手がお題を準備しています…';
+    return;
+  }
   const overlay = $('roundEndOverlay');
   if (overlay) overlay.remove();
-  round++;
-  // 押した人が次の描く人になる（どちらが押しても成立する）
+  // お題を選ぶのを待つ前に番号を進める。その間に相手の頼みが届いても、
+  // 「もう始めた」と分かるので、二重には始まりません
+  round = next;
   currentWord = await randomWord();
   send('round_start', { round, drawer: myToken });
   send('clear');
@@ -331,6 +359,6 @@ export function initGame() {
   });
 
   const input = $('guessInput');
-  if (input) input.addEventListener('keydown', e => { if (e.key === 'Enter') sendGuess(); });
+  if (input) input.addEventListener('keydown', e => { if (isEnter(e)) sendGuess(); });
   window.addEventListener('pagehide', () => { if (channel) send('bye'); });
 }

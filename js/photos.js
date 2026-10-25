@@ -245,6 +245,13 @@ function step(by) {
   openViewer(photos[(i + by + photos.length) % photos.length].id);
 }
 
+/* ギャラリー以外（予定の思い出写真）が、同じファイルを使っているか。
+   予定から写真を足すと、同じファイルがギャラリーにも入ります。
+   以前はギャラリーで消すとファイルごと消え、予定の写真が見えなく
+   なっていました。予定のことはカレンダーが知っているので、教えてもらいます */
+let usedElsewhere = () => false;
+export function setPhotoUsageCheck(fn) { usedElsewhere = fn; }
+
 async function deleteCurrent() {
   const photo = state.photos.find(p => p.id === viewerId);
   if (!photo) return;
@@ -265,7 +272,7 @@ async function deleteCurrent() {
   // ファイルも片づける。失敗しても行は消えているので、続けます。
   const names = [photo.full_path, photo.thumb_path]
     .filter(x => x && !/^https?:/.test(x));
-  if (names.length) {
+  if (names.length && !usedElsewhere(photo)) {
     db.storage.from(PHOTO_BUCKET).remove(names)
       .then(({ error }) => { if (error) console.warn('ファイルの削除に失敗', error); })
       .catch(e => console.warn('ファイルの削除に失敗', e));

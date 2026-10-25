@@ -8,8 +8,8 @@
 // ============================================================
 import { userName } from './supabase.js';
 import { state, upsertEvent, deleteEventRow, loadEvents, saveSetting, addPhotos } from './data.js';
-import { uploadOnePhoto, photoUrl, renderGallery } from './photos.js';
-import { showToast, showError, confirmDialog } from './util.js';
+import { uploadOnePhoto, photoUrl, renderGallery, setPhotoUsageCheck } from './photos.js';
+import { showToast, showError, confirmDialog, isEnter } from './util.js';
 import { registerActions } from './actions.js';
 import { danceMainTime } from './dance.js';
 
@@ -271,7 +271,10 @@ function calNormalize(ev) {
     if (!ev.date) ev.date = calToday();
     if (!ev.endDate || ev.endDate < ev.date) ev.endDate = ev.date;
     if (ev.allDay === undefined) ev.allDay = !ev.start;
-    if (!calLabels.some(l => l.key === ev.label)) ev.label = calLabels[0].key;
+    // 手元に無いラベルでも書きかえない。相手が作ったばかりのラベルを
+    // こちらがまだ受け取っていないだけのことがあり、書きかえたまま保存すると
+    // 相手の付けたラベルが消えてしまいます（表示は calLabel が先頭で代用します）
+    if (!ev.label) ev.label = calLabels[0].key;
     if (!CAL_REPEATS[ev.repeat]) ev.repeat = 'none';
     if (!Array.isArray(ev.repeatDows)) ev.repeatDows = [];
     ev.repeatDows = ev.repeatDows.filter(d => d >= 0 && d <= 6);
@@ -354,6 +357,9 @@ function calOccurrences(fromStr, toStr, ignoreFilter) {
     calNormalizeAll();
     const out = [];
     const from = calParse(fromStr), to = calParse(toStr);
+    // くり返しを展開する回数の上限。以前は 400 回で、検索中のリスト（長い期間）で
+    // 毎日の予定が1年ちょっとで途切れていました。見る期間ぶんは必ず回します
+    const rangeDays = Math.max(0, calDiff(fromStr, toStr));
     events.concat(calExternal).forEach(ev => {
         if (!ignoreFilter && !calMatches(ev)) return;
         const span = Math.max(0, calDiff(ev.date, ev.endDate));
@@ -368,7 +374,7 @@ function calOccurrences(fromStr, toStr, ignoreFilter) {
                 break;
             case 'daily':
                 cur = base < guardStart ? new Date(guardStart.getTime()) : new Date(base.getTime());
-                while (cur <= limit && g++ < 400) { if (cur >= base) calPush(out, ev, cur, span, from, to); cur = calAdd(cur, 1); }
+                while (cur <= limit && g++ < rangeDays + span + 400) { if (cur >= base) calPush(out, ev, cur, span, from, to); cur = calAdd(cur, 1); }
                 break;
             case 'weekly':
             case 'biweekly': {
@@ -381,7 +387,7 @@ function calOccurrences(fromStr, toStr, ignoreFilter) {
                     const k = Math.floor((wkGuard - wk) / (step * 86400000));
                     wk = calAdd(wk, k * step);
                 }
-                while (wk <= limit && g++ < 400) {
+                while (wk <= limit && g++ < rangeDays / 7 + 400) {
                     for (let di = 0; di < dows.length; di++) {
                         const d = calAdd(wk, (dows[di] - CAL_WEEK_START + 7) % 7);
                         if (d >= base && d <= limit) calPush(out, ev, d, span, from, to);
@@ -417,7 +423,9 @@ function calOccurrences(fromStr, toStr, ignoreFilter) {
             }
             case 'yearly':
                 for (let y = from.getFullYear() - 1; y <= to.getFullYear() + 1; y++) {
-                    const d = new Date(y, base.getMonth(), base.getDate());
+                    let d = new Date(y, base.getMonth(), base.getDate());
+                    // 2/29 の予定は、平年は 2/28 に出す（3/1 にずれないように）
+                    if (d.getMonth() !== base.getMonth()) d = new Date(y, base.getMonth() + 1, 0);
                     if (d < base || d > limit) continue;
                     calPush(out, ev, d, span, from, to);
                 }
@@ -1201,7 +1209,8 @@ async function saveEvent() {
 
     if (!date || !title) { showToast('日付とタイトルを入れてね'); return; }
     if (endDate < date) endDate = date;
-    if (!allDay && end && start && end < start) { showToast('終了時刻が開始より前になっています'); return; }
+    // 時刻だけで比べるのは同じ日のときだけ（22:00〜翌02:00 を保存できるように）
+    if (!allDay && end && start && endDate === date && end < start) { showToast('終了時刻が開始より前になっています'); return; }
 
     const saveBtn = document.querySelector('#eventModal .btn-save');
     saveBtn.textContent = '保存中…';
@@ -1238,12 +1247,19 @@ async function saveEvent() {
     }
 }
 async function deleteEvent(idOrIdx, dateStr) {
-    const ev = typeof idOrIdx === 'number' ? events[idOrIdx] : events.find(x => x.id === idOrIdx);
-    if (!ev) return;
-    if (ev.repeat !== 'none' && dateStr) {
+    const first = typeof idOrIdx === 'number' ? events[idOrIdx] : events.find(x => x.id === idOrIdx);
+    if (!first) return;
+    // 確認を待っている間に、相手の更新が届くと events の中身が新しい
+    // オブジェクトに入れかわります。古いほうを触ると削除が保存されないので、
+    // 待ったあとは id で取り直します
+    const id = first.id;
+    const gone = () => { closeCalSheet(); closeEventModal(); renderCalendar(); };
+    if (first.repeat !== 'none' && dateStr) {
         const onlyThis = await confirmDialog('くり返しの予定です。この日だけ削除しますか？', { okText: 'この日だけ', cancelText: 'すべて対象', danger: false });
         if (onlyThis) {
-            ev.exdates.push(dateStr);
+            const cur = events.find(x => x.id === id);
+            if (!cur) return gone();   // その間に消されていた
+            if (cur.exdates.indexOf(dateStr) === -1) cur.exdates.push(dateStr);
             await calPersist();
             closeCalSheet();
             renderCalendar();
@@ -1251,8 +1267,9 @@ async function deleteEvent(idOrIdx, dateStr) {
         }
         if (!await confirmDialog('すべてのくり返しを削除しますか？')) return;
     } else if (!await confirmDialog('この予定を削除しますか？')) return;
-    const i = events.indexOf(ev);
-    if (i !== -1) events.splice(i, 1);
+    const ev = events.find(x => x.id === id);
+    if (!ev) return gone();
+    events.splice(events.indexOf(ev), 1);
     // ギャラリーにも他の予定にも無い写真は、ファイルごと片づける
     for (const ph of (ev.photos || [])) {
         const stillUsed = state.photos.some(q => calPhotoFull(q) === calPhotoFull(ph)) ||
@@ -1580,13 +1597,22 @@ function calStepEventPhoto(n) {
     calOpenEventPhoto((calEvPhotoIndex + n + ev.photos.length) % ev.photos.length);
 }
 async function calDeleteEventPhoto() {
-    const ev = events.find(x => x.id === calSheetEvId);
-    if (!ev || calEvPhotoIndex === null) return;
-    const p = ev.photos[calEvPhotoIndex];
-    const inGallery = state.photos.some(q => calPhotoFull(q) === calPhotoFull(p));
+    const first = events.find(x => x.id === calSheetEvId);
+    if (!first || calEvPhotoIndex === null) return;
+    const p = first.photos[calEvPhotoIndex];
+    if (!p) return;
+    const id = first.id, key = calPhotoFull(p);
+    const inGallery = state.photos.some(q => calPhotoFull(q) === key);
     if (!await confirmDialog('この写真を予定から外しますか？' + (inGallery ? '（ギャラリーの分は残ります）' : ''))) return;
-    ev.photos.splice(calEvPhotoIndex, 1);
-    if (!inGallery) await calRemovePhotoFiles(p);   // どこにも残らないならファイルも消す
+    // 待っている間に予定が入れかわっていることがあるので、id と写真で取り直す
+    const ev = events.find(x => x.id === id);
+    const at = ev ? ev.photos.findIndex(q => calPhotoFull(q) === key) : -1;
+    if (at === -1) { calCloseEventPhoto(); calRenderSheet(); return; }
+    ev.photos.splice(at, 1);
+    // ギャラリーにも、ほかの予定にも残っていなければ、ファイルも消す
+    const stillUsed = state.photos.some(q => calPhotoFull(q) === key) ||
+        events.some(e2 => (e2.photos || []).some(q => calPhotoFull(q) === key));
+    if (!stillUsed) await calRemovePhotoFiles(p);
     calCloseEventPhoto();
     await calPersist();
     calRenderSheet();
@@ -1915,9 +1941,14 @@ function calBuildReminders() {
 }
 
 let calReminderTimer = null;
+// 予定を読めたか。読めないまま書き出すと、ふたりで共有している
+// settings['reminders'] と ['upcoming'] を空で上書きしてしまい、
+// 通知もウィジェットも止まっていました
+let calEventsReady = false;
 
 /** 何度呼ばれてもまとめて1回だけ実行する（描画のたびに走らせない） */
 function calScheduleReminders() {
+    if (!calEventsReady) return;
     clearTimeout(calReminderTimer);
     calReminderTimer = setTimeout(() => {
         calPushReminders();
@@ -2000,6 +2031,7 @@ export async function calReload() {
 
     try {
         events = await loadEvents();
+        calEventsReady = true;
     } catch (e) {
         console.warn('予定を取り直せませんでした', e);
         return;
@@ -2033,7 +2065,8 @@ export function calApplyRemote(type, row) {
 export function calApplySettings(key, value) {
   if (key === 'labels') { calSetLabels(value); calSaveLocalLabels(); }
   if (key === 'members') { calSetMembers(value); calSaveLocalMembers(); }
-  renderCalendar();
+  // 描き直すのはカレンダーの見た目が変わるときだけ（reminders などは関係ない）
+  if (key === 'labels' || key === 'members') renderCalendar();
 }
 
 /* ============================================================
@@ -2049,10 +2082,16 @@ export async function initCalendar() {
   try {
     const rows = await loadEvents();
     events = rows;
+    calEventsReady = true;
   } catch (e) {
     showError('予定を読み込めませんでした', e);
     events = [];
   }
+  // ギャラリーで写真を消すとき、予定がまだ使っているファイルは残してもらう
+  setPhotoUsageCheck(p => {
+      const key = calPhotoFull(p);
+      return !!key && events.some(e => (e.photos || []).some(q => calPhotoFull(q) === key));
+  });
   calNormalizeAll();
   calRemember();
 
@@ -2107,7 +2146,7 @@ export async function initCalendar() {
   });
   // コメント欄は Enter でも送れるように
   document.addEventListener('keydown', e => {
-    if (e.key === 'Enter' && e.target.id === 'calCmtInput') calAddComment();
+    if (isEnter(e) && e.target.id === 'calCmtInput') calAddComment();
   });
   const dateInput = document.getElementById('eventDateInput');
   if (dateInput) dateInput.addEventListener('change', calFillRepeatOptions);

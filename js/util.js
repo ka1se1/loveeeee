@@ -46,6 +46,13 @@ export function emptyState(text) {
   return el('div', { class: 'empty-state', text });
 }
 
+/** 送る・確定するための Enter か。
+ *  日本語入力の変換を確定する Enter も keydown に来るので、それは除きます
+ *  （以前は「あした」→「明日」の確定で、変換前の文字が送られていました） */
+export function isEnter(e) {
+  return e.key === 'Enter' && !e.isComposing && e.keyCode !== 229;
+}
+
 // ------------------------------------------------------------
 //  トースト
 // ------------------------------------------------------------
@@ -102,7 +109,9 @@ export function confirmDialog(message, options = {}) {
 
     const onKey = e => {
       if (e.key === 'Escape') { e.preventDefault(); finish(false); }
-      if (e.key === 'Enter') { e.preventDefault(); finish(true); }
+      // フォーカスのあるボタンに従う。以前はどこにいても「はい」になり、
+      // 「やめる」を選んで Enter を押しても削除されていました
+      if (e.key === 'Enter') { e.preventDefault(); finish(document.activeElement !== cancelBtn); }
     };
     document.addEventListener('keydown', onKey, true);
 

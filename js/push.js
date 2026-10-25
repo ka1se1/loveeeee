@@ -220,6 +220,25 @@ async function subscribe({ silent }) {
 }
 
 /**
+ * この端末で通知を受けるのをやめる。ログアウトの前に呼びます。
+ * 以前はログアウトしても宛先が残り、その端末にメッセージの本文を含む
+ * 通知が届き続けていました。行を消すにはログイン中である必要があります。
+ */
+export async function unsubscribePush() {
+  try {
+    if (!('serviceWorker' in navigator)) return;
+    const reg = registration || await navigator.serviceWorker.getRegistration();
+    const sub = reg && reg.pushManager && await reg.pushManager.getSubscription();
+    if (!sub) return;
+    await db.from('push_subscriptions').delete().eq('endpoint', sub.endpoint);
+    await sub.unsubscribe();
+  } catch (e) {
+    console.warn('通知の購読をやめられませんでした', e);
+  }
+  try { if ('clearAppBadge' in navigator) await navigator.clearAppBadge(); } catch (e) { }
+}
+
+/**
  * 相手に通知を送る。
  * 自分自身には届かないよう、Edge Function 側で呼び出した人を除外します。
  * 失敗しても本来の処理は止めません。

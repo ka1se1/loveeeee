@@ -7,8 +7,9 @@
 //    知らない人が勝手に登録しても、何も見えません。
 // ============================================================
 import { db, setSessionUser, clearSessionUser } from './supabase.js';
-import { $, val, showToast, showError } from './util.js';
+import { $, val, showToast, showError, isEnter } from './util.js';
 import { registerActions } from './actions.js';
+import { unsubscribePush } from './push.js';
 
 const PANELS = ['loginUI', 'nameSetup', 'notMember'];
 
@@ -126,6 +127,9 @@ async function saveName() {
 }
 
 async function signOut() {
+  // ログインしているうちに、この端末の通知の宛先を消す
+  // （残すと、ログアウトした端末にメッセージの通知が届き続けます）
+  await unsubscribePush();
   try { await db.auth.signOut(); } catch (e) { console.warn('ログアウトに失敗', e); }
   clearSessionUser();
   location.reload();
@@ -143,6 +147,6 @@ export function initAuth() {
   const enterRuns = { password: signIn, email: signIn, firstNameInput: saveName };
   for (const [id, fn] of Object.entries(enterRuns)) {
     const node = $(id);
-    if (node) node.addEventListener('keydown', e => { if (e.key === 'Enter') fn(); });
+    if (node) node.addEventListener('keydown', e => { if (isEnter(e)) fn(); });
   }
 }

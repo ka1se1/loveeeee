@@ -65,18 +65,27 @@ export async function resync() {
   }
 }
 
+/** 失敗したら投げる。以前は失敗を捨てて空の配列を返していたので、
+ *  一時的に読めなかっただけで、記念日や設定（ラベル・スプレッドシートの
+ *  一覧など）が手元から消えていました。投げれば、何も置きかえません */
+function rows(r) {
+  if (r.error) throw r.error;
+  return r.data || [];
+}
+
 export async function loadAll() {
   const [photos, diaries, replies, shops, likes, voices, anniversaries, settings, counter] =
     await Promise.all([
       selectAll('photos'),
       selectAll('diaries'),
-      db.from('replies').select('*').order('created_at', { ascending: true }).then(r => r.data || []),
+      db.from('replies').select('*').order('created_at', { ascending: true }).then(rows),
       selectAll('shops'),
-      db.from('shop_likes').select('*').then(r => r.data || []),
+      db.from('shop_likes').select('*').then(rows),
       selectAll('voices'),
-      db.from('anniversaries').select('*').then(r => r.data || []),
-      db.from('settings').select('*').then(r => r.data || []),
-      db.from('counters').select('value').eq('key', 'love').maybeSingle().then(r => r.data)
+      db.from('anniversaries').select('*').then(rows),
+      db.from('settings').select('*').then(rows),
+      db.from('counters').select('value').eq('key', 'love').maybeSingle()
+        .then(r => { if (r.error) throw r.error; return r.data; })
     ]);
 
   replace(state.photos, photos);

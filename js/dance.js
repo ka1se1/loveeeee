@@ -14,7 +14,7 @@
 // ============================================================
 import { db } from './supabase.js';
 import { saveSetting } from './data.js';
-import { $, el, clear, showToast, showError, confirmDialog } from './util.js';
+import { $, el, clear, showToast, showError, confirmDialog, isEnter } from './util.js';
 
 const CACHE_KEY = 'dance_cache_v1';
 const SHEETS_KEY = 'dance_sheets';
@@ -302,7 +302,7 @@ function renderPanel(box, data) {
     class: 'dance-add', type: 'button', disabled: busy, text: busy ? '確かめています…' : '追加',
     onclick: () => addSheet(input.value)
   });
-  input.addEventListener('keydown', e => { if (e.key === 'Enter') add.click(); });
+  input.addEventListener('keydown', e => { if (isEnter(e)) add.click(); });
   panel.appendChild(el('div', { class: 'dance-add-row' }, [input, add]));
   if (panelMsg) panel.appendChild(el('p', { class: 'dance-panel-msg', role: 'alert', text: panelMsg }));
   panel.appendChild(el('p', { class: 'dance-note', text:
