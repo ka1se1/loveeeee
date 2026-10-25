@@ -472,7 +472,7 @@ function calRenderShell() {
 
     if (calSearchOpen) {
         h += '<div class="cal-searchbar"><span>🔍</span>' +
-            '<input id="calSearchInput" type="search" placeholder="予定を検索..." value="' + esc(calSearch) + '" oninput="calOnSearch(this.value)">' +
+            '<input id="calSearchInput" type="search" placeholder="予定を検索..." value="' + esc(calSearch) + '" data-act-input="search">' +
             '<span data-act="closesearch" style="cursor:pointer;color:#6b5d61;">✕</span></div>';
     }
 
@@ -1631,7 +1631,7 @@ function calRenderMemberEditor() {
         '<button class="cal-lbl-color" style="background:' + m.color + '" ' +
         'data-act="mpalette" data-arg="' + i + '">' + esc(m.emoji) + '</button>' +
         '<input class="cal-lbl-name" type="text" maxlength="12" value="' + esc(m.name) +
-        '" placeholder="なまえ" oninput="calMemberDraft[' + i + '].name=this.value">' +
+        '" placeholder="なまえ" data-act-input="mname" data-arg="' + i + '">' +
         '<button class="cal-me-btn' + (m.id === me ? ' on' : '') + '" ' +
         'data-act="setme" data-arg="' + esc(m.id) + '">' +
         (m.id === me ? '自分' : 'これが自分') + '</button>' +
@@ -1718,7 +1718,7 @@ function calRenderLabelEditor() {
             '<button class="cal-lbl-color" style="background:' + l.color + '" data-act="lpalette" data-arg="' + i + '">' +
             (calLabelPaletteOpen === i ? '×' : '') + '</button>' +
             '<input class="cal-lbl-name" type="text" maxlength="12" value="' + esc(l.name) +
-            '" placeholder="ラベル名" oninput="calLabelDraft[' + i + '].name=this.value">' +
+            '" placeholder="ラベル名" data-act-input="lname" data-arg="' + i + '">' +
             '<span class="cal-lbl-count">' + (n ? n + '件' : '') + '</span>' +
             '<button class="cal-lbl-del" data-act="dellabel" data-arg="' + i + '" ' +
             (calLabelDraft.length <= 1 ? 'disabled' : '') + '>🗑</button>' +
@@ -2086,6 +2086,18 @@ export async function initCalendar() {
   document.addEventListener('click', e => {
     const t = e.target.closest('[data-act]');
     if (t) calHandleAct(t);
+  });
+  // 文字の入力。以前は生成した HTML に oninput="calLabelDraft[0].name=…" と
+  // 書いていましたが、calendar.js はモジュールなので、その名前は外から
+  // 見えません。打っても保存されず、描き直すと元の名前に戻っていました
+  // （ラベル名・メンバー名・予定の検索の3か所）。
+  document.addEventListener('input', e => {
+    const t = e.target.closest('[data-act-input]');
+    if (!t) return;
+    const i = Number(t.dataset.arg);
+    if (t.dataset.actInput === 'search') calOnSearch(t.value);
+    else if (t.dataset.actInput === 'lname' && calLabelDraft[i]) calLabelDraft[i].name = t.value;
+    else if (t.dataset.actInput === 'mname' && calMemberDraft[i]) calMemberDraft[i].name = t.value;
   });
   document.addEventListener('change', e => {
     const t = e.target.closest('[data-act-change]');
