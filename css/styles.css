@@ -5271,3 +5271,33 @@ a.dance-place {
     height: 36px;
     padding: 0 10px;
 }
+
+/* ============================================================
+   月表示の予定：名前を2行まで
+   マスの幅は約50px。1行だと、色の縁・余白・色の点・絵文字を
+   引いて名前に1〜2文字しか残りませんでした（測定）。
+   色の点をやめ（左の縁と同じ色なので）、余白を詰め、2行まで
+   折り返します。高さは calendar.js の LH（28px）と揃えています。
+   ============================================================ */
+.cal-month .cal-chipev {
+    height: 26px;
+    line-height: 12px;
+    padding: 1px 2px 1px 3px;
+    white-space: normal;
+    /* 英単語（eagle など）は途中で切らない。日本語はどこでも折り返せる */
+    word-break: normal;
+    overflow-wrap: anywhere;
+    text-overflow: clip;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+}
+.cal-month .cal-chipev.timed {
+    padding-left: 3px;
+}
+/* 誰の予定か。ふたりの予定は絵文字が2つになるので少し小さく詰める */
+.cal-chip-who {
+    font-size: 8px;
+    letter-spacing: -1px;
+    margin-right: 2px;
+}

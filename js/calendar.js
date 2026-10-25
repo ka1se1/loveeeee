@@ -568,7 +568,9 @@ function calRenderMonth() {
     const weeks = (calDiff(calYmd(gridStart), calYmd(gridEnd)) + 1) / 7;
     const occs = calOccurrences(calYmd(gridStart), calYmd(gridEnd));
     const maxLanes = calFullscreen ? 5 : 3;
-    const LH = 17;
+    // 予定1件の高さ。以前は 17px（1行）で、マスの幅（約50px）から絵文字と
+    // 色の点を引くと、名前が1〜2文字しか見えませんでした。2行まで折り返します
+    const LH = 28;
     const today = calToday();
 
     // 1周目：各週のレーンを計算して行の高さを揃える
@@ -652,10 +654,8 @@ function calRenderMonth() {
             const who = (ev.members || []).map(id => {
                 const mb = calMember(id); return mb ? mb.emoji : '';
             }).join('').slice(0, 4);
-            const title = (who ? who : '') + esc(ev.title);
-            const label = timedStyle
-                ? '<span class="tdot" style="background:' + c + '"></span>' + title
-                : title;
+            // 色の点は、左の縁と同じ色なので出しません（そのぶん名前に回す）
+            const label = (who ? '<span class="cal-chip-who">' + who + '</span>' : '') + esc(ev.title);
             h += '<div class="cal-chipev ' + (timedStyle ? 'timed' : '') +
                 '" style="left:calc(' + left + '% + 1px);width:calc(' + width + '% - 2px);top:' + (p.lane * LH) + 'px;background:' + calTint(c, .22) + ';border-left:3px solid ' + c + '"' +
                 '>' + label + '</div>';
