@@ -657,7 +657,9 @@ function calRenderMonth() {
                 const mb = calMember(id); return mb ? mb.emoji : '';
             }).join('').slice(0, 4);
             // 色の点は、左の縁と同じ色なので出しません（そのぶん名前に回す）
-            const label = (who ? '<span class="cal-chip-who">' + who + '</span>' : '') + esc(ev.title);
+            // 誰の予定かは名前の後ろに。先に置くと、絵文字だけで幅が埋まって
+            // 名前が読めませんでした。2行に収まらないときは名前を優先します
+            const label = esc(ev.title) + (who ? '<span class="cal-chip-who">' + who + '</span>' : '');
             h += '<div class="cal-chipev ' + (timedStyle ? 'timed' : '') +
                 '" style="left:calc(' + left + '% + 1px);width:calc(' + width + '% - 2px);top:' + (p.lane * LH) + 'px;background:' + calTint(c, .22) + ';border-left:3px solid ' + c + '"' +
                 '>' + label + '</div>';

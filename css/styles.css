@@ -5298,9 +5298,10 @@ a.dance-place {
 .cal-month-2l .cal-chipev.timed {
     padding-left: 3px;
 }
-/* 誰の予定か。ふたりの予定は絵文字が2つになるので少し小さく詰める */
+/* 誰の予定か（名前の後ろ）。ふたりの予定は絵文字が2つになるので少し小さく詰める */
 .cal-chip-who {
     font-size: 8px;
     letter-spacing: -1px;
-    margin-right: 2px;
+    margin-left: 2px;
+    white-space: nowrap;   /* ふたりの絵文字を2行に分けない */
 }
